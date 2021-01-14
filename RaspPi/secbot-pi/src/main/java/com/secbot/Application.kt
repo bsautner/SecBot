@@ -18,7 +18,7 @@ class Application : SerialPortListener {
 
 
     private val arduinoSerialInterface = ArduinoSerialInterface(this)
-    private val piCamera: RPiCamera = RPiCamera(PHOTO_PATH)
+    private lateinit var piCamera: RPiCamera
     private val apiClient = DefaultApiClient()
 
     override fun onRead(rawData: String) {
@@ -57,13 +57,15 @@ class Application : SerialPortListener {
 
     fun initHardware() {
 
-        piCamera.setWidth(500).setHeight(500) // Set Camera to produce 500x500 images.
-            .setToDefaults()
-//            .setVerticalFlipOn()
-//             .setBrightness(70)                // Adjust Camera's brightness setting.
-//            .setExposure(Exposure.AUTO)       // Set Camera's exposure.
-//            .setTimeout(2)                    // Set Camera's timeout.
-//            .setAddRawBayer(true)         // Add Raw Bayer data to image files created by Camera.
+        piCamera = RPiCamera(PHOTO_PATH)
+            .setWidth(300).setHeight(200)
+            .setBrightness(40)
+            .setExposure(Exposure.AUTO)
+            .setContrast(50).setAddRawBayer(false)
+            .setQuality(75)
+            .setVerticalFlipOn()
+           // .setRegionOfInterest(0.5, 0.5, 0.25, 0.25)
+            .setTimeout(1000)
     }
 
     @Throws(IOException::class, InterruptedException::class)
