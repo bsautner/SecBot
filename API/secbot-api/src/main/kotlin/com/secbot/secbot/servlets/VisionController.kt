@@ -1,5 +1,6 @@
 package com.secbot.secbot.servlets
 
+import com.google.gson.GsonBuilder
 import org.springframework.core.io.FileSystemResource
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpHeaders
@@ -16,31 +17,32 @@ import java.util.*
 @RestController
 class VisionController {
 
+    val gson = GsonBuilder().create()
+
     @PostMapping("/vision")
     fun handleFileUpload(
         @RequestParam("file") file: MultipartFile,
         redirectAttributes: RedirectAttributes
-    ): String? {
+    ): String {
 
-        writeByte(file.bytes)
+        val name = writeByte(file.bytes)
 
         redirectAttributes.addFlashAttribute(
             "message",
             "You successfully uploaded " + file.originalFilename + "!"
         )
-        return "redirect:/"
+        println("Photo recieved: ${file.originalFilename}")
+        return gson.toJson(name)
     }
 
     @GetMapping(value = ["/vision"], produces = ["text/plain"])
     fun index(): String {
-        return "Hello Vision"
+
+        return  gson.toJson("Hello Vision")
     }
 
-    fun writeByte(bytes: ByteArray) {
-        try {
+    fun writeByte(bytes: ByteArray) : String{
 
-            // Initialize a pointer
-            // in file using OutputStream
             val file = File("/tmp/${UUID.randomUUID()}.jpg")
             println( file.exists() )
             val os: OutputStream = FileOutputStream(file)
@@ -51,9 +53,8 @@ class VisionController {
             println( "saved file ${file.absolutePath}" )
             // Close the file
             os.close()
-        } catch (e: Exception) {
-            println("Exception: $e")
-        }
+            return file.name
+
     }
 
     @GetMapping("/vision/{filename}")
