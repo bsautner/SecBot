@@ -63,9 +63,11 @@ class Application : SerialPortListener {
             .setExposure(Exposure.AUTO)
             .setContrast(50).setAddRawBayer(false)
             .setQuality(75)
-            .setVerticalFlipOn()
+           // .setVerticalFlipOn()
            // .setRegionOfInterest(0.5, 0.5, 0.25, 0.25)
             .setTimeout(1000)
+
+        piCamera.setFullPreviewOn()
     }
 
     @Throws(IOException::class, InterruptedException::class)

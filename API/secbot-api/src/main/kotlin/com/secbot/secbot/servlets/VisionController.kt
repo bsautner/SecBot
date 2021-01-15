@@ -44,15 +44,20 @@ class VisionController {
     fun writeByte(bytes: ByteArray) : String{
 
             val file = File("/tmp/${UUID.randomUUID()}.jpg")
-            println( file.exists() )
+            val last = File("/tmp/last.jpg")
+            if (last.exists()) {
+                last.delete()
+            }
             val os: OutputStream = FileOutputStream(file)
-
+            val los = FileOutputStream(last)
             // Starts writing the bytes in it
             os.write(bytes)
+            los.write(bytes)
 
             println( "saved file ${file.absolutePath}" )
             // Close the file
             os.close()
+            los.close()
             return file.name
 
     }
