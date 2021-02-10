@@ -6,9 +6,10 @@ import java.io.IOException
 /**
  * get serial data from arduino connected to usb port and post feedback to main program
  */
-class ArduinoSerialInterface(listener: SerialPortListener) {
+class ArduinoSerialInterface(private val serialPortListener: SerialPortListener) : SerialInterface{
 
-    val serial: SerialPortIO = SerialPortIO(listener)
+
+    val serial: SerialPortIO = SerialPortIO(serialPortListener)
 
     init {
         serial.start()
@@ -16,7 +17,7 @@ class ArduinoSerialInterface(listener: SerialPortListener) {
 
 
     @Throws(IOException::class)
-    fun sendCommand(command: String) {
+    override fun sendCommand(command: String) {
 
         serial.write(command)
         serial.write("\n")

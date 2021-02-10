@@ -1,10 +1,13 @@
 plugins {
     java
     kotlin("jvm") version "1.4.21"
+    kotlin("kapt") version "1.4.30"
+
 }
 
 group = "secbot"
 version = "1.0-SNAPSHOT"
+
 
 val jar by tasks.getting(Jar::class) {
     manifest {
@@ -36,8 +39,10 @@ dependencies {
     implementation("com.squareup.okhttp:okhttp:2.7.5")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-
-
+    implementation("com.google.dagger:dagger-android:2.32")
+     annotationProcessor( "com.google.dagger:dagger-android-processor:2.32")
+     annotationProcessor( "com.google.dagger:dagger-compiler:2.32")
+    kapt("com.google.dagger:dagger-compiler:2.32")
 //    runtimeClasspath files("build/classes/kotlin/main")
     implementation(kotlin("stdlib"))
     testCompile("junit", "junit", "4.12")
