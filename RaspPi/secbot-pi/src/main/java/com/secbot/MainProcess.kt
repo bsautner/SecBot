@@ -3,15 +3,14 @@ package com.secbot
 import com.hopding.jrpicam.RPiCamera
 import com.hopding.jrpicam.enums.Exposure
 import com.secbot.api.DefaultApiClient
-import com.secbot.serial.SerialInterface
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import com.secbot.serial.SerialPortIO
+import kotlinx.coroutines.*
 import java.io.File
 import java.io.IOException
 import java.util.*
 
-class MainProcess(private val serialInterface: SerialInterface) {
+@ExperimentalCoroutinesApi
+class MainProcess(private val serialPort: SerialPortIO)   {
 
     private lateinit var piCamera: RPiCamera
     private val apiClient = DefaultApiClient()
@@ -20,14 +19,13 @@ class MainProcess(private val serialInterface: SerialInterface) {
     private var forwardSpaceCm = -1
     private var state = State.IDLE
 
-    val sim = true;
 
-     fun onRead(rawData: String) {
+      fun onRead(rawData: String) {
 
 
         if (rawData.isNotEmpty()) {
             val sanitized = rawData.trimEnd('\n').trimEnd('\r').trimEnd('\n')
-            println("Serial Data: $sanitized")
+        //    println("Serial Data: $sanitized")
             val data = sanitized.split(":")
             when (data[0]) {
 
@@ -63,9 +61,11 @@ class MainProcess(private val serialInterface: SerialInterface) {
 
 
 
-    fun initHardware() {
 
-        if (! sim) {
+    private fun initHardware() {
+
+            println("Initializing Hardware")
+
             piCamera = RPiCamera(PHOTO_PATH)
                 .setWidth(300).setHeight(200)
                 .setBrightness(40)
@@ -77,45 +77,104 @@ class MainProcess(private val serialInterface: SerialInterface) {
                 .setTimeout(1000)
 
             piCamera.setFullPreviewOn()
-        } //TODO move to DI
 
 
-//        arduinoSerialInterface.sendCommand("S1:45")
-//        arduinoSerialInterface.sendCommand("M1:0")
-
-
-    }
-
-    @Throws(IOException::class, InterruptedException::class)
-    fun start() {
-        initHardware()
-        val speed = 25
 
         GlobalScope.launch {
-            // apiClient.test()
-            while (true) {
-//                arduinoSerialInterface.sendCommand("S1:45")
-//                break;
-                println(state)
+
+            println("Setting Up Serial Port")
+            val s = serialPort.start(this)
+            val r = serialPort.serialReceiver(this, s)
+            while(true) {
+                onRead(r.receive())
+            }
+        }
+    }
+
+    suspend fun diagSterring() {
+
+        serialPort.sendCommand("S1:45")
+        println("center")
+        delay(4000)
+
+        serialPort.sendCommand("S1:80")
+        println("left")
+
+        delay(4000)
+        serialPort.sendCommand("S1:45")
+        println("center")
+        delay(4000)
+
+        serialPort.sendCommand("S1:20")
+         println("right")
+        delay(4000)
+
+
+//        for ( i in 20..70) {
+//            serialPort.sendCommand("S1:$i")
+//            println("Diagnosing Steering right $i")
+//            delay(500)
+//        }
+//
+//        for ( i in 70 downTo 20) {
+//            serialPort.sendCommand("S1:$i")
+//            println("Diagnosing Steering left $i")
+//            delay(500)
+//        }
+    }
+
+
+    @Throws(IOException::class, InterruptedException::class)
+    suspend fun start() {
+        initHardware()
+        var speed: Int
+
+        while (true) {
+            diagSterring()
+        }
+
+
+        while (false) {
+                speed = when  {
+                    state == State.BACKING_UP -> {
+                        15
+                    }
+                    forwardSpaceCm > 500 -> {
+                        50
+                    }
+                    forwardSpaceCm in 11..99 -> {
+                        15
+                    }
+                    forwardSpaceCm < 10 &&  state != State.BACKING_UP -> {
+                        0
+                    }
+
+                    else -> {
+                        25
+                    }
+                }
+
+//                println(state)
                 if (forwardSpaceCm > 10 && state != State.LOOKING && state != State.BACKING_UP) {
                     state = State.CLEAR
                 }
 
                 if (state == State.CLEAR && forwardSpaceCm > 5) {
-                    serialInterface.sendCommand("M1:-$speed")
+                    serialPort.sendCommand("M1:-$speed")
                 }
                 else {
                     if (forwardSpaceCm < 5) {
-                        serialInterface.sendCommand("M1:0")
+                        serialPort.sendCommand("M1:0")
                         state = State.STOPPED
 
                     }
 
                     if (state == State.STOPPED) {
+                        speed = 20
                         while (forwardSpaceCm in 0..9) {
-                            println("backing up")
+                            println("backing up $speed $forwardSpaceCm")
                             state = State.BACKING_UP
-                            serialInterface.sendCommand("M1:$speed")
+                            serialPort.sendCommand("M1:$speed")
                         }
 
 
@@ -123,52 +182,44 @@ class MainProcess(private val serialInterface: SerialInterface) {
                     }
                     if (forwardSpaceCm >= 10 && state == State.BACKING_UP) {
                         println("looking around")
-                        serialInterface.sendCommand("M1:0")
+                        serialPort.sendCommand("M1:0")
                         state = State.LOOKING
                     }
                     if (state == State.LOOKING) {
                         println("looking for clear space ")
-                        serialInterface.sendCommand("S1:10")
-                        Thread.sleep(1000)
+                        serialPort.sendCommand("S1:10")
+                        delay(1000)
 
-                        serialInterface.sendCommand("M1:$speed")
-                        Thread.sleep(2000)
-                        serialInterface.sendCommand("M1:0")
-                        Thread.sleep(1000)
-                        serialInterface.sendCommand("S1:70")
-                        Thread.sleep(1000)
-                        serialInterface.sendCommand("M1:-$speed")
-                        Thread.sleep(1000)
-                        serialInterface.sendCommand("M1:0")
-                        Thread.sleep(1000)
-                        serialInterface.sendCommand("S1:45")
-                        Thread.sleep(1000)
+                        serialPort.sendCommand("M1:$speed")
+                        delay(2000)
+                        serialPort.sendCommand("M1:0")
+                        delay(1000)
+                        serialPort.sendCommand("S1:70")
+                        delay(1000)
+                        serialPort.sendCommand("M1:-$speed")
+                        delay(1000)
+                        serialPort.sendCommand("M1:0")
+                        delay(1000)
+                        serialPort.sendCommand("S1:45")
+                        delay(1000)
                         if (forwardSpaceCm > 10) {
                             state = State.CLEAR
                         }
                     }
                 }
-                Thread.sleep(1000)
-            }
+                delay(1000)
+
 
 
         }
-
-
-        //arduinoSerialInterface!!.sendCommand(Command(CommandType.CALIBRATE.id, "", 0))
-
-        // arduinoSerialInterface.sendCommand("M1:-10")
-
-
     }
 
 
-    fun onError(throwable: Throwable) {
-        throwable.printStackTrace()
-    }
 
     companion object {
         private const val PHOTO_PATH = "/home/pi/camera"
     }
 
 }
+
+

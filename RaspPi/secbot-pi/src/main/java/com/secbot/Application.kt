@@ -2,6 +2,7 @@ package com.secbot
 
 import com.pi4j.util.Console
 import com.secbot.di.DaggerAppComponent
+import kotlinx.coroutines.*
 import sun.applet.Main
 import java.io.IOException
 import java.util.*
@@ -14,32 +15,28 @@ class Application  {
     @Inject
     lateinit var mainProcess : MainProcess
 
+    @Inject
+    lateinit var console: Console
+
 
 
     companion object {
 
         private var INSTANCE: Application = Application()
 
-
-
-
-
-        private var console: Console? = null
         @Throws(InterruptedException::class, IOException::class)
         @JvmStatic
         fun main(args: Array<String>) {
 
             DaggerAppComponent.create().inject(INSTANCE)
-            console = Console()
 
-            console!!.promptForExit()
-            console!!.box("Starting Up Main Program")
+            INSTANCE.console.promptForExit()
+            INSTANCE.console.box("Starting Up Main Program")
 
-            INSTANCE.mainProcess.start()
-            while (console!!.isRunning) {
-                Thread.sleep(10)
-                //  mainProgram.arduinoSerialInterface!!.sendCommand(Command(CommandType.PING.id, "", 0))
-            }
+             runBlocking {
+                INSTANCE.mainProcess.start()
+             }
+
         }
     }
 
