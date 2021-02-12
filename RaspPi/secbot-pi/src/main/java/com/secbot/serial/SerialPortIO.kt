@@ -20,7 +20,7 @@ class SerialPortIO {
     }
 
 
-    @ExperimentalCoroutinesApi
+
     fun serialReceiver(scope: CoroutineScope, data: ReceiveChannel<String>): ReceiveChannel<String> = scope.produce {
 
         for (s in data) {
@@ -46,7 +46,7 @@ class SerialPortIO {
 
         var config = SerialConfig()
         config.device("/dev/$tty")
-            .baud(Baud._9600)
+            .baud(Baud._115200)
             .dataBits(DataBits._8)
             .parity(Parity.NONE)
             .stopBits(StopBits._1)
