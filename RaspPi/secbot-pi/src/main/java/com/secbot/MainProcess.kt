@@ -1,19 +1,18 @@
 package com.secbot
 
 import com.hopding.jrpicam.RPiCamera
-import com.hopding.jrpicam.enums.Exposure
+import com.secbot.Const.PHOTO_PATH
+import com.secbot.IO.IO
 import com.secbot.api.DefaultApiClient
-import com.secbot.serial.SerialPortIO
 import kotlinx.coroutines.*
 import java.io.File
 import java.io.IOException
 import java.util.*
 
 @ExperimentalCoroutinesApi
-class MainProcess(private val serialPort: SerialPortIO)   {
+class MainProcess(private val serialPort: IO, private val camera : Optional<RPiCamera>)   {
 
-    private lateinit var piCamera: RPiCamera
-    private val apiClient = DefaultApiClient()
+     private val apiClient = DefaultApiClient()
    // private val sim = WorldSimulator(this)
 
     private var forwardSpaceCm = -1
@@ -41,7 +40,9 @@ class MainProcess(private val serialPort: SerialPortIO)   {
                         GlobalScope.async {
                             println("Taking photo")
                             val file = takePhoto()
-                            apiClient.uploadPhoto(file)
+                            if (file.isPresent) {
+                                apiClient.uploadPhoto(file.get())
+                            }
                         }
 
                     }
@@ -52,13 +53,17 @@ class MainProcess(private val serialPort: SerialPortIO)   {
         }
 
     }
-    private fun takePhoto() : File {
+    private fun takePhoto() : Optional<File> {
 
 
-        val file = "${UUID.randomUUID()}.jpg"
-        piCamera.takeStill(file, 500, 500)
-        println("Took a photo of obstruction $file" )
-        return File("${PHOTO_PATH}/$file")
+
+        if (camera.isPresent) {
+            val file = "${UUID.randomUUID()}.jpg"
+            camera.get().takeStill(file, 500, 500)
+            println("Took a photo of obstruction $file")
+           return Optional.of(File("${PHOTO_PATH}/$file"))
+        }
+        return Optional.empty()
 
 
     }
@@ -70,17 +75,7 @@ class MainProcess(private val serialPort: SerialPortIO)   {
 
             println("Initializing Hardware")
 
-            piCamera = RPiCamera(PHOTO_PATH)
-                .setWidth(300).setHeight(200)
-                .setBrightness(40)
-                .setExposure(Exposure.AUTO)
-                .setContrast(50).setAddRawBayer(false)
-                .setQuality(75)
-                // .setVerticalFlipOn()
-                // .setRegionOfInterest(0.5, 0.5, 0.25, 0.25)
-                .setTimeout(1000)
 
-            piCamera.setFullPreviewOn()
 
 
 
@@ -196,7 +191,7 @@ class MainProcess(private val serialPort: SerialPortIO)   {
 
 
     companion object {
-        private const val PHOTO_PATH = "/home/pi/camera"
+
         private const val MAN_FRONT_SPACE_CM = 10
     }
 

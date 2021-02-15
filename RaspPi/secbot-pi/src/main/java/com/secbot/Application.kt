@@ -1,5 +1,6 @@
 package com.secbot
 
+import com.pi4j.system.SystemInfo
 import com.pi4j.util.Console
 import com.secbot.di.DaggerAppComponent
 import kotlinx.coroutines.*
@@ -27,6 +28,11 @@ class Application  {
         @Throws(InterruptedException::class, IOException::class)
         @JvmStatic
         fun main(args: Array<String>) {
+
+           System.getProperties().stringPropertyNames().forEach {
+               println(it + " : " + System.getProperty(it))
+           }
+
 
             DaggerAppComponent.create().inject(INSTANCE)
 
