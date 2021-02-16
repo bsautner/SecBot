@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="c6518711-a08a-49b8-bfe8-db0cce34f00e" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/../API/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../API/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../RaspPi/secbot-pi/.idea/kotlinc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/buildSrc/build.gradle.kts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/secbot-android/build.gradle.kts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/secbot-api/build.gradle.kts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/secbot-api/src/main/kotlin/com/secbot/secbot/SecbotApplication.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/secbot-api/src/main/kotlin/com/secbot/secbot/servlets/RootServlet.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/secbot-api/src/main/kotlin/com/secbot/secbot/servlets/VisionController.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/secbot-api/src/main/resources/application.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/secbot-api/src/test/kotlin/com/secbot/secbot/SecbotApplicationTests.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/secbot-control/src/main/kotlin/com/secbot/control/Application.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/secbot-control/src/main/kotlin/com/secbot/control/State.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/secbot-pi/src/main/kotlin/com/secbot/Application.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/secbot-pi/src/main/kotlin/com/secbot/Const.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/secbot-pi/src/main/kotlin/com/secbot/IO/IO.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/secbot-pi/src/main/kotlin/com/secbot/IO/SerialPortIO.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/secbot-pi/src/main/kotlin/com/secbot/IO/SerialWrapper.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/secbot-pi/src/main/kotlin/com/secbot/IO/SimulatorIO.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/secbot-pi/src/main/kotlin/com/secbot/MainProcess.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/secbot-pi/src/main/kotlin/com/secbot/State.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/secbot-pi/src/main/kotlin/com/secbot/api/ApiClient.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/secbot-pi/src/main/kotlin/com/secbot/api/DefaultApiClient.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/secbot-pi/src/main/kotlin/com/secbot/di/AppComponent.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/secbot-pi/src/main/kotlin/com/secbot/di/AppModule.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/secbot-simulator/src/main/kotlin/com/secbot/simulator/Application.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/secbot-simulator/src/main/kotlin/com/secbot/simulator/Ball.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/secbot-simulator/src/main/kotlin/com/secbot/simulator/Robot.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/secbot-simulator/src/main/kotlin/com/secbot/simulator/Simulator.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/secbot-simulator/src/main/kotlin/com/secbot/simulator/main.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../API/secbot-api/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/../API/secbot-api/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Simulator/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../Simulator/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Simulator/src/main/kotlin/com/secbot/Robot.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../Simulator/src/main/kotlin/com/secbot/Robot.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Simulator/src/main/kotlin/com/secbot/Simulator.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../Simulator/src/main/kotlin/com/secbot/Simulator.kt" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <task path="$PROJECT_DIR$">
+          <activation />
+        </task>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="secbot" type="f1a62948:ProjectNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="secbot" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="secbot" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="application" type="c8890929:TasksNode$1" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="secbot" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="build" type="c8890929:TasksNode$1" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectId" id="1oa2Ct06PdrarXLq2TuJNjfyu5B" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../Android" />
+    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.2" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/secbot-api" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Embedded Linux JVM.secbot-pi">
+    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
+      <option name="arquillianRunConfiguration">
+        <value>
+          <option name="containerStateName" value="" />
+        </value>
+      </option>
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="secbot [assemble]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="assemble" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="Application" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <module name="secbot.secbot-simulator.main" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="MAIN_CLASS_NAME" value="com.secbot.simulator.Application" />
+      <option name="WORKING_DIRECTORY" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="MainKt" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <module name="secbot.secbot-simulator.main" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="MAIN_CLASS_NAME" value="com.secbot.simulator.MainKt" />
+      <option name="WORKING_DIRECTORY" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="secbot-pi jvm" type="JetRunConfigurationType" temporary="true">
+      <module name="secbot.secbot-pi.main" />
+      <option name="VM_PARAMETERS" value="" />
+      <option name="PROGRAM_PARAMETERS" value="" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="MAIN_CLASS_NAME" value="com.secbot.Application" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="Run as an Embedded Java application" factoryName="Embedded Linux JVM">
+      <option name="classesDirectory" />
+      <option name="hostname" value="192.168.1.68" />
+      <option name="keyPath" value="" />
+      <option name="password" value="blackflask" />
+      <option name="port" value="1234" />
+      <option name="programArguments" value="" />
+      <option name="runAsRoot" value="false" />
+      <option name="sshPort" value="22" />
+      <option name="username" value="pi" />
+      <option name="usingKey" value="false" />
+      <option name="vmParameters" value="" />
+      <option name="moduleName" value="secbot.secbot-pi.main" />
+      <option name="mainclass" value="com.secbot.Application" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="secbot-pi" type="Run as an Embedded Java application" factoryName="Embedded Linux JVM">
+      <option name="classesDirectory" />
+      <option name="hostname" value="192.168.1.68" />
+      <option name="keyPath" value="" />
+      <option name="password" value="blackflask" />
+      <option name="port" value="1234" />
+      <option name="programArguments" value="" />
+      <option name="runAsRoot" value="false" />
+      <option name="sshPort" value="22" />
+      <option name="username" value="pi" />
+      <option name="usingKey" value="false" />
+      <option name="vmParameters" value="" />
+      <option name="moduleName" value="secbot.secbot-pi.main" />
+      <option name="mainclass" value="com.secbot.Application" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="SecbotApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
+      <module name="secbot.secbot-api.main" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.secbot.secbot.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.secbot.secbot.SecbotApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="Embedded Linux JVM.secbot-pi" />
+      <item itemvalue="Application.secbot-pi jvm" />
+      <item itemvalue="Application.Application" />
+      <item itemvalue="Application.MainKt" />
+      <item itemvalue="Gradle.secbot [assemble]" />
+      <item itemvalue="Spring Boot.SecbotApplication" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Spring Boot.SecbotApplication" />
+        <item itemvalue="Gradle.secbot [assemble]" />
+        <item itemvalue="Application.MainKt" />
+        <item itemvalue="Application.Application" />
+        <item itemvalue="Application.secbot-pi jvm" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c6518711-a08a-49b8-bfe8-db0cce34f00e" name="Default Changelist" comment="" />
+      <created>1613510256720</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1613510256720</updated>
+      <workItem from="1613510257901" duration="1773000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+  </component>
+</project>
