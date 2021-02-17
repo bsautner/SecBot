@@ -1,5 +1,5 @@
 package com.secbot.control
 
 enum class State {
-    CLEAR, STOPPED
+    CLEAR, STOPPED, IDLE, BACKING_UP, LOOKING
 }

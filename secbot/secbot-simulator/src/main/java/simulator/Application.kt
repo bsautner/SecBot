@@ -1,4 +1,4 @@
-package com.secbot.simulator
+package simulator
 
 import com.secbot.control.State
 

@@ -14,6 +14,17 @@ SyRenSimplified SR(SWSerial); // Use SWSerial as the serial port.
 Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(54321);
 Servo myservo;
 
+String MOTOR_1 = "MOTOR_1";
+String MOTOR_2 = "MOTOR_2";
+String STEERING_SERVO = "STEERING_SERVO";
+String FRONT_SONAR = "FRONT_SONAR";
+String COMPASS_HEADING = "COMPASS_HEADING";
+String ACCELEROMETER_X = "ACCELEROMETER_X";
+String ACCELEROMETER_Y = "ACCELEROMETER_Y";
+String ACCELEROMETER_Z = "ACCELEROMETER_Z";
+String DEBUG = "DEBUG";
+
+
 
 //SONAR
 int trigPin = 13;    // Trigger
@@ -22,7 +33,6 @@ int servoPin = 12;
 long duration, cm, inches;
 unsigned long lastSonarPing;
 
-int lastSonarCm = 0;
 int throttle = 0;
 int lastHeading = 0;
 int accelerometer_x = 0;
@@ -59,7 +69,6 @@ void setup()
     ; // will pause Zero, Leonardo, etc until serial console opens
 #endif
 
-  log("Accelerometer Test");
 
 
   /* Initialise the sensor */
@@ -70,7 +79,6 @@ void setup()
       ;
   }
 
-  displaySensorDetails();
   accel.setRange(LSM303_RANGE_4G);
   log("Range set to: ");
   lsm303_accel_range_t new_range = accel.getRange();
@@ -143,11 +151,9 @@ void loop()
 
 
     lastSonarPing = millis();
-    if (cm < 1000 && (cm > lastSonarCm + 1 || cm < lastSonarCm - 1)) {
-
-      Serial.print("front_sonar:");
-      Serial.println(cm);
-      lastSonarCm = cm;
+    if (cm < 1000) {
+      sendCommand(FRONT_SONAR, cm);
+    
       if (cm < 5) {
         SR.motor(0);
       }
@@ -171,18 +177,15 @@ void loop()
 
     if (accelerometer_x > accelerometer_x + 1 || event.acceleration.x < accelerometer_x - 1) {
       accelerometer_x = accelerometer_x;
-      Serial.print("accelerometer_x:");
-      Serial.println(event.acceleration.x);
+      sendCommand(ACCELEROMETER_X, event.acceleration.x);
     }
     if (accelerometer_y > accelerometer_y + 1 || event.acceleration.y < accelerometer_y - 1) {
       accelerometer_y = accelerometer_y;
-      Serial.print("accelerometer_y:");
-      Serial.println(event.acceleration.y);
+      sendCommand(ACCELEROMETER_Y,event.acceleration.y);
     }
     if (accelerometer_z > accelerometer_z + 1 || event.acceleration.x < accelerometer_z - 1) {
       accelerometer_z = accelerometer_z;
-      Serial.print("accelerometer_z:");
-      Serial.println(event.acceleration.z);
+     sendCommand(ACCELEROMETER_Z,event.acceleration.z);
     }
 
 
@@ -199,9 +202,9 @@ void loop()
 
     if (heading > lastHeading + 3 || heading < lastHeading - 3) {
       lastHeading = heading;
+      sendCommand(COMPASS_HEADING, heading);
 
-      Serial.print("compass_heading:");
-      Serial.println(heading);
+    
     }
 
   }
@@ -221,16 +224,24 @@ void serialEvent() {
   }
 }
 
+void sendCommand(String device, float value) {
+    Serial.print(device);
+    Serial.print(":");
+    Serial.print(value);
+      Serial.print("\n");
+    Serial.println();
+}
+
 void processCommand(String command) {
 
 
   String cmd = getValue(inputString, ':', 0);
   String val = getValue(inputString, ':', 1);
 
-  if (cmd == "M1") {
+  if (cmd == MOTOR_1) {
     powerMotor(val.toInt());
   }
-  else if (cmd == "S1") {
+  else if (cmd == STEERING_SERVO) {
     steerServo(val.toInt());
   }
 
@@ -249,13 +260,9 @@ void steerServo(int newPos) {
 }
 
 void powerMotor(int val) {
-
-  if (val < 0 && lastSonarCm < 5) {
-    return;
-  }
-  else {
+ 
     SR.motor(val);
-  }
+ 
 }
 
 
@@ -275,31 +282,6 @@ String getValue(String data, char separator, int index)
   return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
 
-
-//compass
-void displaySensorDetails(void) {
-  sensor_t sensor;
-  accel.getSensor(&sensor);
-  Serial.println("------------------------------------");
-  Serial.print("Sensor:       ");
-  Serial.println(sensor.name);
-  Serial.print("Driver Ver:   ");
-  Serial.println(sensor.version);
-  Serial.print("Unique ID:    ");
-  Serial.println(sensor.sensor_id);
-  Serial.print("Max Value:    ");
-  Serial.print(sensor.max_value);
-  Serial.println(" m/s^2");
-  Serial.print("Min Value:    ");
-  Serial.print(sensor.min_value);
-  Serial.println(" m/s^2");
-  Serial.print("Resolution:   ");
-  Serial.print(sensor.resolution);
-  Serial.println(" m/s^2");
-  Serial.println("------------------------------------");
-  Serial.println("");
-  delay(500);
-}
 
 void log(String s) {
   Serial.println("DEBUG:" + s);

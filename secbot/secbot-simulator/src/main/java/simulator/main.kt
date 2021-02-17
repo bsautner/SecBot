@@ -1,4 +1,4 @@
-package com.secbot.simulator
+package simulator
 
 import androidx.compose.desktop.Window
 import androidx.compose.ui.unit.IntSize

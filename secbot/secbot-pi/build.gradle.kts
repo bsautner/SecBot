@@ -45,5 +45,9 @@ dependencies {
     annotationProcessor( "com.google.dagger:dagger-android-processor:2.32")
     annotationProcessor( "com.google.dagger:dagger-compiler:2.32")
     kapt("com.google.dagger:dagger-compiler:2.32")
+
+    implementation(project(":secbot-control"))
+
+
     implementation(kotlin("stdlib"))
 }

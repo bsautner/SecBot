@@ -1,4 +1,4 @@
-package com.secbot.IO
+package com.secbot.io
 
 import com.pi4j.io.serial.*
 import java.io.InputStream

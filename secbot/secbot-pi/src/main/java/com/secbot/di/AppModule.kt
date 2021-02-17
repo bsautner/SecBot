@@ -5,25 +5,32 @@ import com.hopding.jrpicam.enums.Exposure
 import com.pi4j.io.serial.Serial
 import com.pi4j.io.serial.SerialFactory
 import com.pi4j.util.Console
+import com.secbot.control.SecBot
 import com.secbot.Const.PHOTO_PATH
-import com.secbot.IO.IO
-import com.secbot.IO.SerialPortIO
-import com.secbot.IO.SerialWrapper
-import com.secbot.IO.SimulatorIO
+import com.secbot.control.IO
+import com.secbot.io.SerialPortIO
+import com.secbot.io.SerialWrapper
+import com.secbot.io.SimulatorIO
 import com.secbot.MainProcess
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.*
+import javax.inject.Singleton
 
 @ExperimentalCoroutinesApi
 @Module
 class AppModule {
 
+    @Provides
+    @Singleton
+    fun provideSecBot() : SecBot {
+        return SecBot()
+    }
 
     @Provides
-    fun provideMainProcess(serialPort: IO, camera: Optional<RPiCamera>) : MainProcess {
-        return MainProcess(serialPort, camera)
+    fun provideMainProcess(secBot: SecBot, serialPort: IO, camera: Optional<RPiCamera>) : MainProcess {
+        return MainProcess(secBot, serialPort, camera)
     }
 
 

@@ -6,6 +6,7 @@ import kotlinx.coroutines.*
 import java.io.IOException
 import javax.inject.Inject
 
+@ExperimentalCoroutinesApi
 class Application  {
 
 
@@ -22,14 +23,10 @@ class Application  {
 
         private var INSTANCE: Application = Application()
 
+
         @Throws(InterruptedException::class, IOException::class)
         @JvmStatic
         fun main(args: Array<String>) {
-
-           System.getProperties().stringPropertyNames().forEach {
-               println(it + " : " + System.getProperty(it))
-           }
-
 
             DaggerAppComponent.create().inject(INSTANCE)
 

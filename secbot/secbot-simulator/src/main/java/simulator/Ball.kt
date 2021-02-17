@@ -1,4 +1,4 @@
-package com.secbot.simulator
+package simulator
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

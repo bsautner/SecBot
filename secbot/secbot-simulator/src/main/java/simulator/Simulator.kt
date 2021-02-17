@@ -1,4 +1,4 @@
-package com.secbot.simulator
+package simulator
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
+import com.secbot.control.SecBot
 import kotlin.random.Random
 
 class Simulator {
@@ -26,8 +27,9 @@ class Simulator {
     var pieces = mutableStateListOf<Ball.BallViewModel>()
         private set
 
+    val secBot = SecBot()
 
-    var bot = mutableStateOf(Robot.BotData(this, 20F, Color.Black))
+    var bot = mutableStateOf(SecBotSimulator.BotData(this, secBot))
 
     var elapsed by mutableStateOf(0L)
 
@@ -35,6 +37,8 @@ class Simulator {
 
 
     var numBlocks by mutableStateOf(20)
+
+
 
     private fun start() {
         previousTimeNanos = System.nanoTime()
@@ -77,7 +81,7 @@ class Simulator {
     @Composable
     fun simulatorComposable() {
         val game = remember { Simulator() }
-        val robot = remember { Robot() }
+        val robot = remember { SecBotSimulator() }
         val ball = remember { Ball() }
         game.start()
         Row {
