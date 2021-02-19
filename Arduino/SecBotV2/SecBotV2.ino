@@ -1,4 +1,3 @@
-//this is the working sketch for wandering around
 #include <Adafruit_LSM303_Accel.h>
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
@@ -7,32 +6,35 @@
 #include <SyRenSimplified.h>
 #include <Servo.h>
 
+const int SONAR_ECHO_PIN = 5;
+const int SONAR_TRIGGER_PIN = 6;
+const int STEERING_SERVO_PIN = 12;
+
+
+
+const String MOTOR_1 = "MOTOR_1";
+const String MOTOR_2 = "MOTOR_2";
+const String STEERING_SERVO = "STEERING_SERVO";
+const String FRONT_SONAR = "FRONT_SONAR";
+const String COMPASS_HEADING = "COMPASS_HEADING";
+const String ACCELEROMETER_X = "ACCELEROMETER_X";
+const String ACCELEROMETER_Y = "ACCELEROMETER_Y";
+const String ACCELEROMETER_Z = "ACCELEROMETER_Z";
+const String DEBUG = "DEBUG";
+
+Servo steering_servo;
+Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(54321);
+
 SoftwareSerial SWSerial(NOT_A_PIN, 2); // RX on no pin (unused), TX on pin 11 (to S1).
 SyRenSimplified SR(SWSerial); // Use SWSerial as the serial port.
 
-/* compass / accel sensor Assign a unique ID to this sensor at the same time */
-Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(54321);
-Servo myservo;
 
-String MOTOR_1 = "MOTOR_1";
-String MOTOR_2 = "MOTOR_2";
-String STEERING_SERVO = "STEERING_SERVO";
-String FRONT_SONAR = "FRONT_SONAR";
-String COMPASS_HEADING = "COMPASS_HEADING";
-String ACCELEROMETER_X = "ACCELEROMETER_X";
-String ACCELEROMETER_Y = "ACCELEROMETER_Y";
-String ACCELEROMETER_Z = "ACCELEROMETER_Z";
-String DEBUG = "DEBUG";
-
-
-
-//SONAR
-int trigPin = 13;    // Trigger
-int echoPin = 5;    // Echo
-int servoPin = 12;
-long duration, cm, inches;
-unsigned long lastSonarPing;
+long duration, cm, inches, lastSonarPing;
 int lastCm = 0;
+
+
+String inputString = "";
+bool stringComplete = false;
 
 int throttle = 0;
 int lastHeading = 0;
@@ -41,38 +43,55 @@ int accelerometer_y = 0;
 int accelerometer_z = 0;
 
 
-//SERIAL COM
-String inputString = "";         // a String to hold incoming data
-bool stringComplete = false;  // whether the string is complete
-
-bool isInit = false;
-
-void setup()
-{
-   myservo.attach(servoPin);
-  SWSerial.begin(9600);
+void setup() {
   Serial.begin(115200);
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for native USB port only
-  }
-
-
-
-
-  //    //Sonar Setup
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
+  Serial1.begin(115200);
+  SWSerial.begin(9600);
 
   inputString.reserve(200);
 
-  //compass
-#ifndef ESP8266
-  while (!Serial)
-    ; // will pause Zero, Leonardo, etc until serial console opens
-#endif
+  steering_servo.attach(STEERING_SERVO_PIN);
+  steering_servo.write(40);
+  steering_servo.detach();
+
+  pinMode(SONAR_TRIGGER_PIN, OUTPUT);
+  pinMode(SONAR_ECHO_PIN, INPUT);
+
+  /* Initialise the sensor */
+  if (!accel.begin()) {
+    /* There was a problem detecting the ADXL345 ... check your connections */
+    log("no LSM303 detected");
+    while (1)
+      ;
+  }
+  setupAccel();
+  powerMotor(0);
+
+}
+
+void loop() {
+  if (stringComplete) {
+    inputString = "";
+    stringComplete = false;
+  }
+
+  if (Serial1.available()) {
+     char inChar = (char)Serial1.read();
+    inputString += inChar;
+    if (inChar == '\n') {
+      processCommand(inputString);
+      stringComplete = true;
+
+    }
+  }
+
+  sonarPing();
+  orientationCheck();
 
 
+}
 
+void setupAccel() {
   /* Initialise the sensor */
   if (!accel.begin()) {
     /* There was a problem detecting the ADXL345 ... check your connections */
@@ -115,59 +134,9 @@ void setup()
       break;
   }
 
-
 }
 
-void loop()
-{
-  log("Loop Start");
-  if (! isInit) {
-    SR.motor(0);
-    steerServo(45);
-    delay(2000);
-    isInit = true;
-
-  }
-  int power;
-
-  if (stringComplete) {
-
-    // clear the string:
-    inputString = "";
-    stringComplete = false;
-  }
-
-  //SONAR LOOP
-
-  if (millis() - lastSonarPing > 100) {
-
-
-    digitalWrite(trigPin, LOW);
-    delayMicroseconds(5);
-    digitalWrite(trigPin, HIGH);
-    delayMicroseconds(10);
-    digitalWrite(trigPin, LOW);
-    pinMode(echoPin, INPUT);
-    duration = pulseIn(echoPin, HIGH);
-    // Convert the time into a distance
-    cm = (duration / 2) / 29.1;   // Divide by 29.1 or multiply by 0.0343
-    
-
-    lastSonarPing = millis();
-    if (cm < 1000 && cm != lastCm && cm != lastCm-1 && cm != lastCm+1) {
-      sendCommand(FRONT_SONAR, cm);
-      lastCm = cm;
-      if (cm < 5) {
-        SR.motor(0);
-      }
-
-    }
-
-
-
-
-  }
-
+void orientationCheck() {
   //compass
 
 
@@ -184,11 +153,11 @@ void loop()
     }
     if (accelerometer_y > accelerometer_y + 1 || event.acceleration.y < accelerometer_y - 1) {
       accelerometer_y = accelerometer_y;
-      sendCommand(ACCELEROMETER_Y,event.acceleration.y);
+      sendCommand(ACCELEROMETER_Y, event.acceleration.y);
     }
     if (accelerometer_z > accelerometer_z + 1 || event.acceleration.x < accelerometer_z - 1) {
       accelerometer_z = accelerometer_z;
-     sendCommand(ACCELEROMETER_Z,event.acceleration.z);
+      sendCommand(ACCELEROMETER_Z, event.acceleration.z);
     }
 
 
@@ -203,41 +172,76 @@ void loop()
       heading = 360 + heading;
     }
 
-    if (heading > lastHeading + 3 || heading < lastHeading - 3) {
+    if (heading > lastHeading + 10 || heading < lastHeading - 10) {
       lastHeading = heading;
       sendCommand(COMPASS_HEADING, heading);
 
-    
-    }
-
-  }
-}
-
-void serialEvent() {
-  while (Serial.available()) {
-    // get the new byte:
-    char inChar = (char)Serial.read();
-    inputString += inChar;
-    if (inChar == '\n') {
-      processCommand(inputString);
-      stringComplete = true;
 
     }
 
   }
 }
 
-void sendCommand(String device, float value) {
-    Serial.print(device);
-    Serial.print(":");
-    Serial.print(value);
-      Serial.print("\n");
-    Serial.println();
+void sonarPing() {
+  //SONAR LOOP
+
+  if (millis() - lastSonarPing > 100) {
+
+
+    digitalWrite(SONAR_TRIGGER_PIN, LOW);
+    delayMicroseconds(5);
+    digitalWrite(SONAR_TRIGGER_PIN, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(SONAR_TRIGGER_PIN, LOW);
+    pinMode(SONAR_ECHO_PIN, INPUT);
+    duration = pulseIn(SONAR_ECHO_PIN, HIGH);
+    // Convert the time into a distance
+    cm = (duration / 2) / 29.1;   // Divide by 29.1 or multiply by 0.0343
+
+
+    lastSonarPing = millis();
+    if (cm < 1000 && cm != lastCm && cm != lastCm - 1 && cm != lastCm + 1) {
+      sendCommand(FRONT_SONAR, cm);
+      lastCm = cm;
+      if (cm < 5) {
+        powerMotor(0);
+      }
+
+    }
+
+
+
+
+  }
 }
 
+void steerServo(int newPos) {
+  log("steerServo");
+  if (newPos <= 70 && newPos >= 20) {
+    steering_servo.attach(STEERING_SERVO_PIN);
+    delay(100);
+    steering_servo.write(newPos);
+    delay(100);
+    steering_servo.detach();
+
+  }
+
+
+
+}
+
+void powerMotor(int val) {
+
+  SR.motor(val);
+
+}
+
+
+
+//Serial Input
 void processCommand(String command) {
 
-
+  
   String cmd = getValue(inputString, ':', 0);
   String val = getValue(inputString, ':', 1);
 
@@ -247,26 +251,21 @@ void processCommand(String command) {
   else if (cmd == STEERING_SERVO) {
     log("Steering servo");
     steerServo(val.toInt());
+  } else if (cmd == "PING") {
+    sendCommand("PONG", millis());
   }
 
 }
 
-void steerServo(int newPos) {
-log("steerServo");
- 
-  myservo.write(newPos);
-//  delay(100);
-//  myservo.detach();
-
-
-
+void sendCommand(String device, float value) {
+  Serial1.print("{");
+  Serial1.print(device);
+  Serial1.print(":");
+  Serial1.print(value);
+  Serial1.print("}");
 }
 
-void powerMotor(int val) {
  
-    SR.motor(val);
- 
-}
 
 
 String getValue(String data, char separator, int index)
@@ -284,7 +283,6 @@ String getValue(String data, char separator, int index)
   }
   return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
-
 
 void log(String s) {
   Serial.println("DEBUG:" + s);

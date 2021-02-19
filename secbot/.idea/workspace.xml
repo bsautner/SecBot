@@ -5,33 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c6518711-a08a-49b8-bfe8-db0cce34f00e" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/Device.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/SecBot.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/SerialData.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Arduino/SecBot/SecBot.ino" beforeDir="false" afterPath="$PROJECT_DIR$/../Arduino/SecBot/SecBot.ino" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-control/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-control/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-control/src/main/kotlin/com/secbot/control/Application.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/Application.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-control/src/main/kotlin/com/secbot/control/State.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/State.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-pi/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-pi/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-pi/src/main/kotlin/com/secbot/Application.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/Application.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-pi/src/main/kotlin/com/secbot/Const.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/Const.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-pi/src/main/kotlin/com/secbot/IO/IO.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/IO.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-pi/src/main/kotlin/com/secbot/IO/SerialPortIO.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/IO/SerialPortIO.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-pi/src/main/kotlin/com/secbot/IO/SerialWrapper.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/IO/SerialWrapper.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-pi/src/main/kotlin/com/secbot/IO/SimulatorIO.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/IO/SimulatorIO.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-pi/src/main/kotlin/com/secbot/MainProcess.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/MainProcess.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-pi/src/main/kotlin/com/secbot/State.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-pi/src/main/kotlin/com/secbot/api/ApiClient.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/api/ApiClient.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-pi/src/main/kotlin/com/secbot/api/DefaultApiClient.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/api/DefaultApiClient.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-pi/src/main/kotlin/com/secbot/di/AppComponent.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/di/AppComponent.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-pi/src/main/kotlin/com/secbot/di/AppModule.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/di/AppModule.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-simulator/src/main/kotlin/com/secbot/simulator/Application.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-simulator/src/main/java/simulator/Application.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-simulator/src/main/kotlin/com/secbot/simulator/Ball.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-simulator/src/main/java/simulator/Ball.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-simulator/src/main/kotlin/com/secbot/simulator/Robot.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-simulator/src/main/java/simulator/SecBotSimulator.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-simulator/src/main/kotlin/com/secbot/simulator/Simulator.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-simulator/src/main/java/simulator/Simulator.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-simulator/src/main/kotlin/com/secbot/simulator/main.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-simulator/src/main/java/simulator/main.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/Device.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/Device.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/IO.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/IO.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/SecBot.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/SecBot.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/Application.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/Application.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/MainProcess.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/MainProcess.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/io/SerialPortIO.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/io/SerialPortIO.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -107,7 +88,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../Android" />
+    <property name="last_opened_file_path" value="$USER_HOME$/xfinity/code/compliance_scanner" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -133,17 +114,6 @@
     </key>
   </component>
   <component name="RunManager" selected="Embedded Linux JVM.secbot-pi">
-    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
-      <option name="arquillianRunConfiguration">
-        <value>
-          <option name="containerStateName" value="" />
-        </value>
-      </option>
-      <option name="TEST_OBJECT" value="class" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="secbot [assemble]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -281,7 +251,15 @@
       <updated>1613510256720</updated>
       <workItem from="1613510257901" duration="2953000" />
       <workItem from="1613569972023" duration="116000" />
-      <workItem from="1613570101341" duration="23725000" />
+      <workItem from="1613570101341" duration="25276000" />
+      <workItem from="1613657799119" duration="787000" />
+      <workItem from="1613659258868" duration="659000" />
+      <workItem from="1613660279964" duration="1998000" />
+      <workItem from="1613748819995" duration="596000" />
+      <workItem from="1613749429862" duration="133000" />
+      <workItem from="1613749576289" duration="1687000" />
+      <workItem from="1613766909155" duration="963000" />
+      <workItem from="1613767885447" duration="3639000" />
     </task>
     <servers />
   </component>
@@ -302,5 +280,21 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/io/SerialPortIO.kt</url>
+          <line>60</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/io/SerialPortIO.kt</url>
+          <line>69</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

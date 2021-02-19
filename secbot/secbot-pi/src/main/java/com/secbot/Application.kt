@@ -3,6 +3,7 @@ package com.secbot
 import com.pi4j.util.Console
 import com.secbot.di.DaggerAppComponent
 import kotlinx.coroutines.*
+import java.io.ByteArrayOutputStream
 import java.io.IOException
 import javax.inject.Inject
 

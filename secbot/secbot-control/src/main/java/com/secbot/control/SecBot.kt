@@ -62,15 +62,12 @@ class SecBot : IO {
 
     override fun sendCommand(command: SerialData) {
         devices[command.device] = command
-        println(">>> ${command.toSerialCommand()}")
-
-
     }
 
     override fun receiver(scope: CoroutineScope, data: ReceiveChannel<SerialData>): ReceiveChannel<SerialData> = scope.produce {
 
         for (s in data) {
-         //   println("SecBot Receiver got command: $s")
+          //  println("SecBot Receiver got command: $s")
             send(s)
         }
     }
@@ -79,52 +76,53 @@ class SecBot : IO {
 
       //  println("starting secbot on thread: ${Thread.currentThread().name}")
         while (true) {
-            println("State  $state at speed $speed with $forwardSonarDistanceCm cm of free space")
-
-            when {
-                (forwardSonarDistanceCm > MIN_FRONT_SPACE_CM && state != State.LOOKING && state != State.BACKING_UP) -> {
-                    changeState(State.CLEAR)
-                    send(SerialData(Device.MOTOR_1, speed, System.currentTimeMillis()))
-
-                }
-                (state == State.CLEAR && forwardSonarDistanceCm > 10) -> {
-                    send(SerialData(Device.MOTOR_1, speed, System.currentTimeMillis()))
-                }
-                (forwardSonarDistanceCm < MIN_FRONT_SPACE_CM && state != State.STOPPED && state != State.LOOKING && state != State.BACKING_UP) -> {
-                    send(SerialData(Device.MOTOR_1, speed, System.currentTimeMillis()))
-                    changeState(State.STOPPED)
-                }
-                (state == State.STOPPED && forwardSonarDistanceCm < MIN_FRONT_SPACE_CM) -> {
-
-                    changeState(State.BACKING_UP)
-                    send(SerialData(Device.MOTOR_1, speed, System.currentTimeMillis()))
-                }
-                (forwardSonarDistanceCm <= MIN_FRONT_SPACE_CM && state == State.BACKING_UP) -> {
-                    send(SerialData(Device.MOTOR_1, speed, System.currentTimeMillis()))
-                    delay(1000)
-                    changeState(State.LOOKING)
-                }
-                (state == State.LOOKING) -> {
-//                    send(SerialData(Device.MOTOR_1, 0.0, System.currentTimeMillis()))
+//            println("State  $state at speed $speed with $forwardSonarDistanceCm cm of free space")
+//
+//            when {
+//                (forwardSonarDistanceCm > MIN_FRONT_SPACE_CM && state != State.LOOKING && state != State.BACKING_UP) -> {
+//                    changeState(State.CLEAR)
+//                    send(SerialData(Device.MOTOR_1, speed, System.currentTimeMillis()))
+//
+//                }
+//                (state == State.CLEAR && forwardSonarDistanceCm > 10) -> {
+//                    send(SerialData(Device.MOTOR_1, speed, System.currentTimeMillis()))
+//                }
+//                (forwardSonarDistanceCm < MIN_FRONT_SPACE_CM && state != State.STOPPED && state != State.LOOKING && state != State.BACKING_UP) -> {
+//                    send(SerialData(Device.MOTOR_1, speed, System.currentTimeMillis()))
+//                    changeState(State.STOPPED)
+//                }
+//                (state == State.STOPPED && forwardSonarDistanceCm < MIN_FRONT_SPACE_CM) -> {
+//
+//                    changeState(State.BACKING_UP)
+//                    send(SerialData(Device.MOTOR_1, speed, System.currentTimeMillis()))
+//                }
+//                (forwardSonarDistanceCm <= MIN_FRONT_SPACE_CM && state == State.BACKING_UP) -> {
+//                    send(SerialData(Device.MOTOR_1, speed, System.currentTimeMillis()))
 //                    delay(1000)
-//                    send(SerialData(Device.STEERING_SERVO, 30.0, System.currentTimeMillis()))
-//                    delay(500)
-//                    send(SerialData(Device.MOTOR_1, -20.0, System.currentTimeMillis()))
-//                    delay(1000)
-//                    send(SerialData(Device.STEERING_SERVO, 70.0, System.currentTimeMillis()))
-//                    delay(500)
-//                    send(SerialData(Device.MOTOR_1, 20.0, System.currentTimeMillis()))
-//                    delay(1000)
-//                    send(SerialData(Device.STEERING_SERVO, 45.0, System.currentTimeMillis()))
-//                    send(SerialData(Device.MOTOR_1, 0.0, System.currentTimeMillis()))
-//                    delay(1000)
-                    if (forwardSonarDistanceCm >= MIN_FRONT_SPACE_CM) {
-                        changeState(State.CLEAR)
-                    }
-                }
+//                    changeState(State.LOOKING)
+//                }
+//                (state == State.LOOKING) -> {
+////                    send(SerialData(Device.MOTOR_1, 0.0, System.currentTimeMillis()))
+////                    delay(1000)
+////                    send(SerialData(Device.STEERING_SERVO, 30.0, System.currentTimeMillis()))
+////                    delay(500)
+////                    send(SerialData(Device.MOTOR_1, -20.0, System.currentTimeMillis()))
+////                    delay(1000)
+////                    send(SerialData(Device.STEERING_SERVO, 70.0, System.currentTimeMillis()))
+////                    delay(500)
+////                    send(SerialData(Device.MOTOR_1, 20.0, System.currentTimeMillis()))
+////                    delay(1000)
+////                    send(SerialData(Device.STEERING_SERVO, 45.0, System.currentTimeMillis()))
+////                    send(SerialData(Device.MOTOR_1, 0.0, System.currentTimeMillis()))
+////                    delay(1000)
+//                    if (forwardSonarDistanceCm >= MIN_FRONT_SPACE_CM) {
+//                        changeState(State.CLEAR)
+//                    }
+//                }
 
 
-            }
+           // }
+            send(SerialData(Device.PING, 0.0, System.currentTimeMillis()))
             delay(500)
 
         }

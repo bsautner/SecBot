@@ -62,7 +62,7 @@ class MainProcess(private val secBot: SecBot, private val serialPort: IO, privat
             val s = serialPort.start(this)
             val r = serialPort.receiver(this, s)
 
-            while(true) {
+            while(! r.isClosedForReceive) {
 
                 val data: SerialData = r.receive()
                // println("Main Process got input data: $data on thread ${Thread.currentThread().name}")
@@ -73,7 +73,7 @@ class MainProcess(private val secBot: SecBot, private val serialPort: IO, privat
         GlobalScope.launch {
             val s = secBot.start(this)
             val r = secBot.receiver(this, s)
-            while (true) {
+            while (! r.isClosedForReceive) {
                 val data: SerialData = r.receive()
               //  println("Main Process got output data: ${data.toSerialCommand()} on thread ${Thread.currentThread().name}")
                 serialPort.sendCommand(data)
