@@ -1,4 +1,5 @@
 #include <Adafruit_LSM303_Accel.h>
+#include <Adafruit_LSM303DLH_Mag.h>
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
 
@@ -23,7 +24,7 @@ const String ACCELEROMETER_Z = "ACCELEROMETER_Z";
 const String DEBUG = "DEBUG";
 
 Servo steering_servo;
-Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(54321);
+Adafruit_LSM303DLH_Mag_Unified mag = Adafruit_LSM303DLH_Mag_Unified(12345);
 
 SoftwareSerial SWSerial(NOT_A_PIN, 2); // RX on no pin (unused), TX on pin 11 (to S1).
 SyRenSimplified SR(SWSerial); // Use SWSerial as the serial port.
@@ -57,14 +58,18 @@ void setup() {
   pinMode(SONAR_TRIGGER_PIN, OUTPUT);
   pinMode(SONAR_ECHO_PIN, INPUT);
 
-  /* Initialise the sensor */
-  if (!accel.begin()) {
-    /* There was a problem detecting the ADXL345 ... check your connections */
-    log("no LSM303 detected");
+  mag.enableAutoRange(true);
+
+  if (!mag.begin()) {
+    /* There was a problem detecting the LSM303 ... check your connections */
+    Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
     while (1)
       ;
   }
-  setupAccel();
+
+
+
+  
   powerMotor(0);
 
 }
@@ -91,50 +96,7 @@ void loop() {
 
 }
 
-void setupAccel() {
-  /* Initialise the sensor */
-  if (!accel.begin()) {
-    /* There was a problem detecting the ADXL345 ... check your connections */
-    log("no LSM303 detected");
-    while (1)
-      ;
-  }
-
-  accel.setRange(LSM303_RANGE_4G);
-  log("Range set to: ");
-  lsm303_accel_range_t new_range = accel.getRange();
-  switch (new_range) {
-    case LSM303_RANGE_2G:
-      log("+- 2G");
-      break;
-    case LSM303_RANGE_4G:
-      log("+- 4G");
-      break;
-    case LSM303_RANGE_8G:
-      log("+- 8G");
-      break;
-    case LSM303_RANGE_16G:
-      log("+- 16G");
-      break;
-  }
-
-
-  accel.setMode(LSM303_MODE_NORMAL);
-  log("Mode set to: ");
-  lsm303_accel_mode_t new_mode = accel.getMode();
-  switch (new_mode) {
-    case LSM303_MODE_NORMAL:
-      log("Normal");
-      break;
-    case LSM303_MODE_LOW_POWER:
-      log("Low Power");
-      break;
-    case LSM303_MODE_HIGH_RESOLUTION:
-      log("High Resolution");
-      break;
-  }
-
-}
+ 
 
 void orientationCheck() {
   //compass
@@ -142,8 +104,8 @@ void orientationCheck() {
 
   if (millis() - throttle > 500) {
     throttle = millis();
-    sensors_event_t event;
-    accel.getEvent(&event);
+  sensors_event_t event;
+  mag.getEvent(&event);
 
     /* Display the results (acceleration is measured in m/s^2) */
 
@@ -172,12 +134,12 @@ void orientationCheck() {
       heading = 360 + heading;
     }
 
-    if (heading > lastHeading + 10 || heading < lastHeading - 10) {
+  //  if (heading > lastHeading + 10 || heading < lastHeading - 10) {
       lastHeading = heading;
       sendCommand(COMPASS_HEADING, heading);
 
 
-    }
+   // }
 
   }
 }

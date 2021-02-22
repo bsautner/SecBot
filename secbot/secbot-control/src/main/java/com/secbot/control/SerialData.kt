@@ -1,6 +1,6 @@
 package com.secbot.control
 
-data class SerialData(val device: Device, private var v: Double, private var timestamp: Long) {
+data class SerialData(val device: Device, private var v: Double, var timestamp: Long) {
 
     var value: Double = v
         set(value) {

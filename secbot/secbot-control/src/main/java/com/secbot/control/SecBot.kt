@@ -2,6 +2,7 @@ package com.secbot.control
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.delay
@@ -9,7 +10,7 @@ import kotlinx.coroutines.delay
 @ExperimentalCoroutinesApi
 class SecBot : IO {
 
-    var state: State = State.IDLE
+    var state: State = State.POWER_ON
 
 
     private val devices = HashMap<Device, SerialData>().apply {
@@ -23,10 +24,29 @@ class SecBot : IO {
         this[Device.STEERING_SERVO] = SerialData(Device.STEERING_SERVO, 45.0, System.currentTimeMillis())
     }
 
+    val orientation : Int
+        get() {
+            return devices[Device.COMPASS_HEADING]?.value?.toInt() ?: 0
+        }
 
     val forwardSonarDistanceCm: Double
         get() {
             return devices[Device.FRONT_SONAR]?.value ?: 0.0
+        }
+
+    val accel : String
+        get() {
+            return "x: ${devices[Device.ACCELEROMETER_X]?.value} y: ${devices[Device.ACCELEROMETER_Y]?.value} z: ${devices[Device.ACCELEROMETER_Z]?.value}"
+        }
+
+    val forwardSonarNotChanging : Boolean
+        get() {
+            return System.currentTimeMillis() - (devices[Device.FRONT_SONAR]?.timestamp ?: 0) > 1000
+        }
+
+    val forwardClear : Boolean
+        get() {
+            return forwardSonarDistanceCm > MIN_FRONT_SPACE_CM
         }
 
     val speed: Double
@@ -56,7 +76,7 @@ class SecBot : IO {
 
 
     private fun changeState(newState: State) {
-        println("State Changed from $state to $newState at speed $speed with $forwardSonarDistanceCm cm of free space")
+        println("State Changed from $state to $newState at speed $speed with $forwardSonarDistanceCm cm of free space heading $orientation")
         state = newState
     }
 
@@ -74,60 +94,121 @@ class SecBot : IO {
 
     override fun start(scope: CoroutineScope) = scope.produce {
 
-      //  println("starting secbot on thread: ${Thread.currentThread().name}")
+
+
         while (true) {
-//            println("State  $state at speed $speed with $forwardSonarDistanceCm cm of free space")
-//
-//            when {
-//                (forwardSonarDistanceCm > MIN_FRONT_SPACE_CM && state != State.LOOKING && state != State.BACKING_UP) -> {
-//                    changeState(State.CLEAR)
-//                    send(SerialData(Device.MOTOR_1, speed, System.currentTimeMillis()))
-//
-//                }
-//                (state == State.CLEAR && forwardSonarDistanceCm > 10) -> {
-//                    send(SerialData(Device.MOTOR_1, speed, System.currentTimeMillis()))
-//                }
-//                (forwardSonarDistanceCm < MIN_FRONT_SPACE_CM && state != State.STOPPED && state != State.LOOKING && state != State.BACKING_UP) -> {
-//                    send(SerialData(Device.MOTOR_1, speed, System.currentTimeMillis()))
-//                    changeState(State.STOPPED)
-//                }
-//                (state == State.STOPPED && forwardSonarDistanceCm < MIN_FRONT_SPACE_CM) -> {
-//
-//                    changeState(State.BACKING_UP)
-//                    send(SerialData(Device.MOTOR_1, speed, System.currentTimeMillis()))
-//                }
-//                (forwardSonarDistanceCm <= MIN_FRONT_SPACE_CM && state == State.BACKING_UP) -> {
-//                    send(SerialData(Device.MOTOR_1, speed, System.currentTimeMillis()))
-//                    delay(1000)
-//                    changeState(State.LOOKING)
-//                }
-//                (state == State.LOOKING) -> {
-////                    send(SerialData(Device.MOTOR_1, 0.0, System.currentTimeMillis()))
-////                    delay(1000)
-////                    send(SerialData(Device.STEERING_SERVO, 30.0, System.currentTimeMillis()))
-////                    delay(500)
-////                    send(SerialData(Device.MOTOR_1, -20.0, System.currentTimeMillis()))
-////                    delay(1000)
-////                    send(SerialData(Device.STEERING_SERVO, 70.0, System.currentTimeMillis()))
-////                    delay(500)
-////                    send(SerialData(Device.MOTOR_1, 20.0, System.currentTimeMillis()))
-////                    delay(1000)
-////                    send(SerialData(Device.STEERING_SERVO, 45.0, System.currentTimeMillis()))
-////                    send(SerialData(Device.MOTOR_1, 0.0, System.currentTimeMillis()))
-////                    delay(1000)
-//                    if (forwardSonarDistanceCm >= MIN_FRONT_SPACE_CM) {
-//                        changeState(State.CLEAR)
-//                    }
-//                }
+            println("$state at speed $speed with $forwardSonarDistanceCm cm of free space heading $orientation accellerating $accel")
+
+            when {
+                (state == State.BACKING_UP && forwardSonarNotChanging && ! forwardClear) -> {  //i'm stuck
+                    changeState(State.STUCK_BACKWARD)
+                    stop()
 
 
-           // }
-            send(SerialData(Device.PING, 0.0, System.currentTimeMillis()))
+
+                }
+
+                (state == State.DRIVING_FORWARD && forwardSonarNotChanging &&  forwardClear) -> {  //i'm stuck
+                    changeState(State.STUCK_FORWARD)
+                    stop()
+
+
+
+                }
+
+                (state == State.STUCK_FORWARD) ->  {
+                    findNewDirection(this, this@SecBot)
+                }
+
+                (state == State.STUCK_BACKWARD) ->  {
+                    findNewDirection(this, this@SecBot)
+                }
+
+
+                (forwardClear  && state != State.LOOKING && state != State.BACKING_UP && state != State.DRIVING_FORWARD && state != State.STUCK_FORWARD && state != State.STUCK_BACKWARD) -> {
+                    driveForward()
+
+                }
+                (state == State.DRIVING_FORWARD && forwardSonarDistanceCm > 10) -> {
+                    send(SerialData(Device.MOTOR_1, speed, System.currentTimeMillis()))
+                }
+                (! forwardClear && state != State.STOPPED && state != State.LOOKING && state != State.BACKING_UP) -> {
+                    send(SerialData(Device.MOTOR_1, speed, System.currentTimeMillis()))
+                    changeState(State.STOPPED)
+                }
+                (state == State.STOPPED && state != State.STUCK_BACKWARD && ! forwardClear) -> {
+
+                    changeState(State.BACKING_UP)
+                    send(SerialData(Device.MOTOR_1, speed, System.currentTimeMillis()))
+                }
+                (! forwardClear && state == State.BACKING_UP) -> {
+                    send(SerialData(Device.MOTOR_1, speed, System.currentTimeMillis()))
+                    wait()
+                    changeState(State.LOOKING)
+                }
+                (state == State.BACKING_UP && forwardClear ) -> {
+                    changeState(State.DRIVING_FORWARD)
+                }
+
+
+                (state == State.LOOKING) -> {
+                    findNewDirection(this, this@SecBot)
+                    if (forwardSonarDistanceCm >= MIN_FRONT_SPACE_CM) {
+                        changeState(State.DRIVING_FORWARD)
+                    }
+                }
+
+
+            }
+           // send(SerialData(Device.PING, 0.0, System.currentTimeMillis()))
             delay(500)
 
         }
 
 
+
+    }
+
+    private suspend fun ProducerScope<SerialData>.driveForward() {
+        changeState(State.DRIVING_FORWARD)
+        send(SerialData(Device.MOTOR_1, speed, System.currentTimeMillis()))
+
+    }
+
+    private suspend fun findNewDirection(
+        producerScope: ProducerScope<SerialData>,
+        secBot: SecBot
+    ) {
+        producerScope.stop()
+        secBot.wait()
+        producerScope.send(SerialData(Device.STEERING_SERVO, 30.0, System.currentTimeMillis()))
+        delay(500)
+        producerScope.backwardsSlow()
+        secBot.wait()
+        producerScope.send(SerialData(Device.STEERING_SERVO, 70.0, System.currentTimeMillis()))
+        delay(500)
+        producerScope.forwardSlow()
+        secBot.wait()
+        producerScope.send(SerialData(Device.STEERING_SERVO, 45.0, System.currentTimeMillis()))
+        producerScope.stop()
+        secBot.wait()
+        producerScope.driveForward()
+    }
+
+    private suspend fun ProducerScope<SerialData>.backwardsSlow() {
+        send(SerialData(Device.MOTOR_1, -20.0, System.currentTimeMillis()))
+    }
+
+    private suspend fun ProducerScope<SerialData>.forwardSlow() {
+        send(SerialData(Device.MOTOR_1, 15.0, System.currentTimeMillis()))
+    }
+
+    private suspend fun wait() {
+        delay(1000)
+    }
+
+    private suspend fun ProducerScope<SerialData>.stop() {
+        send(SerialData(Device.MOTOR_1, 0.0, System.currentTimeMillis()))
     }
 
 

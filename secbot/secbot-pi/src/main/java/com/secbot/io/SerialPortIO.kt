@@ -28,7 +28,7 @@ class SerialPortIO( private val serial: Serial) : IO {
     override fun receiver(scope: CoroutineScope, data: ReceiveChannel<SerialData>): ReceiveChannel<SerialData> = scope.produce {
 
         for (s in data) {
-            println(s)
+
             send(s)
         }
     }
@@ -84,11 +84,7 @@ class SerialPortIO( private val serial: Serial) : IO {
 
                         } catch (ex: Exception) {
                              println("Malformed Serial Data : $sanitized caused ${ex.message}")
-                            println("**************************************s")
-                            for (s in sanitized.toCharArray()) {
-                                println("$s : [${s.toInt()}]")
-                            }
-                            println("**************************************e")
+
                         }
                     }
                 } else {
@@ -108,6 +104,7 @@ class SerialPortIO( private val serial: Serial) : IO {
                 .stopBits(StopBits._1)
                 .flowControl(FlowControl.NONE)
             serial.open(config)
+            serial.flush()
             delay(100)
 
             while (serial.isOpen) {
