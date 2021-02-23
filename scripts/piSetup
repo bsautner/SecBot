@@ -1,0 +1,6 @@
+apt update
+apt upgrade -y
+apt dist-upgrade
+apt autoremove
+apt clean
+sudo apt-get install wiringpi
