@@ -1,6 +1,8 @@
-apt update
+#run as sudo 
+
+apt update --fix-missing
 apt upgrade -y
 apt dist-upgrade
 apt autoremove
 apt clean
-sudo apt-get install wiringpi
+rpi-update
