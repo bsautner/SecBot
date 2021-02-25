@@ -5,13 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c6518711-a08a-49b8-bfe8-db0cce34f00e" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../Arduino/SecBotV2/SecBotV2.ino" beforeDir="false" afterPath="$PROJECT_DIR$/../Arduino/SecBotV2/SecBotV2.ino" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/SecBot.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/SecBot.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/SerialData.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/SerialData.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/State.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/State.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/io/SerialPortIO.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/io/SerialPortIO.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-simulator/src/main/java/simulator/Application.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-simulator/src/main/java/simulator/Application.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -121,17 +115,6 @@
     </key>
   </component>
   <component name="RunManager" selected="Embedded Linux JVM.secbot-pi">
-    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
-      <option name="arquillianRunConfiguration">
-        <value>
-          <option name="containerStateName" value="" />
-        </value>
-      </option>
-      <option name="TEST_OBJECT" value="class" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="secbot [assemble]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -212,7 +195,7 @@
     </configuration>
     <configuration name="secbot-pi" type="Run as an Embedded Java application" factoryName="Embedded Linux JVM">
       <option name="classesDirectory" />
-      <option name="hostname" value="192.168.1.68" />
+      <option name="hostname" value="192.168.1.49" />
       <option name="keyPath" value="" />
       <option name="password" value="blackflask" />
       <option name="port" value="1234" />
@@ -280,6 +263,8 @@
       <workItem from="1613767885447" duration="5058000" />
       <workItem from="1613999891574" duration="4775000" />
       <workItem from="1614011058792" duration="7444000" />
+      <workItem from="1614102062599" duration="635000" />
+      <workItem from="1614182560692" duration="2519000" />
     </task>
     <servers />
   </component>

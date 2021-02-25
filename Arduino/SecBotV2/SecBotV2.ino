@@ -6,11 +6,24 @@
 #include <SoftwareSerial.h>
 #include <SyRenSimplified.h>
 #include <Servo.h>
+#include <SharpIR.h>    //IR sensor library
 
+ #define model 20150 
+
+
+ 
+const int LIDAR_PIN = A0;
+
+const int MOTOR_PIN_1 = 2;
+const int MOTOR_PIN_2 = 3;
 const int SONAR_ECHO_PIN = 5;
 const int SONAR_TRIGGER_PIN = 6;
 const int STEERING_SERVO_PIN = 12;
+const int DISTANCE_SCAN_SERVO_PIN = 13;
 
+
+SharpIR IR_prox(LIDAR_PIN,model);  //define the sensor
+ 
 
 
 const String MOTOR_1 = "MOTOR_1";
@@ -24,10 +37,18 @@ const String ACCELEROMETER_Z = "ACCELEROMETER_Z";
 const String DEBUG = "DEBUG";
 
 Servo steering_servo;
+Servo scanning_servo;
+
+
+
 Adafruit_LSM303DLH_Mag_Unified mag = Adafruit_LSM303DLH_Mag_Unified(12345);
 
-SoftwareSerial SWSerial(NOT_A_PIN, 2); // RX on no pin (unused), TX on pin 11 (to S1).
-SyRenSimplified SR(SWSerial); // Use SWSerial as the serial port.
+SoftwareSerial SWSerial1(NOT_A_PIN, MOTOR_PIN_1);
+SyRenSimplified SR1(SWSerial1);
+
+
+SoftwareSerial SWSerial2(NOT_A_PIN, MOTOR_PIN_2);
+SyRenSimplified SR2(SWSerial2);
 
 
 long duration, cm, inches, lastSonarPing;
@@ -47,7 +68,8 @@ int accelerometer_z = 0;
 void setup() {
   Serial.begin(115200);
   Serial1.begin(115200);
-  SWSerial.begin(9600);
+  SWSerial1.begin(9600);
+  SWSerial2.begin(9600);
 
   inputString.reserve(200);
 
@@ -55,6 +77,7 @@ void setup() {
   steering_servo.write(40);
   steering_servo.detach();
 
+  pinMode(LIDAR_PIN, INPUT);
   pinMode(SONAR_TRIGGER_PIN, OUTPUT);
   pinMode(SONAR_ECHO_PIN, INPUT);
 
@@ -70,7 +93,8 @@ void setup() {
 
 
   
-  powerMotor(0);
+  powerMotor(0, 1);
+  powerMotor(0, 2);
 
 }
 
@@ -160,13 +184,16 @@ void sonarPing() {
     // Convert the time into a distance
     cm = (duration / 2) / 29.1;   // Divide by 29.1 or multiply by 0.0343
 
-
+    int l=IR_prox.distance(); 
+    Serial.println(l);
     lastSonarPing = millis();
+  
     if (cm < 1000 && cm != lastCm && cm != lastCm - 1 && cm != lastCm + 1) {
       sendCommand(FRONT_SONAR, cm);
       lastCm = cm;
       if (cm < 5) {
-        powerMotor(0);
+        powerMotor(0, 1);
+        powerMotor(0, 2);
       }
 
     }
@@ -192,11 +219,6 @@ void steerServo(int newPos) {
 
 }
 
-void powerMotor(int val) {
-
-  SR.motor(val);
-
-}
 
 
 
@@ -208,7 +230,10 @@ void processCommand(String command) {
   String val = getValue(inputString, ':', 1);
 
   if (cmd == MOTOR_1) {
-    powerMotor(val.toInt());
+    powerMotor(val.toInt(), 1);
+  }
+  else if (cmd == MOTOR_2) {
+    powerMotor(val.toInt(), 2);
   }
   else if (cmd == STEERING_SERVO) {
     log("Steering servo");
@@ -244,6 +269,21 @@ String getValue(String data, char separator, int index)
     }
   }
   return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
+}
+
+
+void powerMotor(int val, int m) {
+
+  if (m == 1) {
+
+    SR2.motor(0);
+    SR1.motor(val);
+  } else {
+    SR1.motor(0);
+    SR2.motor(val);
+  }
+
+
 }
 
 void log(String s) {
