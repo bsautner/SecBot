@@ -6,29 +6,36 @@
 #include <SoftwareSerial.h>
 #include <SyRenSimplified.h>
 #include <Servo.h>
-#include <SharpIR.h>    //IR sensor library
+#include <SharpIR.h>
 
- #define model 20150 
+#define model 20150
 
 
- 
-const int LIDAR_PIN = A0;
+
+const int SCANNING_IR_PIN = A0;
+const int SCANNING_SERVO_FEEDBACK_PIN = A8;
 
 const int MOTOR_PIN_1 = 2;
 const int MOTOR_PIN_2 = 3;
-const int SONAR_ECHO_PIN = 5;
-const int SONAR_TRIGGER_PIN = 6;
+const int FRONT_SONAR_ECHO_PIN = 5;
+const int FRONT_SONAR_TRIGGER_PIN = 6;
+const int SCANNING_SONAR_ECHO_PIN = 8;
+const int SCANNING_SONAR_TRIGGER_PIN = 9;
+const int SCANNING_SERVO_PIN = 11;
 const int STEERING_SERVO_PIN = 12;
-const int DISTANCE_SCAN_SERVO_PIN = 13;
+const int DISTANCE_SCAN_SERVO_PIN = 12;
 
 
-SharpIR IR_prox(LIDAR_PIN,model);  //define the sensor
- 
+SharpIR IR_prox(SCANNING_IR_PIN, model);
+
 
 
 const String MOTOR_1 = "MOTOR_1";
 const String MOTOR_2 = "MOTOR_2";
 const String STEERING_SERVO = "STEERING_SERVO";
+const String SCANNING_SERVO = "SCANNING_SERVO";
+const String SCANNING_SONAR = "SCANNING_SONAR";
+const String SCANNING_IR = "SCANNING_IR";
 const String FRONT_SONAR = "FRONT_SONAR";
 const String COMPASS_HEADING = "COMPASS_HEADING";
 const String ACCELEROMETER_X = "ACCELEROMETER_X";
@@ -38,6 +45,11 @@ const String DEBUG = "DEBUG";
 
 Servo steering_servo;
 Servo scanning_servo;
+
+int scanning_servo_pos = 0;    // variable to store the servo position
+int scanning_servo_min;
+int scanning_servo_max;
+int scanning_servo_tolerance = 3;
 
 
 
@@ -50,13 +62,22 @@ SyRenSimplified SR1(SWSerial1);
 SoftwareSerial SWSerial2(NOT_A_PIN, MOTOR_PIN_2);
 SyRenSimplified SR2(SWSerial2);
 
+long control_loop_timestamp = millis();
 
-long duration, cm, inches, lastSonarPing;
-int lastCm = 0;
+long front_sonar_duration, front_sonar_cm;
+int front_sonar_last_cm = 0;
+
+
+long scanning_sonar_duration, scanning_sonar_cm;
+int scanning_sonar_last_cm = 0;
+
+long scanning_ir_duration, scanning_ir_cm;
+int scanning_ir_last_cm = 0;
 
 
 String inputString = "";
-bool stringComplete = false;
+String serial_input_string = "";
+
 
 int throttle = 0;
 int lastHeading = 0;
@@ -77,10 +98,17 @@ void setup() {
   steering_servo.write(40);
   steering_servo.detach();
 
-  pinMode(LIDAR_PIN, INPUT);
-  pinMode(SONAR_TRIGGER_PIN, OUTPUT);
-  pinMode(SONAR_ECHO_PIN, INPUT);
+  
+  calibrateScanningServo();
 
+
+
+  pinMode(SCANNING_IR_PIN, INPUT);
+  pinMode(SCANNING_SONAR_TRIGGER_PIN, OUTPUT);
+  pinMode(SCANNING_SONAR_ECHO_PIN, INPUT);
+
+  pinMode(FRONT_SONAR_TRIGGER_PIN, OUTPUT);
+  pinMode(FRONT_SONAR_ECHO_PIN, INPUT);
   mag.enableAutoRange(true);
 
   if (!mag.begin()) {
@@ -92,24 +120,32 @@ void setup() {
 
 
 
-  
+
   powerMotor(0, 1);
   powerMotor(0, 2);
 
 }
 
 void loop() {
-  if (stringComplete) {
-    inputString = "";
-    stringComplete = false;
-  }
+
 
   if (Serial1.available()) {
-     char inChar = (char)Serial1.read();
+    char inChar = (char)Serial1.read();
     inputString += inChar;
     if (inChar == '\n') {
       processCommand(inputString);
-      stringComplete = true;
+      inputString = "";
+      
+
+    }
+  }
+
+  if (Serial.available()) {
+    char inChar = (char)Serial.read();
+    serial_input_string += inChar;
+    if (inChar == '\n') {
+      processCommand(serial_input_string);
+      serial_input_string = "";
 
     }
   }
@@ -120,7 +156,26 @@ void loop() {
 
 }
 
- 
+void calibrateScanningServo() {
+  log("Calibrating Scanning Servo");
+  scanning_servo.attach(SCANNING_SERVO_PIN);
+  pinMode(SCANNING_SERVO_FEEDBACK_PIN, INPUT);
+
+  scanning_servo.write(20);
+  delay(2000);
+  scanning_servo.write(20);
+  delay(2000);
+  scanning_servo_min = analogRead(SCANNING_SERVO_FEEDBACK_PIN);
+
+  scanning_servo.write(160);
+  delay(2000);
+  scanning_servo_max = analogRead(SCANNING_SERVO_FEEDBACK_PIN);
+
+  scanning_servo.write(90);
+  delay(2000);
+  scanning_servo.detach();
+}
+
 
 void orientationCheck() {
   //compass
@@ -128,8 +183,8 @@ void orientationCheck() {
 
   if (millis() - throttle > 500) {
     throttle = millis();
-  sensors_event_t event;
-  mag.getEvent(&event);
+    sensors_event_t event;
+    mag.getEvent(&event);
 
     /* Display the results (acceleration is measured in m/s^2) */
 
@@ -158,47 +213,70 @@ void orientationCheck() {
       heading = 360 + heading;
     }
 
-  //  if (heading > lastHeading + 10 || heading < lastHeading - 10) {
-      lastHeading = heading;
-      sendCommand(COMPASS_HEADING, heading);
+    //  if (heading > lastHeading + 10 || heading < lastHeading - 10) {
+    lastHeading = heading;
+    sendCommand(COMPASS_HEADING, heading);
 
 
-   // }
+    // }
 
   }
 }
+//long front_sonar_duration, front_sonar_cm, front_sonar_timestamp;
+//int front_sonar_last_cm = 0;
 
 void sonarPing() {
   //SONAR LOOP
 
-  if (millis() - lastSonarPing > 100) {
+  if (millis() - control_loop_timestamp > 100) {
 
 
-    digitalWrite(SONAR_TRIGGER_PIN, LOW);
+    digitalWrite(FRONT_SONAR_TRIGGER_PIN, LOW);
     delayMicroseconds(5);
-    digitalWrite(SONAR_TRIGGER_PIN, HIGH);
+    digitalWrite(FRONT_SONAR_TRIGGER_PIN, HIGH);
     delayMicroseconds(10);
-    digitalWrite(SONAR_TRIGGER_PIN, LOW);
-    pinMode(SONAR_ECHO_PIN, INPUT);
-    duration = pulseIn(SONAR_ECHO_PIN, HIGH);
-    // Convert the time into a distance
-    cm = (duration / 2) / 29.1;   // Divide by 29.1 or multiply by 0.0343
+    digitalWrite(FRONT_SONAR_TRIGGER_PIN, LOW);
+    pinMode(FRONT_SONAR_ECHO_PIN, INPUT);
+    front_sonar_duration = pulseIn(FRONT_SONAR_ECHO_PIN, HIGH);
+    front_sonar_cm = (front_sonar_duration / 2) / 29.1;
 
-    int l=IR_prox.distance(); 
-    Serial.println(l);
-    lastSonarPing = millis();
-  
-    if (cm < 1000 && cm != lastCm && cm != lastCm - 1 && cm != lastCm + 1) {
-      sendCommand(FRONT_SONAR, cm);
-      lastCm = cm;
-      if (cm < 5) {
+
+
+    if (front_sonar_cm < 1000 && front_sonar_cm != front_sonar_last_cm && front_sonar_cm != front_sonar_last_cm - 1 && front_sonar_cm != front_sonar_last_cm + 1) {
+      sendCommand(FRONT_SONAR, front_sonar_cm);
+      front_sonar_last_cm = front_sonar_cm;
+      if (front_sonar_cm < 5) {
         powerMotor(0, 1);
         powerMotor(0, 2);
       }
 
     }
 
+    digitalWrite(SCANNING_SONAR_TRIGGER_PIN, LOW);
+    delayMicroseconds(5);
+    digitalWrite(SCANNING_SONAR_TRIGGER_PIN, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(SCANNING_SONAR_TRIGGER_PIN, LOW);
+    pinMode(SCANNING_SONAR_ECHO_PIN, INPUT);
+    scanning_sonar_duration = pulseIn(SCANNING_SONAR_ECHO_PIN, HIGH);
+    scanning_sonar_cm = (scanning_sonar_duration / 2) / 29.1;
 
+
+
+    if (scanning_sonar_cm != scanning_sonar_last_cm && scanning_sonar_cm != scanning_sonar_last_cm - 1 && scanning_sonar_cm != scanning_sonar_last_cm + 1) {
+      sendCommand(SCANNING_SONAR, scanning_sonar_cm);
+      scanning_sonar_last_cm = scanning_sonar_cm;
+    }
+
+
+    scanning_ir_cm = IR_prox.distance();
+
+    if (scanning_ir_cm != scanning_ir_last_cm && scanning_ir_cm != scanning_ir_last_cm - 1 && scanning_ir_cm != scanning_ir_last_cm + 1) {
+      sendCommand(SCANNING_IR, scanning_ir_cm);
+      scanning_ir_last_cm = scanning_ir_cm;
+    }
+
+    control_loop_timestamp = millis();
 
 
   }
@@ -219,16 +297,35 @@ void steerServo(int newPos) {
 
 }
 
+void scanServo(int newPos) {
+  
+  if (newPos <= 160 && newPos >= 20) {
 
+    log("scan Servo");
+    scanning_servo.attach(SCANNING_SERVO_PIN);
+    delay(100);
+    scanning_servo.write(newPos);
+    log(map( analogRead(SCANNING_SERVO_FEEDBACK_PIN), scanning_servo_min, scanning_servo_max, 20, 160));
+    while (abs(map( analogRead(SCANNING_SERVO_FEEDBACK_PIN), scanning_servo_min, scanning_servo_max, 20, 160) - newPos) > scanning_servo_tolerance) {
+        log(abs(map( analogRead(SCANNING_SERVO_FEEDBACK_PIN), scanning_servo_min, scanning_servo_max, 20, 160) - newPos));
+    
+    } ;
+    scanning_servo.detach();
+
+  }
+
+
+
+}
 
 
 //Serial Input
 void processCommand(String command) {
 
-  
-  String cmd = getValue(inputString, ':', 0);
-  String val = getValue(inputString, ':', 1);
 
+  String cmd = getValue(command, ':', 0);
+  String val = getValue(command, ':', 1);
+  log("process command " + cmd);
   if (cmd == MOTOR_1) {
     powerMotor(val.toInt(), 1);
   }
@@ -237,7 +334,10 @@ void processCommand(String command) {
   }
   else if (cmd == STEERING_SERVO) {
     log("Steering servo");
-    steerServo(val.toInt());
+  }
+  else if (cmd == SCANNING_SERVO) {
+    log("scanning servo");
+    scanServo(val.toInt());
   } else if (cmd == "PING") {
     sendCommand("PONG", millis());
   }
@@ -252,7 +352,7 @@ void sendCommand(String device, float value) {
   Serial1.print("}");
 }
 
- 
+
 
 
 String getValue(String data, char separator, int index)

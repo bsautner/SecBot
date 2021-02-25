@@ -5,7 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c6518711-a08a-49b8-bfe8-db0cce34f00e" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../Arduino/SecBotV2/SecBotV2.ino" beforeDir="false" afterPath="$PROJECT_DIR$/../Arduino/SecBotV2/SecBotV2.ino" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/Device.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/Device.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/SecBot.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/SecBot.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/io/SerialPortIO.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/io/SerialPortIO.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -264,7 +268,7 @@
       <workItem from="1613999891574" duration="4775000" />
       <workItem from="1614011058792" duration="7444000" />
       <workItem from="1614102062599" duration="635000" />
-      <workItem from="1614182560692" duration="2519000" />
+      <workItem from="1614182560692" duration="3504000" />
     </task>
     <servers />
   </component>
@@ -285,21 +289,5 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/io/SerialPortIO.kt</url>
-          <line>85</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="kotlin-line">
-          <url>file://$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/io/SerialPortIO.kt</url>
-          <line>90</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

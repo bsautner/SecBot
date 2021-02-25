@@ -103,17 +103,11 @@ class SecBot : IO {
                 (state == State.BACKING_UP && forwardSonarNotChanging && ! forwardClear) -> {  //i'm stuck
                     changeState(State.STUCK_BACKWARD)
                     stop()
-
-
-
                 }
 
                 (state == State.DRIVING_FORWARD && forwardSonarNotChanging &&  forwardClear) -> {  //i'm stuck
                     changeState(State.STUCK_FORWARD)
                     stop()
-
-
-
                 }
 
                 (state == State.STUCK_FORWARD) ->  {

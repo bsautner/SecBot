@@ -84,11 +84,10 @@ class SerialPortIO( private val serial: Serial) : IO {
 
                         } catch (ex: Exception) {
                              println("Malformed Serial Data : $sanitized caused ${ex.message}")
+                            ex.printStackTrace()
 
                         }
                     }
-                } else {
-                    println("Malformed Serial Data : ${it.asciiString}")
                 }
             }
 
