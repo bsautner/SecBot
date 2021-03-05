@@ -11,7 +11,8 @@ import kotlinx.coroutines.delay
 class SecBot : IO {
 
     var state: State = State.POWER_ON
-
+//    SerialData(device=SCANNING_SONAR, v=104.0, timestamp=1614953950281, value=104.0)
+//    SerialData(device=SCANNING_IR, v=77.0, timestamp=1614953950282, value=77.0)
 
     private val devices = HashMap<Device, SerialData>().apply {
         this[Device.ACCELEROMETER_X] = SerialData(Device.ACCELEROMETER_X, 0.0, System.currentTimeMillis())
@@ -22,9 +23,12 @@ class SecBot : IO {
         this[Device.MOTOR_1] = SerialData(Device.MOTOR_1, 0.0, System.currentTimeMillis())
         this[Device.MOTOR_2] = SerialData(Device.MOTOR_2, 0.0, System.currentTimeMillis())
         this[Device.STEERING_SERVO] = SerialData(Device.STEERING_SERVO, 45.0, System.currentTimeMillis())
+        this[Device.SCANNING_SONAR] = SerialData(Device.SCANNING_SONAR, 0.0, System.currentTimeMillis())
+        this[Device.SCANNING_IR] = SerialData(Device.SCANNING_IR, 0.0, System.currentTimeMillis())
+
     }
 
-    val orientation : Int
+    val orientation: Int
         get() {
             return devices[Device.COMPASS_HEADING]?.value?.toInt() ?: 0
         }
@@ -34,17 +38,27 @@ class SecBot : IO {
             return devices[Device.FRONT_SONAR]?.value ?: 0.0
         }
 
-    val accel : String
+    val scanningSonarDistanceCm: Double
+        get() {
+            return devices[Device.SCANNING_SONAR]?.value ?: 0.0
+        }
+
+    val scanningIRDistanceCm: Double
+        get() {
+            return devices[Device.SCANNING_IR]?.value ?: 0.0
+        }
+
+    val accel: String
         get() {
             return "x: ${devices[Device.ACCELEROMETER_X]?.value} y: ${devices[Device.ACCELEROMETER_Y]?.value} z: ${devices[Device.ACCELEROMETER_Z]?.value}"
         }
 
-    val forwardSonarNotChanging : Boolean
+    val forwardSonarNotChanging: Boolean
         get() {
             return System.currentTimeMillis() - (devices[Device.FRONT_SONAR]?.timestamp ?: 0) > 1000
         }
 
-    val forwardClear : Boolean
+    val forwardClear: Boolean
         get() {
             return forwardSonarDistanceCm > MIN_FRONT_SPACE_CM
         }
@@ -70,13 +84,13 @@ class SecBot : IO {
                 }
             }
             //TODO remove flip when wires to motor can be reversed
-            devices[Device.MOTOR_1]?.value = speed.toDouble()* -1
+            devices[Device.MOTOR_1]?.value = speed.toDouble() * -1
             return speed.toDouble() * -1
         }
 
 
     private fun changeState(newState: State) {
-        println("State Changed from $state to $newState at speed $speed with $forwardSonarDistanceCm cm of free space heading $orientation")
+        println("State Changed from $state to $newState at speed $speed with [f: $forwardSonarDistanceCm / s: $scanningSonarDistanceCm / ir: $scanningIRDistanceCm] cm of free space heading $orientation")
         state = newState
     }
 
@@ -84,63 +98,97 @@ class SecBot : IO {
         devices[command.device] = command
     }
 
-    override fun receiver(scope: CoroutineScope, data: ReceiveChannel<SerialData>): ReceiveChannel<SerialData> = scope.produce {
+    override fun receiver(scope: CoroutineScope, data: ReceiveChannel<SerialData>): ReceiveChannel<SerialData> =
+        scope.produce {
 
-        for (s in data) {
-          //  println("SecBot Receiver got command: $s")
-            send(s)
+            for (s in data) {
+                //  println("SecBot Receiver got command: $s")
+                send(s)
+            }
         }
-    }
+//    override fun start(scope: CoroutineScope) = scope.produce {
+//        while (true) {
+//            stop()
+//            println("testing steering")
+//            send(SerialData(Device.STEERING_SERVO, 70.0, System.currentTimeMillis()))
+//            delay(500)
+//            send(SerialData(Device.STEERING_SERVO, 45.0, System.currentTimeMillis()))
+//            delay(500)
+//            send(SerialData(Device.STEERING_SERVO, 20.0, System.currentTimeMillis()))
+//            delay(500)
+//
+//
+//        }
+//    }
 
     override fun start(scope: CoroutineScope) = scope.produce {
+        delay(1500)
+        println("calibrating")
 
+        stop()
+        send(SerialData(Device.STEERING_SERVO, 70.0, System.currentTimeMillis()))
+        delay(500)
+        send(SerialData(Device.STEERING_SERVO, 45.0, System.currentTimeMillis()))
+        delay(500)
+        send(SerialData(Device.STEERING_SERVO, 20.0, System.currentTimeMillis()))
+        delay(500)
+        send(SerialData(Device.STEERING_SERVO, 45.0, System.currentTimeMillis()))
+        delay(500)
 
+        send(SerialData(Device.SCANNING_SERVO, 160.0, System.currentTimeMillis()))
+        delay(500)
+        send(SerialData(Device.SCANNING_SERVO, 20.0, System.currentTimeMillis()))
+        delay(500)
+        send(SerialData(Device.SCANNING_SERVO, 160.0, System.currentTimeMillis()))
+        delay(500)
+        send(SerialData(Device.SCANNING_SERVO, 90.0, System.currentTimeMillis()))
+        delay(500)
 
         while (true) {
-            println("$state at speed $speed with $forwardSonarDistanceCm cm of free space heading $orientation accellerating $accel")
+            println("$state at speed $speed with [f: $forwardSonarDistanceCm / s: $scanningSonarDistanceCm / ir: $scanningIRDistanceCm]  cm of free space heading $orientation accellerating $accel")
 
             when {
-                (state == State.BACKING_UP && forwardSonarNotChanging && ! forwardClear) -> {  //i'm stuck
+                (state == State.BACKING_UP && forwardSonarNotChanging && !forwardClear) -> {  //i'm stuck
                     changeState(State.STUCK_BACKWARD)
                     stop()
                 }
 
-                (state == State.DRIVING_FORWARD && forwardSonarNotChanging &&  forwardClear) -> {  //i'm stuck
+                (state == State.DRIVING_FORWARD && forwardSonarNotChanging && forwardClear) -> {  //i'm stuck
                     changeState(State.STUCK_FORWARD)
                     stop()
                 }
 
-                (state == State.STUCK_FORWARD) ->  {
+                (state == State.STUCK_FORWARD) -> {
                     findNewDirection(this, this@SecBot)
                 }
 
-                (state == State.STUCK_BACKWARD) ->  {
+                (state == State.STUCK_BACKWARD) -> {
                     findNewDirection(this, this@SecBot)
                 }
 
 
-                (forwardClear  && state != State.LOOKING && state != State.BACKING_UP && state != State.DRIVING_FORWARD && state != State.STUCK_FORWARD && state != State.STUCK_BACKWARD) -> {
+                (forwardClear && state != State.LOOKING && state != State.BACKING_UP && state != State.DRIVING_FORWARD && state != State.STUCK_FORWARD && state != State.STUCK_BACKWARD) -> {
                     driveForward()
 
                 }
                 (state == State.DRIVING_FORWARD && forwardSonarDistanceCm > 10) -> {
                     send(SerialData(Device.MOTOR_1, speed, System.currentTimeMillis()))
                 }
-                (! forwardClear && state != State.STOPPED && state != State.LOOKING && state != State.BACKING_UP) -> {
+                (!forwardClear && state != State.STOPPED && state != State.LOOKING && state != State.BACKING_UP) -> {
                     send(SerialData(Device.MOTOR_1, speed, System.currentTimeMillis()))
                     changeState(State.STOPPED)
                 }
-                (state == State.STOPPED && state != State.STUCK_BACKWARD && ! forwardClear) -> {
+                (state == State.STOPPED && state != State.STUCK_BACKWARD && !forwardClear) -> {
 
                     changeState(State.BACKING_UP)
                     send(SerialData(Device.MOTOR_1, speed, System.currentTimeMillis()))
                 }
-                (! forwardClear && state == State.BACKING_UP) -> {
+                (!forwardClear && state == State.BACKING_UP) -> {
                     send(SerialData(Device.MOTOR_1, speed, System.currentTimeMillis()))
                     wait()
                     changeState(State.LOOKING)
                 }
-                (state == State.BACKING_UP && forwardClear ) -> {
+                (state == State.BACKING_UP && forwardClear) -> {
                     changeState(State.DRIVING_FORWARD)
                 }
 
@@ -154,11 +202,10 @@ class SecBot : IO {
 
 
             }
-           // send(SerialData(Device.PING, 0.0, System.currentTimeMillis()))
+            // send(SerialData(Device.PING, 0.0, System.currentTimeMillis()))
             delay(500)
 
         }
-
 
 
     }

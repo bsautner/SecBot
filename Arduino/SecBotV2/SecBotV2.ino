@@ -1,3 +1,5 @@
+#include <SyRenSimplified.h>
+
 #include <Adafruit_LSM303_Accel.h>
 #include <Adafruit_LSM303DLH_Mag.h>
 #include <Adafruit_Sensor.h>
@@ -8,7 +10,7 @@
 #include <Servo.h>
 #include <SharpIR.h>
 
-#define model 20150
+#define model SharpIR::GP2Y0A02YK
 
 
 
@@ -26,7 +28,7 @@ const int STEERING_SERVO_PIN = 12;
 const int DISTANCE_SCAN_SERVO_PIN = 12;
 
 
-SharpIR IR_prox(SCANNING_IR_PIN, model);
+SharpIR IR_prox(SharpIR::GP2Y0A02YK0F, SCANNING_IR_PIN);
 
 
 
@@ -64,15 +66,16 @@ SyRenSimplified SR2(SWSerial2);
 
 long control_loop_timestamp = millis();
 
-long front_sonar_duration, front_sonar_cm;
+long front_sonar_duration;
 int front_sonar_last_cm = 0;
 
 
-long scanning_sonar_duration, scanning_sonar_cm;
+long scanning_sonar_duration;
 int scanning_sonar_last_cm = 0;
 
-long scanning_ir_duration, scanning_ir_cm;
-int scanning_ir_last_cm = 0;
+long scanning_ir_duration;
+
+long scanning_ir_last_cm = 0;
 
 
 String inputString = "";
@@ -111,18 +114,17 @@ void setup() {
   pinMode(FRONT_SONAR_ECHO_PIN, INPUT);
   mag.enableAutoRange(true);
 
-  if (!mag.begin()) {
-    /* There was a problem detecting the LSM303 ... check your connections */
-    Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
-    while (1)
-      ;
-  }
+ if (!mag.begin()) {
+   /* There was a problem detecting the LSM303 ... check your connections */
+   Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
+   while (1)
+     ;
+ }
 
 
 
 
-  powerMotor(0, 1);
-  powerMotor(0, 2);
+
 
 }
 
@@ -152,7 +154,6 @@ void loop() {
 
   sonarPing();
   orientationCheck();
-
 
 }
 
@@ -228,9 +229,9 @@ void orientationCheck() {
 void sonarPing() {
   //SONAR LOOP
 
+ 
+  
   if (millis() - control_loop_timestamp > 100) {
-
-
     digitalWrite(FRONT_SONAR_TRIGGER_PIN, LOW);
     delayMicroseconds(5);
     digitalWrite(FRONT_SONAR_TRIGGER_PIN, HIGH);
@@ -238,9 +239,8 @@ void sonarPing() {
     digitalWrite(FRONT_SONAR_TRIGGER_PIN, LOW);
     pinMode(FRONT_SONAR_ECHO_PIN, INPUT);
     front_sonar_duration = pulseIn(FRONT_SONAR_ECHO_PIN, HIGH);
-    front_sonar_cm = (front_sonar_duration / 2) / 29.1;
-
-
+    int front_sonar_cm = (front_sonar_duration / 2) / 29.1;
+   
 
     if (front_sonar_cm < 1000 && front_sonar_cm != front_sonar_last_cm && front_sonar_cm != front_sonar_last_cm - 1 && front_sonar_cm != front_sonar_last_cm + 1) {
       sendCommand(FRONT_SONAR, front_sonar_cm);
@@ -251,6 +251,8 @@ void sonarPing() {
       }
 
     }
+    delay(100);
+
 
     digitalWrite(SCANNING_SONAR_TRIGGER_PIN, LOW);
     delayMicroseconds(5);
@@ -259,17 +261,19 @@ void sonarPing() {
     digitalWrite(SCANNING_SONAR_TRIGGER_PIN, LOW);
     pinMode(SCANNING_SONAR_ECHO_PIN, INPUT);
     scanning_sonar_duration = pulseIn(SCANNING_SONAR_ECHO_PIN, HIGH);
-    scanning_sonar_cm = (scanning_sonar_duration / 2) / 29.1;
+    int scanning_sonar_cm = (scanning_sonar_duration / 2) / 29.1;
 
-
+ 
 
     if (scanning_sonar_cm != scanning_sonar_last_cm && scanning_sonar_cm != scanning_sonar_last_cm - 1 && scanning_sonar_cm != scanning_sonar_last_cm + 1) {
       sendCommand(SCANNING_SONAR, scanning_sonar_cm);
       scanning_sonar_last_cm = scanning_sonar_cm;
+  
     }
 
 
-    scanning_ir_cm = IR_prox.distance();
+    int scanning_ir_cm = IR_prox.getDistance();
+   
 
     if (scanning_ir_cm != scanning_ir_last_cm && scanning_ir_cm != scanning_ir_last_cm - 1 && scanning_ir_cm != scanning_ir_last_cm + 1) {
       sendCommand(SCANNING_IR, scanning_ir_cm);
@@ -334,6 +338,7 @@ void processCommand(String command) {
   }
   else if (cmd == STEERING_SERVO) {
     log("Steering servo");
+    steerServo(val.toInt());
   }
   else if (cmd == SCANNING_SERVO) {
     log("scanning servo");
@@ -350,6 +355,11 @@ void sendCommand(String device, float value) {
   Serial1.print(":");
   Serial1.print(value);
   Serial1.print("}");
+ 
+  Serial.print(device);
+  Serial.print(":");
+  Serial.println(value);
+ 
 }
 
 
@@ -374,14 +384,14 @@ String getValue(String data, char separator, int index)
 
 void powerMotor(int val, int m) {
 
-  if (m == 1) {
+   if (m == 1) {
 
-    SR2.motor(0);
-    SR1.motor(val);
-  } else {
-    SR1.motor(0);
-    SR2.motor(val);
-  }
+     SR2.motor(0);
+     SR1.motor(val);
+   } else {
+     SR1.motor(0);
+     SR2.motor(val);
+   }
 
 
 }

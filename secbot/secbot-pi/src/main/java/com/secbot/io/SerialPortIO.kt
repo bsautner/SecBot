@@ -28,7 +28,7 @@ class SerialPortIO( private val serial: Serial) : IO {
     override fun receiver(scope: CoroutineScope, data: ReceiveChannel<SerialData>): ReceiveChannel<SerialData> = scope.produce {
 
         for (s in data) {
-
+         //   println(s)
             send(s)
         }
     }
