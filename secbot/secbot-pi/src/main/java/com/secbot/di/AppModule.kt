@@ -12,6 +12,7 @@ import com.secbot.io.SerialPortIO
 import com.secbot.io.SerialWrapper
 import com.secbot.io.SimulatorIO
 import com.secbot.MainProcess
+import com.secbot.mqtt.MQTT
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -29,8 +30,13 @@ class AppModule {
     }
 
     @Provides
-    fun provideMainProcess(secBot: SecBot, serialPort: IO, camera: Optional<RPiCamera>) : MainProcess {
-        return MainProcess(secBot, serialPort, camera)
+    fun provideMainProcess(secBot: SecBot, serialPort: IO, camera: Optional<RPiCamera>, mqtt: MQTT) : MainProcess {
+        return MainProcess(secBot, serialPort, mqtt, camera)
+    }
+
+    @Provides
+    fun provideMQTT() : MQTT {
+        return MQTT()
     }
 
 

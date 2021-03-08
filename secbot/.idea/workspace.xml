@@ -5,11 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c6518711-a08a-49b8-bfe8-db0cce34f00e" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/mqtt/MQTT.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Arduino/SecBotV2/SecBotV2.ino" beforeDir="false" afterPath="$PROJECT_DIR$/../Arduino/SecBotV2/SecBotV2.ino" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/Device.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/Device.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/SecBot.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/SecBot.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/secbot-control/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-control/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/SerialData.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-control/src/main/java/com/secbot/control/SerialData.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/secbot-pi/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-pi/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/Application.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/Application.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/MainProcess.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/MainProcess.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/di/AppModule.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/di/AppModule.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/io/SerialPortIO.kt" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-pi/src/main/java/com/secbot/io/SerialPortIO.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/secbot-simulator/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/secbot-simulator/build.gradle.kts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,10 +68,10 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Kotlin Class" />
         <option value="Kotlin Enum" />
         <option value="Kotlin Data Class" />
         <option value="Kotlin Interface" />
+        <option value="Kotlin Class" />
       </list>
     </option>
   </component>
@@ -93,7 +100,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$USER_HOME$/xfinity/code/compliance_scanner" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../compose-jb/examples/widgetsgallery/desktop" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
@@ -118,7 +125,18 @@
       <recent name="control" />
     </key>
   </component>
-  <component name="RunManager" selected="Embedded Linux JVM.secbot-pi">
+  <component name="RunManager" selected="Application.MainKt">
+    <configuration default="true" type="ArquillianJUnit" factoryName="" nameIsGenerated="true">
+      <option name="arquillianRunConfiguration">
+        <value>
+          <option name="containerStateName" value="" />
+        </value>
+      </option>
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="secbot [assemble]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -140,6 +158,48 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
+    <configuration name="secbot [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="build" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="secbot [jar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="jar" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
     <configuration name="Application" type="JetRunConfigurationType" temporary="true" nameIsGenerated="true">
       <module name="secbot.secbot-simulator.main" />
       <option name="VM_PARAMETERS" />
@@ -147,7 +207,7 @@
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
       <option name="PASS_PARENT_ENVS" value="true" />
-      <option name="MAIN_CLASS_NAME" value="com.secbot.simulator.Application" />
+      <option name="MAIN_CLASS_NAME" value="simulator.Application" />
       <option name="WORKING_DIRECTORY" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -162,19 +222,6 @@
       <option name="PASS_PARENT_ENVS" value="true" />
       <option name="MAIN_CLASS_NAME" value="simulator.MainKt" />
       <option name="WORKING_DIRECTORY" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="secbot-pi jvm" type="JetRunConfigurationType" temporary="true">
-      <module name="secbot.secbot-pi.main" />
-      <option name="VM_PARAMETERS" value="" />
-      <option name="PROGRAM_PARAMETERS" value="" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <option name="MAIN_CLASS_NAME" value="com.secbot.Application" />
-      <option name="WORKING_DIRECTORY" value="" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -215,34 +262,21 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="SecbotApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
-      <module name="secbot.secbot-api.main" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="com.secbot.secbot.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="SPRING_BOOT_MAIN_CLASS" value="com.secbot.secbot.SecbotApplication" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <list>
       <item itemvalue="Embedded Linux JVM.secbot-pi" />
       <item itemvalue="Gradle.secbot [assemble]" />
-      <item itemvalue="Application.secbot-pi jvm" />
-      <item itemvalue="Application.Application" />
       <item itemvalue="Application.MainKt" />
-      <item itemvalue="Spring Boot.SecbotApplication" />
+      <item itemvalue="Gradle.secbot [jar]" />
+      <item itemvalue="Gradle.secbot [build]" />
+      <item itemvalue="Application.Application" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.secbot [assemble]" />
-        <item itemvalue="Application.MainKt" />
-        <item itemvalue="Spring Boot.SecbotApplication" />
         <item itemvalue="Application.MainKt" />
         <item itemvalue="Application.Application" />
+        <item itemvalue="Gradle.secbot [build]" />
+        <item itemvalue="Gradle.secbot [jar]" />
+        <item itemvalue="Gradle.secbot [assemble]" />
       </list>
     </recent_temporary>
   </component>
@@ -270,6 +304,7 @@
       <workItem from="1614102062599" duration="635000" />
       <workItem from="1614182560692" duration="3504000" />
       <workItem from="1614953182523" duration="3674000" />
+      <workItem from="1615213409449" duration="11907000" />
     </task>
     <servers />
   </component>

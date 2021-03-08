@@ -11,7 +11,7 @@ data class SerialData(val device: Device, private var v: Double, var timestamp: 
         }
 
     fun toSerialCommand() : String {
-        return "${device.name}:$v\n"
+        return "${device.name}:$v:$timestamp\n"
     }
 
     override fun toString(): String {

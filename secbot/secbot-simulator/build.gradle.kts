@@ -18,11 +18,15 @@ repositories {
 }
 dependencies {
     implementation(kotlin("stdlib"))
+    implementation(compose.desktop.currentOs)
+    implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
+
+
     implementation(project(":secbot-control"))
     testImplementation(kotlin("test-junit5"))
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.6.0")
-    implementation(compose.desktop.currentOs)
+
 }
 
 tasks.test {

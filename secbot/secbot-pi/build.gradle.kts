@@ -1,3 +1,5 @@
+import org.gradle.jvm.tasks.Jar
+
 plugins {
     java
     kotlin("jvm")
@@ -9,9 +11,11 @@ plugins {
 group = "com.secbot"
 version = "1.0-SNAPSHOT"
 
-val jar by tasks.getting(Jar::class) {
-    manifest {
-        attributes["Main-Class"] = "com.secbot.Application"
+
+
+tasks {
+    "build" {
+        dependsOn(fatJar)
     }
 }
 
@@ -29,7 +33,12 @@ repositories {
     maven(url= "https://oss.sonatype.org/content/groups/public")
     maven(url ="https://jitpack.io")
 }
+
+
 dependencies {
+
+    implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
+
     implementation("com.github.Hopding:JRPiCam:1.1.1")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.72")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.7")
@@ -50,4 +59,19 @@ dependencies {
 
 
     implementation(kotlin("stdlib"))
+}
+val jar by tasks.getting(Jar::class) {
+    manifest {
+        attributes["Main-Class"] = "com.secbot.Application"
+    }
+}
+val fatJar = task("fatJar", type = Jar::class) {
+    baseName = "${project.name}-fat"
+    manifest {
+        attributes["Implementation-Title"] = "SecBot Go!"
+        attributes["Implementation-Version"] = version
+        attributes["Main-Class"] = "com.secbot.Application"
+    }
+    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
+    with(tasks.jar.get() as CopySpec)
 }

@@ -5,13 +5,14 @@ import com.secbot.control.SecBot
 import com.secbot.Const.PHOTO_PATH
 import com.secbot.control.IO
 import com.secbot.control.SerialData
+import com.secbot.mqtt.MQTT
 import kotlinx.coroutines.*
 import java.io.File
 import java.io.IOException
 import java.util.*
 
 @ExperimentalCoroutinesApi
-class MainProcess(private val secBot: SecBot, private val serialPort: IO, private val camera : Optional<RPiCamera>)   {
+class MainProcess(private val secBot: SecBot, private val serialPort: IO, private val mqtt: MQTT, private val camera : Optional<RPiCamera>)   {
 
     // private val apiClient = DefaultApiClient()
 
@@ -58,6 +59,10 @@ class MainProcess(private val secBot: SecBot, private val serialPort: IO, privat
 
     @Throws(IOException::class, InterruptedException::class)
     suspend fun start() {
+
+
+
+
         GlobalScope.launch {
             val s = serialPort.start(this)
             val r = serialPort.receiver(this, s)
@@ -65,8 +70,9 @@ class MainProcess(private val secBot: SecBot, private val serialPort: IO, privat
             while(! r.isClosedForReceive) {
 
                 val data: SerialData = r.receive()
-               // println("Main Process got input data: $data on thread ${Thread.currentThread().name}")
+                println("Main Process got serial data: $data on thread ${Thread.currentThread().name}")
                 secBot.sendCommand(data)
+                mqtt.sendCommand(data)
             }
         }
 
@@ -75,8 +81,20 @@ class MainProcess(private val secBot: SecBot, private val serialPort: IO, privat
             val r = secBot.receiver(this, s)
             while (! r.isClosedForReceive) {
                 val data: SerialData = r.receive()
-              //  println("Main Process got output data: ${data.toSerialCommand()} on thread ${Thread.currentThread().name}")
+                println("Main Process got Pi data: ${data.toSerialCommand()} on thread ${Thread.currentThread().name}")
                 serialPort.sendCommand(data)
+            }
+
+        }
+
+        //relay serial data to MQTT Broker
+        GlobalScope.launch {
+            val s = mqtt.start(this)
+            val r = mqtt.receiver(this, s)
+            while (! r.isClosedForReceive) {
+                val data: SerialData = r.receive()
+                println("Main Process got mqtt data: ${data.toSerialCommand()} on thread ${Thread.currentThread().name}")
+                mqtt.sendCommand(data)
             }
 
         }

@@ -2,6 +2,7 @@ package com.secbot
 
 import com.pi4j.util.Console
 import com.secbot.di.DaggerAppComponent
+import com.secbot.mqtt.MQTT
 import kotlinx.coroutines.*
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -29,12 +30,14 @@ class Application  {
         @JvmStatic
         fun main(args: Array<String>) {
 
+
             DaggerAppComponent.create().inject(INSTANCE)
 
             INSTANCE.console.promptForExit()
             INSTANCE.console.box("Starting Up Main Program")
 
              runBlocking {
+
                 INSTANCE.mainProcess.start()
              }
 

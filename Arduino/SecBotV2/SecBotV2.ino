@@ -9,6 +9,7 @@
 #include <SyRenSimplified.h>
 #include <Servo.h>
 #include <SharpIR.h>
+#include <Time.h>
 
 #define model SharpIR::GP2Y0A02YK
 
@@ -102,6 +103,8 @@ void setup() {
   steering_servo.detach();
 
   
+  powerMotor(0, 0);
+  powerMotor(0, 1);
   calibrateScanningServo();
 
 
@@ -153,7 +156,7 @@ void loop() {
   }
 
   sonarPing();
-  orientationCheck();
+  //orientationCheck();
 
 }
 
@@ -231,7 +234,7 @@ void sonarPing() {
 
  
   
-  if (millis() - control_loop_timestamp > 100) {
+  if (millis() - control_loop_timestamp > 1000) {
     digitalWrite(FRONT_SONAR_TRIGGER_PIN, LOW);
     delayMicroseconds(5);
     digitalWrite(FRONT_SONAR_TRIGGER_PIN, HIGH);
@@ -287,7 +290,7 @@ void sonarPing() {
 }
 
 void steerServo(int newPos) {
-  log("steerServo");
+//  log("steerServo");
   if (newPos <= 70 && newPos >= 20) {
     steering_servo.attach(STEERING_SERVO_PIN);
     delay(100);
@@ -305,7 +308,7 @@ void scanServo(int newPos) {
   
   if (newPos <= 160 && newPos >= 20) {
 
-    log("scan Servo");
+   // log("scan Servo");
     scanning_servo.attach(SCANNING_SERVO_PIN);
     delay(100);
     scanning_servo.write(newPos);
@@ -350,10 +353,13 @@ void processCommand(String command) {
 }
 
 void sendCommand(String device, float value) {
+  
   Serial1.print("{");
   Serial1.print(device);
   Serial1.print(":");
   Serial1.print(value);
+  Serial1.print(":");
+  Serial1.print(now());
   Serial1.print("}");
  
   Serial.print(device);

@@ -35,43 +35,39 @@ class SerialPortIO( private val serial: Serial) : IO {
 
     override fun start(scope: CoroutineScope) = scope.produce {
 
-        var device : Device = Device.DEBUG
-        var data: Double
         println("starting serial on thread: ${Thread.currentThread().name}")
 
         serial.addListener(SerialDataEventListener {
 
             scope.launch(Dispatchers.IO) {
-             //   println("Serial Data Received ${it.asciiString}")
+
                 if (it.asciiString.isNotEmpty()) {
-                     val sanitized = it.asciiString//.trimEnd('\n').trimEnd('\r').trimEnd('\n')
+                     val sanitized = it.asciiString
 
                     if (sanitized.startsWith(Device.DEBUG.name)) {
-                        println(sanitized)
+                        //println(sanitized)
                     } else {
-                      //  val split = sanitized.trimStart('{').trimEnd('}').split(":")
+
                         try {
 
                             for (s in sanitized.toCharArray()) {
+
 
                                 when {
                                     (s == '{')  -> {
                                         sb.clear()
                                     }
-                                    (s == ':')  -> {
-                                        device = Device.valueOf(sb.toString())
-                                        sb.clear()
-                                    }
                                     (s == '}')  -> {
-                                        data = sb.toString().toDouble()
+                                        val split = sb.toString().split(":")
                                         send(
                                             SerialData(
-                                                device,
-                                                data,
-                                                System.currentTimeMillis()
+                                                Device.valueOf(split[0]),
+                                                split[1].toDouble(),
+                                                split[2].toLong()
                                             )
                                         )
                                         sb.clear()
+
                                     }
                                     else -> {
                                         sb.append(s)
@@ -84,6 +80,9 @@ class SerialPortIO( private val serial: Serial) : IO {
 
                         } catch (ex: Exception) {
                              println("Malformed Serial Data : $sanitized caused ${ex.message}")
+                            for (c in sanitized.toCharArray()) {
+                                println(c)
+                            }
                             ex.printStackTrace()
 
                         }
