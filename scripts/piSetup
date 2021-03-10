@@ -1,8 +1,0 @@
-#run as sudo 
-
-apt update --fix-missing
-apt upgrade -y
-apt dist-upgrade
-apt autoremove
-apt clean
-rpi-update

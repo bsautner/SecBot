@@ -1,5 +1,0 @@
-package com.secbot.control
-
-enum class State {
-    POWER_ON, DRIVING_FORWARD, STOPPED, IDLE, BACKING_UP, LOOKING, STUCK_FORWARD, STUCK_BACKWARD
-}
