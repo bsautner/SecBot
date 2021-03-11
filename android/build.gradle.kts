@@ -17,6 +17,8 @@ dependencies {
 
     val lifecycle_version = "2.3.0"
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version")
+    implementation("androidx.activity:activity-ktx:1.3.0-alpha03")
+
 
 
     implementation(project(":common"))
