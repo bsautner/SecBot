@@ -9,7 +9,7 @@ import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.delay
 
 @ExperimentalCoroutinesApi
-class SecBot : SensorDataHandler {
+class SecBot  {
 
     var state: State = State.POWER_ON
 
@@ -116,7 +116,7 @@ class SecBot : SensorDataHandler {
 //        devices[data.device] = data
 //    }
 
-    override fun receiver(scope: CoroutineScope, data: ReceiveChannel<SensorData>): ReceiveChannel<SensorData> =
+     fun receiver(scope: CoroutineScope, data: ReceiveChannel<SensorData>): ReceiveChannel<SensorData> =
         scope.produce {
 
             for (s in data) {
@@ -126,7 +126,7 @@ class SecBot : SensorDataHandler {
         }
 
 
-    override fun start(scope: CoroutineScope): ReceiveChannel<SensorData> = scope.produce {
+     fun start(scope: CoroutineScope): ReceiveChannel<SensorData> = scope.produce {
         delay(1500)
         println("calibrating")
 

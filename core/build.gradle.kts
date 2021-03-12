@@ -18,6 +18,7 @@ tasks.withType<KotlinCompile> {
 dependencies {
     implementation("com.google.code.gson:gson:2.8.6")
     implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
+
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.31")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
     implementation(kotlin("stdlib"))

@@ -18,6 +18,8 @@ dependencies {
     val lifecycle_version = "2.3.0"
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version")
     implementation("androidx.activity:activity-ktx:1.3.0-alpha03")
+    implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
+    implementation("com.google.code.gson:gson:2.8.6")
 
 
 
