@@ -1,22 +1,24 @@
 package com.secbot.pi.io
 
 import com.pi4j.io.serial.*
-import com.secbot.core.Device
-import com.secbot.core.IO
-import com.secbot.core.SerialData
+import com.secbot.core.hardware.Control
+import com.secbot.core.SensorDataHandler
+import com.secbot.core.data.DeviceCommand
+import com.secbot.core.data.SensorData
+import com.secbot.core.hardware.Sensor
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
 
 
 @ExperimentalCoroutinesApi
-class SimulatorIO(private val serial: Serial) : IO {
+class SimulatorSensorDataHandler(private val serial: Serial) : SensorDataHandler {
 
-    override fun send(command: SerialData) {
+     fun send(command: SensorData) {
         println("Sending simulated command $command")
     }
 
-    override fun receive(data: SerialData) {
+     fun receiveSensorData(data: SensorData) {
         println("reveive simulated data $data")
     }
 
@@ -33,7 +35,7 @@ class SimulatorIO(private val serial: Serial) : IO {
 
 
 
-    override fun receiver(scope: CoroutineScope, data: ReceiveChannel<SerialData>): ReceiveChannel<SerialData> = scope.produce {
+    override fun receiver(scope: CoroutineScope, data: ReceiveChannel<SensorData>): ReceiveChannel<SensorData> = scope.produce {
 
         for (s in data) {
             send(s)
@@ -46,7 +48,7 @@ class SimulatorIO(private val serial: Serial) : IO {
 
             scope.launch(Dispatchers.IO) {
 
-                send(SerialData(Device.DEBUG, 0.0, System.currentTimeMillis()))
+                send(SensorData(Sensor.SCANNING_IR, 0.0))
             }
 
 

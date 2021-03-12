@@ -3,8 +3,8 @@ package com.secbot.pi
 import com.hopding.jrpicam.RPiCamera
 import com.secbot.core.SecBot
 import com.secbot.pi.Const.PHOTO_PATH
-import com.secbot.core.IO
-import com.secbot.core.SerialData
+import com.secbot.core.SensorDataHandler
+import com.secbot.core.data.SensorData
 import com.secbot.core.mqtt.MQTT
 import kotlinx.coroutines.*
 import java.io.File
@@ -12,7 +12,7 @@ import java.io.IOException
 import java.util.*
 
 @ExperimentalCoroutinesApi
-class MainProcess(private val secBot: SecBot, private val serialPort: IO, private val mqtt: MQTT, private val camera : Optional<RPiCamera>)   {
+class MainProcess(private val secBot: SecBot, private val serialPort: SensorDataHandler, private val mqtt: MQTT, private val camera : Optional<RPiCamera>)   {
 
     // private val apiClient = DefaultApiClient()
 
@@ -70,10 +70,10 @@ class MainProcess(private val secBot: SecBot, private val serialPort: IO, privat
             delay(1000)
             while(! r.isClosedForReceive) {
 
-                val data: SerialData = r.receive()
+                val data: SensorData = r.receive()
                 println("Main Process got serial data: $data on thread ${Thread.currentThread().name}")
-                secBot.send(data)
-                mqtt.send(data)
+//                secBot.send(data)
+//                mqtt.send(data)
             }
         }
 
@@ -83,9 +83,9 @@ class MainProcess(private val secBot: SecBot, private val serialPort: IO, privat
             val r = secBot.receiver(this, s)
             delay(1000)
             while (! r.isClosedForReceive) {
-                val data: SerialData = r.receive()
-                println("Main Process got Pi data: ${data.toSerialCommand()} on thread ${Thread.currentThread().name}")
-                serialPort.send(data)
+                val data: SensorData = r.receive()
+                //println("Main Process got Pi data: ${data.toSerialCommand()} on thread ${Thread.currentThread().name}")
+                //serialPort.send(data)
             }
 
         }
@@ -96,8 +96,8 @@ class MainProcess(private val secBot: SecBot, private val serialPort: IO, privat
             val r = mqtt.receiver(this, s)
             delay(1000)
             while (! r.isClosedForReceive) {
-                val data: SerialData = r.receive()
-                println("Main Process got mqtt data: ${data.toSerialCommand()} on thread ${Thread.currentThread().name}")
+                val data: SensorData = r.receive()
+             //   println("Main Process got mqtt data: ${data.toSerialCommand()} on thread ${Thread.currentThread().name}")
                // mqtt.sendCommand(data)
             }
 

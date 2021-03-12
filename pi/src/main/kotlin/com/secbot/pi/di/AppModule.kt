@@ -7,10 +7,10 @@ import com.pi4j.io.serial.SerialFactory
 import com.pi4j.util.Console
 import com.secbot.core.SecBot
 import com.secbot.pi.Const.PHOTO_PATH
-import com.secbot.core.IO
-import com.secbot.pi.io.SerialPortIO
+import com.secbot.core.SensorDataHandler
+import com.secbot.pi.io.SerialPortManager
 import com.secbot.pi.io.SerialWrapper
-import com.secbot.pi.io.SimulatorIO
+import com.secbot.pi.io.SimulatorSensorDataHandler
 import com.secbot.pi.MainProcess
 import com.secbot.core.mqtt.MQTT
 import dagger.Module
@@ -30,11 +30,11 @@ class AppModule {
     }
 
     @Provides
-    fun provideMainProcess(secBot: SecBot, serialPort: IO, camera: Optional<RPiCamera>, mqtt: MQTT) : MainProcess {
+    fun provideMainProcess(secBot: SecBot, serialPort: SensorDataHandler, camera: Optional<RPiCamera>, mqtt: MQTT) : MainProcess {
         return MainProcess(secBot, serialPort, mqtt, camera)
     }
 
-    @Provides
+    @Provides @Singleton
     fun provideMQTT() : MQTT {
         return MQTT()
     }
@@ -42,10 +42,10 @@ class AppModule {
 
 
     @Provides
-    fun provideSerialPort(io: Serial) : IO {
+    fun provideSerialPort(io: Serial, mqtt: MQTT) : SensorDataHandler {
         return when (SYSTEM) {
-            AMD -> SimulatorIO(io)
-            PI -> SerialPortIO(io)
+            AMD -> SimulatorSensorDataHandler(io)
+            PI -> SerialPortManager(io, mqtt)
             else ->  throw RuntimeException()
         }
 

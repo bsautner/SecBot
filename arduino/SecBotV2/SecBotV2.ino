@@ -1,5 +1,3 @@
-#include <SyRenSimplified.h>
-
 #include <Adafruit_LSM303_Accel.h>
 #include <Adafruit_LSM303DLH_Mag.h>
 #include <Adafruit_Sensor.h>
@@ -9,7 +7,7 @@
 #include <SyRenSimplified.h>
 #include <Servo.h>
 #include <SharpIR.h>
-#include <Time.h>
+#include <Arduino_JSON.h>
 
 #define model SharpIR::GP2Y0A02YK
 
@@ -155,7 +153,7 @@ void loop() {
     }
   }
 
-  sonarPing();
+  readSensors();
   //orientationCheck();
 
 }
@@ -181,60 +179,17 @@ void calibrateScanningServo() {
 }
 
 
-void orientationCheck() {
-  //compass
 
+ 
 
-  if (millis() - throttle > 500) {
-    throttle = millis();
-    sensors_event_t event;
-    mag.getEvent(&event);
-
-    /* Display the results (acceleration is measured in m/s^2) */
-
-    if (accelerometer_x > accelerometer_x + 1 || event.acceleration.x < accelerometer_x - 1) {
-      accelerometer_x = accelerometer_x;
-      sendCommand(ACCELEROMETER_X, event.acceleration.x);
-    }
-    if (accelerometer_y > accelerometer_y + 1 || event.acceleration.y < accelerometer_y - 1) {
-      accelerometer_y = accelerometer_y;
-      sendCommand(ACCELEROMETER_Y, event.acceleration.y);
-    }
-    if (accelerometer_z > accelerometer_z + 1 || event.acceleration.x < accelerometer_z - 1) {
-      accelerometer_z = accelerometer_z;
-      sendCommand(ACCELEROMETER_Z, event.acceleration.z);
-    }
-
-
-    float Pi = 3.14159;
-
-    // Calculate the angle of the vector y,x
-    float heading = (atan2(event.magnetic.y, event.magnetic.x) * 180) / Pi;
-
-    // Normalize to 0-360
-    if (heading < 0)
-    {
-      heading = 360 + heading;
-    }
-
-    //  if (heading > lastHeading + 10 || heading < lastHeading - 10) {
-    lastHeading = heading;
-    sendCommand(COMPASS_HEADING, heading);
-
-
-    // }
-
-  }
-}
-//long front_sonar_duration, front_sonar_cm, front_sonar_timestamp;
-//int front_sonar_last_cm = 0;
-
-void sonarPing() {
+void readSensors() {
   //SONAR LOOP
 
  
   
   if (millis() - control_loop_timestamp > 1000) {
+    orientationCheck();
+    
     digitalWrite(FRONT_SONAR_TRIGGER_PIN, LOW);
     delayMicroseconds(5);
     digitalWrite(FRONT_SONAR_TRIGGER_PIN, HIGH);
@@ -246,7 +201,7 @@ void sonarPing() {
    
 
     if (front_sonar_cm < 1000 && front_sonar_cm != front_sonar_last_cm && front_sonar_cm != front_sonar_last_cm - 1 && front_sonar_cm != front_sonar_last_cm + 1) {
-      sendCommand(FRONT_SONAR, front_sonar_cm);
+      sendSensorData(FRONT_SONAR, front_sonar_cm);
       front_sonar_last_cm = front_sonar_cm;
       if (front_sonar_cm < 5) {
         powerMotor(0, 1);
@@ -269,7 +224,7 @@ void sonarPing() {
  
 
     if (scanning_sonar_cm != scanning_sonar_last_cm && scanning_sonar_cm != scanning_sonar_last_cm - 1 && scanning_sonar_cm != scanning_sonar_last_cm + 1) {
-      sendCommand(SCANNING_SONAR, scanning_sonar_cm);
+      sendSensorData(SCANNING_SONAR, scanning_sonar_cm);
       scanning_sonar_last_cm = scanning_sonar_cm;
   
     }
@@ -279,7 +234,7 @@ void sonarPing() {
    
 
     if (scanning_ir_cm != scanning_ir_last_cm && scanning_ir_cm != scanning_ir_last_cm - 1 && scanning_ir_cm != scanning_ir_last_cm + 1) {
-      sendCommand(SCANNING_IR, scanning_ir_cm);
+      sendSensorData(SCANNING_IR, scanning_ir_cm);
       scanning_ir_last_cm = scanning_ir_cm;
     }
 
@@ -287,6 +242,46 @@ void sonarPing() {
 
 
   }
+}
+
+void orientationCheck() {
+  //compass
+
+ 
+    sensors_event_t event;
+    mag.getEvent(&event);
+
+    /* Display the results (acceleration is measured in m/s^2) */
+
+   // if (accelerometer_x > accelerometer_x + 1 || event.acceleration.x < accelerometer_x - 1) {
+      accelerometer_x = accelerometer_x;
+      sendSensorData(ACCELEROMETER_X, event.acceleration.x);
+    //}
+   // if (accelerometer_y > accelerometer_y + 1 || event.acceleration.y < accelerometer_y - 1) {
+      accelerometer_y = accelerometer_y;
+      sendSensorData(ACCELEROMETER_Y, event.acceleration.y);
+   // }
+   // if (accelerometer_z > accelerometer_z + 1 || event.acceleration.x < accelerometer_z - 1) {
+      accelerometer_z = accelerometer_z;
+      sendSensorData(ACCELEROMETER_Z, event.acceleration.z);
+   // }
+
+
+    float Pi = 3.14159;
+
+    // Calculate the angle of the vector y,x
+    float heading = (atan2(event.magnetic.y, event.magnetic.x) * 180) / Pi;
+
+    // Normalize to 0-360
+    if (heading < 0)
+    {
+      heading = 360 + heading;
+    }
+
+    //  if (heading > lastHeading + 10 || heading < lastHeading - 10) {
+    lastHeading = heading;
+    sendSensorData(COMPASS_HEADING, heading);
+ 
 }
 
 void steerServo(int newPos) {
@@ -347,24 +342,18 @@ void processCommand(String command) {
     log("scanning servo");
     scanServo(val.toInt());
   } else if (cmd == "PING") {
-    sendCommand("PONG", millis());
+    sendSensorData("PONG", millis());
   }
 
 }
 
-void sendCommand(String device, float value) {
-  
-  Serial1.print("{");
-  Serial1.print(device);
-  Serial1.print(":");
-  Serial1.print(value);
-  Serial1.print(":");
-  Serial1.print(now());
-  Serial1.print("}");
+void sendSensorData(String device, float value) {
+  JSONVar myObject;
+   myObject["device"] =device;
+   myObject["reading"] = value;
+     String jsonString = JSON.stringify(myObject);
+     Serial1.println(jsonString);
  
-  Serial.print(device);
-  Serial.print(":");
-  Serial.println(value);
  
 }
 

@@ -1,9 +1,9 @@
 package com.secbot.core.mqtt
 
 import com.google.gson.GsonBuilder
-import com.secbot.core.Device
-import com.secbot.core.IO
-import com.secbot.core.SerialData
+import com.secbot.core.SensorDataHandler
+import com.secbot.core.data.DeviceCommand
+import com.secbot.core.data.SensorData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -16,9 +16,9 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 import java.util.*
 
 @ExperimentalCoroutinesApi
-class MQTT : IO {
+class MQTT : SensorDataHandler {
 
-    private val feedbackTopic = "feedback"
+    private val sensorTopic = "sensor"
     private val controlTopic = "control"
 
     private val qos = 2
@@ -38,31 +38,31 @@ class MQTT : IO {
         println("Connected MQTT OK")
     }
 
-    override fun send(command: SerialData) {
-        println("mqtt sending ${command.toSerialCommand()}")
+    fun publishSensorData(command: SensorData) {
+        println("mqtt sending ${command.toString()}")
         val message = MqttMessage(gson.toJson(command).toByteArray())
         message.qos = qos
-        client.publish(feedbackTopic, message)
+        client.publish(sensorTopic, message)
     }
 
-    override fun receive(data: SerialData) {
-        println("mqtt received ${data.toSerialCommand()}")
-        val message = MqttMessage(gson.toJson(data).toByteArray())
-        message.qos = qos
-      //  client.publish(controlTopic, message)
-    }
+//     fun receiveSensorData(data: SensorData) {
+//      //  println("mqtt received ${data.toSerialCommand()}")
+//        val message = MqttMessage(gson.toJson(data).toByteArray())
+//        message.qos = qos
+//      //  client.publish(controlTopic, message)
+//    }
 
-    override fun receiver(scope: CoroutineScope, data: ReceiveChannel<SerialData>): ReceiveChannel<SerialData> = scope.produce {
+    override fun receiver(scope: CoroutineScope, data: ReceiveChannel<SensorData>): ReceiveChannel<SensorData> = scope.produce {
 
     for (s in data) {
-            println(s)
+           // println(s)
             send(s)
         }
     }
 
     override fun start(scope: CoroutineScope) = scope.produce {
 
-        client.subscribe(feedbackTopic)
+        client.subscribe(sensorTopic)
         client.setCallback(callback(this, feedbackListener))
 
 //
@@ -71,7 +71,7 @@ class MQTT : IO {
 
     }
 
-    class callback(private val scope: ProducerScope<SerialData>, private val feedbackListener: FeedbackListener?) : MqttCallback {
+    class callback(private val scope: ProducerScope<SensorData>, private val feedbackListener: FeedbackListener?) : MqttCallback {
         override fun connectionLost(cause: Throwable?) {
             cause?.printStackTrace()
         }
@@ -79,13 +79,13 @@ class MQTT : IO {
         override fun messageArrived(topic: String?, message: MqttMessage?) {
             println("MQTT Message Received $topic/$message")
             val json = message?.payload?.let { String(it) }
-            val serialData = GsonBuilder().create().fromJson(json, SerialData::class.java)
+            val serialData = GsonBuilder().create().fromJson(json, SensorData::class.java)
             feedbackListener?.onRevieve(serialData)
 
             scope.launch(Dispatchers.IO) {
 
 
-                scope.send(GsonBuilder().create().fromJson(json, SerialData::class.java))
+                scope.send(GsonBuilder().create().fromJson(json, SensorData::class.java))
             }
 
         }
