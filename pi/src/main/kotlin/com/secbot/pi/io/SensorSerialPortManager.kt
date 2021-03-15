@@ -1,29 +1,28 @@
 package com.secbot.pi.io
 
 import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import com.pi4j.io.serial.*
 import com.secbot.core.data.DeviceCommand
 import com.secbot.core.data.SensorData
 import com.secbot.core.mqtt.MQTT
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.produce
-import java.lang.Exception
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
+import org.eclipse.paho.client.mqttv3.MqttCallback
+import org.eclipse.paho.client.mqttv3.MqttMessage
 import java.lang.StringBuilder
 
 @ExperimentalCoroutinesApi
-class SensorSerialPortManager(
+class SensorSerialPortManager  (
     private val serial: Serial,
     private val mqtt: MQTT,
     private val tty: String,
-    private val gson: Gson) {
+    private val gson: Gson) : SerialPort(serial, tty) {
 
     private val sb = StringBuilder()
 
-    suspend fun start() {
+    override suspend fun start() {
+        super.start()
 
-        println("starting serial $tty on thread: ${Thread.currentThread().name}")
 
         serial.addListener(SerialDataEventListener {
 
@@ -37,6 +36,7 @@ class SensorSerialPortManager(
                         when {
                             (s == '}') -> {
                                 val sensorData = gson.fromJson(sb.toString(), SensorData::class.java)
+                                println("Got Sensor Data over Serial Port $tty $sb")
                                 GlobalScope.launch {
                                     mqtt.publishSensorData(sensorData)
                                 }
@@ -58,23 +58,10 @@ class SensorSerialPortManager(
             }
         })
 
+    }
 
-        val config = SerialConfig()
-        config.device("/dev/$tty")
-            .baud(Baud._115200)
-            .dataBits(DataBits._8)
-            .parity(Parity.NONE)
-            .stopBits(StopBits._1)
-            .flowControl(FlowControl.NONE)
-        serial.open(config)
-        serial.flush()
-        delay(100)
-        println("$tty connected")
+    override suspend fun sendCommand(command: DeviceCommand) {
 
-        while (serial.isOpen) {
-
-            delay(10)
-        }
     }
 
 

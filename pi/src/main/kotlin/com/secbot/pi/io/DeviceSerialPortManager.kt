@@ -1,79 +1,59 @@
 package com.secbot.pi.io
 
 import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import com.pi4j.io.serial.*
 import com.secbot.core.data.DeviceCommand
-import com.secbot.core.data.SensorData
 import com.secbot.core.mqtt.MQTT
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.produce
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
 import org.eclipse.paho.client.mqttv3.MqttCallback
 import org.eclipse.paho.client.mqttv3.MqttMessage
-import java.lang.Exception
-import java.lang.StringBuilder
 
 @ExperimentalCoroutinesApi
-class DeviceSerialPortManager(private val serial: Serial, private val mqtt: MQTT, private val tty: String, private val gson: Gson)  {
+class DeviceSerialPortManager(private val serial: Serial, private val mqtt: MQTT, tty: String, private val gson: Gson) : SerialPort(serial, tty) {
 
 
 
 
-    suspend fun sendCommand(command: DeviceCommand) {
+    override suspend fun start() {
+        super.start()
+        subscribeDeviceCommands()
 
-        if (serial.isOpen) {
-            serial.write(gson.toJson(command))
-        } else {
-            println("Can't send serial command because port is closed")
-        }
     }
 
-    suspend fun subscribeDeviceCommands() {
+    private fun subscribeDeviceCommands() {
 
         mqtt.subscribeDeviceCommands(object: MqttCallback {
-            override fun connectionLost(cause: Throwable?) {
-                TODO("Not yet implemented")
+            override fun connectionLost(cause: Throwable) {
+
+                println("MQTT Connection lost")
+                cause.printStackTrace()
             }
 
-            override fun messageArrived(topic: String?, message: MqttMessage?) {
-                TODO("Not yet implemented")
+            override fun messageArrived(topic: String, message: MqttMessage) {
+                println("MQTT Message Arrived $topic ${String(message.payload)}")
+                GlobalScope.launch {
+                    sendCommand(gson.fromJson(String(message.payload), DeviceCommand::class.java))
+                }
+
             }
 
-            override fun deliveryComplete(token: IMqttDeliveryToken?) {
-                TODO("Not yet implemented")
+            override fun deliveryComplete(token: IMqttDeliveryToken) {
+
             }
 
         })
     }
 
 
+    override suspend fun sendCommand(command: DeviceCommand) {
 
-    suspend fun start() {
+        if (serial.isOpen) {
+            kotlin.runCatching {    serial.writeln(gson.toJson(command)) }
 
-
-
-            val config = SerialConfig()
-            config.device("/dev/$tty")
-                .baud(Baud._115200)
-                .dataBits(DataBits._8)
-                .parity(Parity.NONE)
-                .stopBits(StopBits._1)
-                .flowControl(FlowControl.NONE)
-            serial.open(config)
-            serial.flush()
-            delay(100)
-
-
-
-            while (serial.isOpen) {
-
-                delay(10)
-            }
-
-
-
+        } else {
+            println("Can't send serial command because port is closed")
+        }
     }
 
 }

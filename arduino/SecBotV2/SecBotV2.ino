@@ -77,9 +77,9 @@ long scanning_ir_duration;
 long scanning_ir_last_cm = 0;
 
 
-String inputString = "";
-String serial_input_string = "";
-
+String input_string = "";
+String serial_sensor_input_string = "";
+String serial_device_input_string = "";
 
 int throttle = 0;
 int lastHeading = 0;
@@ -91,10 +91,15 @@ int accelerometer_z = 0;
 void setup() {
   Serial.begin(115200);
   Serial1.begin(115200);
+  Serial2.begin(115200);
+
+
   SWSerial1.begin(9600);
   SWSerial2.begin(9600);
 
-  inputString.reserve(200);
+  input_string.reserve(200);
+  serial_sensor_input_string.reserve(200);
+  serial_device_input_string.reserve(200);
 
   steering_servo.attach(STEERING_SERVO_PIN);
   steering_servo.write(40);
@@ -118,8 +123,8 @@ void setup() {
  if (!mag.begin()) {
    /* There was a problem detecting the LSM303 ... check your connections */
    Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
-   while (1)
-     ;
+  //  while (1)
+  //    ;
  }
 
 
@@ -132,12 +137,23 @@ void setup() {
 void loop() {
 
 
-  if (Serial1.available()) {
-    char inChar = (char)Serial1.read();
-    inputString += inChar;
+  if (Serial2.available()) {
+    char inChar = (char)Serial2.read();
+    serial_device_input_string += inChar;
     if (inChar == '\n') {
-      processCommand(inputString);
-      inputString = "";
+      processCommand(serial_device_input_string);
+      serial_device_input_string = "";
+      
+
+    }
+  }
+
+    if (Serial1.available()) {
+    char inChar = (char)Serial1.read();
+    serial_sensor_input_string += inChar;
+    if (inChar == '\n') {
+      processCommand(serial_sensor_input_string);
+      serial_sensor_input_string = "";
       
 
     }
@@ -145,10 +161,11 @@ void loop() {
 
   if (Serial.available()) {
     char inChar = (char)Serial.read();
-    serial_input_string += inChar;
+    input_string += inChar;
     if (inChar == '\n') {
-      processCommand(serial_input_string);
-      serial_input_string = "";
+    //  processCommand(serial_input_string);
+      Serial.println(input_string);
+      input_string = "";
 
     }
   }
@@ -324,27 +341,41 @@ void scanServo(int newPos) {
 //Serial Input
 void processCommand(String command) {
 
+  
+  log(command);
 
-  String cmd = getValue(command, ':', 0);
-  String val = getValue(command, ':', 1);
-  log("process command " + cmd);
-  if (cmd == MOTOR_1) {
-    powerMotor(val.toInt(), 1);
-  }
-  else if (cmd == MOTOR_2) {
-    powerMotor(val.toInt(), 2);
-  }
-  else if (cmd == STEERING_SERVO) {
-    log("Steering servo");
-    steerServo(val.toInt());
-  }
-  else if (cmd == SCANNING_SERVO) {
-    log("scanning servo");
-    scanServo(val.toInt());
-  } else if (cmd == "PING") {
-    sendSensorData("PONG", millis());
+   JSONVar myObject = JSON.parse(command);
+     if (JSON.typeof(myObject) == "undefined") {
+    Serial.println("Parsing input failed!");
+    return;
   }
 
+    if (myObject.hasOwnProperty("control") && myObject.hasOwnProperty("value")) {
+    
+      String cmd = (const char*) myObject["control"];
+      String val = (const char*) myObject["value"];
+      if (cmd == MOTOR_1) {
+      powerMotor(val.toInt(), 1);
+    }
+    else if (cmd == MOTOR_2) {
+      powerMotor(val.toInt(), 2);
+    }
+    else if (cmd == STEERING_SERVO) {
+      log("Steering servo");
+      steerServo(val.toInt());
+    }
+    else if (cmd == SCANNING_SERVO) {
+      log("scanning servo");
+      scanServo(val.toInt());
+    } else if (cmd == "PING") {
+      log("sending pong");
+      sendSensorData("PONG", millis());
+    }
+
+  }
+    
+  
+ 
 }
 
 void sendSensorData(String device, float value) {
@@ -356,26 +387,7 @@ void sendSensorData(String device, float value) {
  
  
 }
-
-
-
-
-String getValue(String data, char separator, int index)
-{
-  int found = 0;
-  int strIndex[] = { 0, -1 };
-  int maxIndex = data.length() - 1;
-
-  for (int i = 0; i <= maxIndex && found <= index; i++) {
-    if (data.charAt(i) == separator || i == maxIndex) {
-      found++;
-      strIndex[0] = strIndex[1] + 1;
-      strIndex[1] = (i == maxIndex) ? i + 1 : i;
-    }
-  }
-  return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
-}
-
+ 
 
 void powerMotor(int val, int m) {
 

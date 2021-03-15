@@ -26,7 +26,7 @@ class MQTT {
     private val client = MqttClient(broker, clientId, persistence)
     private val gson = GsonBuilder().create()
 
-    suspend fun start() {
+    fun start() {
         val connOpts = MqttConnectOptions()
         connOpts.isCleanSession = true
         println("Connecting to broker: $broker")
@@ -34,7 +34,7 @@ class MQTT {
         println("Connected MQTT OK")
     }
 
-    suspend fun publishSensorData(reading: SensorData) {
+    fun publishSensorData(reading: SensorData) {
        // println("mqtt sending ${reading.toString()}")
         checkConnection()
         val message = MqttMessage(gson.toJson(reading).toByteArray())
@@ -42,28 +42,28 @@ class MQTT {
         client.publish(sensorTopic, message)
     }
 
-    suspend fun publishDeviceCommand(command: DeviceCommand) {
+    fun publishDeviceCommand(command: DeviceCommand) {
         checkConnection()
         client.publish(controlTopic, gson.toJson(command).toByteArray(), 2, false)
     }
 
 
-    suspend fun subscribeDeviceCommands(callback: MqttCallback) {
+    fun subscribeDeviceCommands(callback: MqttCallback) {
         checkConnection()
         client.subscribe(controlTopic)
         client.setCallback(callback)
 
     }
 
-    suspend fun subscribeSensorData(callback: MqttCallback) {
+    fun subscribeSensorData(callback: MqttCallback) {
         checkConnection()
         client.subscribe(sensorTopic)
         client.setCallback(callback)
 
     }
 
-    suspend fun checkConnection() {
-        if (! client.isConnected) {
+    private fun checkConnection() {
+        if (! client.isConnected ) {
             println("reconnecting mqtt broker")
             start()
         }
