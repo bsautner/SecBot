@@ -1,5 +1,7 @@
 package com.secbot.pi.di
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.hopding.jrpicam.RPiCamera
 import com.hopding.jrpicam.enums.Exposure
 import com.pi4j.io.serial.Serial
@@ -7,14 +9,12 @@ import com.pi4j.io.serial.SerialFactory
 import com.pi4j.util.Console
 import com.secbot.core.SecBot
 import com.secbot.pi.Const.PHOTO_PATH
-import com.secbot.core.SensorDataHandler
-import com.secbot.pi.io.SerialPortManager
-import com.secbot.pi.io.SerialWrapper
-import com.secbot.pi.io.SimulatorSensorDataHandler
+import com.secbot.pi.io.SensorSerialPortManager
 import com.secbot.pi.MainProcess
 import com.secbot.core.mqtt.MQTT
 import dagger.Module
 import dagger.Provides
+import dagger.Reusable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.util.*
 import javax.inject.Singleton
@@ -30,25 +30,25 @@ class AppModule {
     }
 
     @Provides
-    fun provideMainProcess(secBot: SecBot, serialPort: SensorDataHandler, camera: Optional<RPiCamera>, mqtt: MQTT) : MainProcess {
-        return MainProcess(secBot, serialPort, mqtt, camera)
+    fun provideMainProcess(secBot: SecBot, sensorPort: SensorSerialPortManager, camera: Optional<RPiCamera>, mqtt: MQTT) : MainProcess {
+        return MainProcess(secBot, sensorPort, mqtt, camera)
     }
 
-    @Provides @Singleton
+    @Provides
     fun provideMQTT() : MQTT {
         return MQTT()
     }
 
+    @Provides @Reusable
+    fun provideGson() : Gson {
+
+        return GsonBuilder().create()
+    }
 
 
     @Provides
-    fun provideSerialPort(io: Serial, mqtt: MQTT) : SensorDataHandler {
-        return when (SYSTEM) {
-            AMD -> SimulatorSensorDataHandler(io)
-            PI -> SerialPortManager(io, mqtt)
-            else ->  throw RuntimeException()
-        }
-
+    fun provideSerialPort(io: Serial, mqtt: MQTT, gson: Gson) : SensorSerialPortManager {
+        return SensorSerialPortManager(io, mqtt, SENSOR_SERIAL_PORT, gson)
     }
 
     @Provides
@@ -59,11 +59,7 @@ class AppModule {
     @Provides
     fun provideIO() : Serial {
 
-        return when (SYSTEM) {
-             AMD -> SerialWrapper()
-             PI -> SerialFactory.createInstance()
-             else ->  throw RuntimeException()
-        }
+        return SerialFactory.createInstance()
 
     }
 
@@ -99,7 +95,8 @@ class AppModule {
         private var SYSTEM = System.getProperty("os.arch")
         private const val PI = "arm"
         private const val AMD =  "amd64"
-
+        private const val SENSOR_SERIAL_PORT = "ttyUSB0"
+        private const val DEVICE_COMMAND_SERIAL_PORT = "ttyUSB1"
     }
 
 }
