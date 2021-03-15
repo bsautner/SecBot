@@ -8,6 +8,7 @@
 #include <Servo.h>
 #include <SharpIR.h>
 #include <Arduino_JSON.h>
+#include <RPLidar.h>
 
 #define model SharpIR::GP2Y0A02YK
 
@@ -18,6 +19,7 @@ const int SCANNING_SERVO_FEEDBACK_PIN = A8;
 
 const int MOTOR_PIN_1 = 2;
 const int MOTOR_PIN_2 = 3;
+const int RPLIDAR_MOTOR=4;
 const int FRONT_SONAR_ECHO_PIN = 5;
 const int FRONT_SONAR_TRIGGER_PIN = 6;
 const int SCANNING_SONAR_ECHO_PIN = 8;
@@ -28,9 +30,9 @@ const int DISTANCE_SCAN_SERVO_PIN = 12;
 
 
 SharpIR IR_prox(SharpIR::GP2Y0A02YK0F, SCANNING_IR_PIN);
+RPLidar lidar;
 
-
-
+const String LIDAR = "LIDAR";
 const String MOTOR_1 = "MOTOR_1";
 const String MOTOR_2 = "MOTOR_2";
 const String STEERING_SERVO = "STEERING_SERVO";
@@ -93,6 +95,11 @@ void setup() {
   Serial1.begin(115200);
   Serial2.begin(115200);
 
+  // bind the RPLIDAR driver to the arduino hardware serial
+  lidar.begin(Serial3);
+  
+  // set pin modes
+  pinMode(RPLIDAR_MOTOR, OUTPUT);
 
   SWSerial1.begin(9600);
   SWSerial2.begin(9600);
@@ -120,12 +127,12 @@ void setup() {
   pinMode(FRONT_SONAR_ECHO_PIN, INPUT);
   mag.enableAutoRange(true);
 
- if (!mag.begin()) {
-   /* There was a problem detecting the LSM303 ... check your connections */
-   Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
-  //  while (1)
-  //    ;
- }
+//  if (!mag.begin()) {
+//    /* There was a problem detecting the LSM303 ... check your connections */
+//    Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
+//   //  while (1)
+//   //    ;
+//  }
 
 
 
@@ -171,7 +178,8 @@ void loop() {
   }
 
   readSensors();
-  //orientationCheck();
+
+
 
 }
 
@@ -204,7 +212,7 @@ void readSensors() {
 
  
   
-  if (millis() - control_loop_timestamp > 1000) {
+  if (millis() - control_loop_timestamp > 100) {
     orientationCheck();
     
     digitalWrite(FRONT_SONAR_TRIGGER_PIN, LOW);
@@ -255,6 +263,36 @@ void readSensors() {
       scanning_ir_last_cm = scanning_ir_cm;
     }
 
+ if (IS_OK(lidar.waitPoint())) {
+    float distance = lidar.getCurrentPoint().distance; //distance value in mm unit
+    float angle    = lidar.getCurrentPoint().angle; //anglue value in degree
+    bool  startBit = lidar.getCurrentPoint().startBit; //whether this point is belong to a new scan
+    byte  quality  = lidar.getCurrentPoint().quality; //quality of the current measurement
+     
+   Serial.print("distance:" );
+    Serial.print(distance);
+     Serial.print(" angle: ");
+      Serial.print(angle);
+       Serial.print(" startBit: ");
+        Serial.print(startBit);
+            Serial.print(" quality: ");
+        Serial.print(quality);
+        Serial.println();
+    
+  } else {
+    analogWrite(RPLIDAR_MOTOR, 0); //stop the rplidar motor
+    
+    // try to detect RPLIDAR... 
+    rplidar_response_device_info_t info;
+    if (IS_OK(lidar.getDeviceInfo(info, 100))) {
+       // detected...
+       lidar.startScan();
+       
+       // start motor rotating at max allowed speed
+       analogWrite(RPLIDAR_MOTOR, 255);
+       delay(1000);
+    }
+  }  
     control_loop_timestamp = millis();
 
 
