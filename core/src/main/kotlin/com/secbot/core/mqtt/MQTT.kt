@@ -1,16 +1,14 @@
 package com.secbot.core.mqtt
 
 import com.google.gson.GsonBuilder
-import com.secbot.core.data.DeviceCommand
-import com.secbot.core.data.SensorData
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import com.secbot.core.hardware.Device
+import com.secbot.core.hardware.DeviceContainer
+import com.secbot.core.hardware.DeviceType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.ProducerScope
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.produce
-import kotlinx.coroutines.launch
-import org.eclipse.paho.client.mqttv3.*
+import org.eclipse.paho.client.mqttv3.MqttCallback
+import org.eclipse.paho.client.mqttv3.MqttClient
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions
+import org.eclipse.paho.client.mqttv3.MqttMessage
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 import java.util.*
 
@@ -34,15 +32,15 @@ class MQTT {
         println("Connected MQTT OK")
     }
 
-    fun publishSensorData(reading: SensorData) {
-       // println("mqtt sending ${reading.toString()}")
+    fun publishSensorData(deviceContainer: DeviceContainer) {
+
         checkConnection()
-        val message = MqttMessage(gson.toJson(reading).toByteArray())
+        val message = MqttMessage(gson.toJson(deviceContainer).toByteArray())
         message.qos = qos
         client.publish(sensorTopic, message)
     }
 
-    fun publishDeviceCommand(command: DeviceCommand) {
+    fun publishDeviceCommand(command: Device) {
         checkConnection()
         client.publish(controlTopic, gson.toJson(command).toByteArray(), 2, false)
     }
@@ -67,6 +65,10 @@ class MQTT {
             println("reconnecting mqtt broker")
             start()
         }
+    }
+
+    fun isConnected(): Boolean {
+       return client.isConnected
     }
 
     companion object {

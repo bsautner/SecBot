@@ -2,12 +2,8 @@ package com.secbot.pi
 
 import com.hopding.jrpicam.RPiCamera
 import com.secbot.core.SecBot
-import com.secbot.core.data.DeviceCommand
 import com.secbot.pi.Const.PHOTO_PATH
-import com.secbot.core.data.SensorData
-import com.secbot.core.hardware.Control
 import com.secbot.core.mqtt.MQTT
-import com.secbot.pi.io.SensorSerialPortManager
 import com.secbot.pi.io.SerialManager
 import kotlinx.coroutines.*
 import java.io.File
@@ -45,16 +41,16 @@ class MainProcess(private val secBot: SecBot, private val sensorSerialPort: Seri
         GlobalScope.runCatching {
             mqtt.start().also {
                 sensorSerialPort.start()
-                commandPort.start()
+              //  commandPort.start()
             }
 
         }
 
-        while (sensorSerialPort.isConnected() && commandPort.isConnected()) {
+        while (sensorSerialPort.isConnected()) {
             delay(10)
             if (System.currentTimeMillis() - t > 1000) {
                 t = System.currentTimeMillis()
-                commandPort.sendCommand(DeviceCommand(Control.PING, t.toDouble()))
+              //  commandPort.sendCommand(DeviceCommand(Control.PING, t.toDouble()))
 
             }
         }

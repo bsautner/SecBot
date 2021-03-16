@@ -5,8 +5,8 @@ import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import com.secbot.core.hardware.Sensor
+import com.secbot.core.hardware.Compass
+import com.secbot.core.hardware.DeviceType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 
@@ -18,10 +18,10 @@ fun mainScreen(vm : MainViewModel) {
         Column {
 
             Text(vm.test)
-            for (s in Sensor.values()  ) {
-                Text("${s.name} : ${vm.sensors[s]?.reading}")
 
-            }
+            Text("Compass Heading ${vm.compass.heading}")
+
+
 
             Button(
 

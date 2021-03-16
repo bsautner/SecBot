@@ -1,6 +1,6 @@
 package com.secbot.core
 
-import com.secbot.core.data.SensorData
+import com.secbot.core.hardware.Device
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ProducerScope
@@ -22,9 +22,9 @@ class SecBot  {
 ////        }
 //    }
 
-     fun receiveSensorData(data: SensorData) {
-        TODO("Not yet implemented")
-    }
+//     fun receiveSensorData(data: SensorData) {
+//        TODO("Not yet implemented")
+//    }
 //    SerialData(device=SCANNING_SONAR, v=104.0, timestamp=1614953950281, value=104.0)
 //    SerialData(device=SCANNING_IR, v=77.0, timestamp=1614953950282, value=77.0)
 
@@ -116,7 +116,7 @@ class SecBot  {
 //        devices[data.device] = data
 //    }
 
-     fun receiver(scope: CoroutineScope, data: ReceiveChannel<SensorData>): ReceiveChannel<SensorData> =
+     fun receiver(scope: CoroutineScope, data: ReceiveChannel<Device>): ReceiveChannel<Device> =
         scope.produce {
 
             for (s in data) {
@@ -126,7 +126,7 @@ class SecBot  {
         }
 
 
-     fun start(scope: CoroutineScope): ReceiveChannel<SensorData> = scope.produce {
+     fun start(scope: CoroutineScope): ReceiveChannel<Device> = scope.produce {
         delay(1500)
         println("calibrating")
 
@@ -216,7 +216,7 @@ class SecBot  {
 
     }
 
-    private suspend fun ProducerScope<SensorData>.driveForward() {
+    private suspend fun ProducerScope<Device>.driveForward() {
      //   changeState(State.DRIVING_FORWARD)
        // send(SerialData(Control.MOTOR_1, speed, System.currentTimeMillis()))
 

@@ -71,7 +71,7 @@ class VisionController {
         println(file.exists())
         return ResponseEntity.ok()
             .contentType(MediaType.IMAGE_JPEG)
-            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.filename.toString() + "\"")
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.filename?.toString() + "\"")
             .body<Resource?>(file)
     }
 

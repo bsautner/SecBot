@@ -5,12 +5,12 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.platform.setContent
 import com.google.gson.GsonBuilder
-import com.secbot.core.data.DeviceCommand
-import com.secbot.core.data.SensorData
+import com.secbot.core.hardware.Device
+import com.secbot.core.hardware.DeviceContainer
+import com.secbot.core.mqtt.DeviceInstanceCreator
 import com.secbot.core.mqtt.MQTT
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
 import org.eclipse.paho.client.mqttv3.MqttCallback
@@ -21,19 +21,23 @@ class MainActivity : AppCompatActivity() {
 
     private val vm by viewModels<MainViewModel>()
     private val mqtt = MQTT()
-    private val gson = GsonBuilder().create()
+    private val gson = GsonBuilder().registerTypeAdapter(Device::class.java, DeviceInstanceCreator()).create()
     private val feedbackListener = object : MqttCallback {
 
         override fun connectionLost(cause: Throwable) {
-            TODO("Not yet implemented")
+            println("MQTT Connection Lost")
+            cause.printStackTrace()
         }
 
         override fun messageArrived(topic: String, message: MqttMessage) {
 
-            val json = String(message.payload)
-            println("got mqtt data: $json")
 
-            vm.setValue(gson.fromJson(json, SensorData::class.java))
+            val json = String(message.payload)
+            println("Message Arrived $json")
+            val deviceContainer = gson.fromJson(json, DeviceContainer::class.java)
+
+            vm.setValue(deviceContainer)
+            println("got mqtt data: ${gson.fromJson(json, DeviceContainer::class.java).devices.size}")
         }
 
         override fun deliveryComplete(token: IMqttDeliveryToken?) {
@@ -55,21 +59,13 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
 
 
-        println("channel closed")
-        GlobalScope.launch {
-                mqtt.start()
-                mqtt.subscribeSensorData(feedbackListener)
 
-               // delay(1000)
-//                while (! r.isClosedForReceive) {
-//                    val data: SensorData = r.receive()
-//                 //   println("Main Process got mqtt data: ${data.toSerialCommand()} on thread ${Thread.currentThread().name}")
-//                    // mqtt.sendCommand(data)
-//                }
-                //println("mqtt closed")
+        GlobalScope.launch {
+               MqttService(mqtt, feedbackListener).monitor()
 
 
         }
+        println("channel closed")
     }
 
 

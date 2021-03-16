@@ -8,6 +8,7 @@ import com.pi4j.io.serial.Serial
 import com.pi4j.io.serial.SerialFactory
 import com.pi4j.util.Console
 import com.secbot.core.SecBot
+import com.secbot.core.SensorDataProcessor
 import com.secbot.pi.Const.PHOTO_PATH
 import com.secbot.pi.io.SensorSerialPortManager
 import com.secbot.pi.MainProcess
@@ -48,10 +49,14 @@ class AppModule {
         return GsonBuilder().create()
     }
 
+    @Provides @Reusable
+    fun provideSensorDataProcessor(gson: Gson) : SensorDataProcessor {
+        return SensorDataProcessor(gson)
+    }
 
     @Provides @Named(SENSOR_SERIAL_PORT)
-    fun provideSensorSerialPort(io: Serial, mqtt: MQTT, gson: Gson) : SerialManager {
-        return SensorSerialPortManager(io, mqtt, SENSOR_SERIAL_PORT, gson)
+    fun provideSensorSerialPort(sensorDataProcessor: SensorDataProcessor, io: Serial, mqtt: MQTT, gson: Gson) : SerialManager {
+        return SensorSerialPortManager(sensorDataProcessor, io, mqtt, SENSOR_SERIAL_PORT, gson)
     }
 
     @Provides @Named(DEVICE_COMMAND_SERIAL_PORT)

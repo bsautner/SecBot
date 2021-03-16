@@ -2,23 +2,21 @@ package com.secbot.pi.io
 
 import com.google.gson.Gson
 import com.pi4j.io.serial.*
-import com.secbot.core.data.DeviceCommand
-import com.secbot.core.data.SensorData
+import com.secbot.core.SensorDataProcessor
+import com.secbot.core.hardware.*
 import com.secbot.core.mqtt.MQTT
 import kotlinx.coroutines.*
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
-import org.eclipse.paho.client.mqttv3.MqttCallback
-import org.eclipse.paho.client.mqttv3.MqttMessage
-import java.lang.StringBuilder
+import java.util.*
+
 
 @ExperimentalCoroutinesApi
 class SensorSerialPortManager  (
+    private val processor: SensorDataProcessor,
     private val serial: Serial,
     private val mqtt: MQTT,
-    private val tty: String,
+    tty: String,
     private val gson: Gson) : SerialPort(serial, tty) {
 
-    private val sb = StringBuilder()
 
     override suspend fun start() {
         super.start()
@@ -26,33 +24,34 @@ class SensorSerialPortManager  (
 
         serial.addListener(SerialDataEventListener {
 
+            val deviceContainer = DeviceContainer()
+
+
             if (it.asciiString.isNotEmpty()) {
-                val sanitized = it.asciiString
+
+
 
                 try {
 
-                    for (s in sanitized.toCharArray()) {
-                        sb.append(s)
-                        when {
-                            (s == '}') -> {
-                                val sensorData = gson.fromJson(sb.toString(), SensorData::class.java)
-                                println("Got Sensor Data over Serial Port $tty $sb")
-                                GlobalScope.launch {
-                                    mqtt.publishSensorData(sensorData)
-                                }
 
-                                sb.clear()
-                            }
+                    val split = it.asciiString.split('\n')
+                    for (s in split) {
+                        if (s.isNotBlank()) {
+                            deviceContainer.put(processor.process(s))
                         }
-
-
                     }
 
 
                 } catch (ex: Exception) {
-                    println("Malformed Serial Data : $sanitized caused ${ex.message}")
+
+                    println("Malformed Serial Data : ${it.asciiString} caused ${ex.message}")
                     ex.printStackTrace()
 
+                }
+                if (deviceContainer.isNotEmpty()) {
+                    GlobalScope.launch {
+                        mqtt.publishSensorData(deviceContainer)
+                    }
                 }
 
             }
@@ -60,8 +59,8 @@ class SensorSerialPortManager  (
 
     }
 
-    override suspend fun sendCommand(command: DeviceCommand) {
-
+    override suspend fun sendCommand(device: Device) {
+        TODO("Not yet implemented")
     }
 
 

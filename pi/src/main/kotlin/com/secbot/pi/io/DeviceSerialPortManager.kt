@@ -2,7 +2,7 @@ package com.secbot.pi.io
 
 import com.google.gson.Gson
 import com.pi4j.io.serial.*
-import com.secbot.core.data.DeviceCommand
+import com.secbot.core.hardware.Device
 import com.secbot.core.mqtt.MQTT
 import kotlinx.coroutines.*
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
@@ -33,7 +33,7 @@ class DeviceSerialPortManager(private val serial: Serial, private val mqtt: MQTT
             override fun messageArrived(topic: String, message: MqttMessage) {
                 println("MQTT Message Arrived $topic ${String(message.payload)}")
                 GlobalScope.launch {
-                    sendCommand(gson.fromJson(String(message.payload), DeviceCommand::class.java))
+                    sendCommand(gson.fromJson(String(message.payload), Device::class.java))
                 }
 
             }
@@ -46,7 +46,7 @@ class DeviceSerialPortManager(private val serial: Serial, private val mqtt: MQTT
     }
 
 
-    override suspend fun sendCommand(command: DeviceCommand) {
+    override suspend fun sendCommand(command: Device) {
 
         if (serial.isOpen) {
             kotlin.runCatching {    serial.writeln(gson.toJson(command)) }

@@ -1,11 +1,12 @@
 package com.secbot.pi.io
 
-import com.secbot.core.data.DeviceCommand
+import com.secbot.core.hardware.Device
+
 
 interface SerialManager {
 
     suspend fun start()
-    suspend fun sendCommand(command: DeviceCommand)
+    suspend fun sendCommand(device: Device)
     fun isConnected() : Boolean
 
 }
