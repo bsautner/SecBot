@@ -6,6 +6,7 @@ import com.secbot.core.SensorDataProcessor
 import com.secbot.core.hardware.*
 import com.secbot.core.mqtt.MQTT
 import kotlinx.coroutines.*
+import java.lang.NullPointerException
 import java.util.*
 
 
@@ -37,7 +38,11 @@ class SensorSerialPortManager  (
                     val split = it.asciiString.split('\n')
                     for (s in split) {
                         if (s.isNotBlank()) {
-                            deviceContainer.put(processor.process(s))
+                            try {
+                                deviceContainer.put(processor.process(s))
+                            } catch (ex: NullPointerException) {
+                               // println("FIXME - ${ex.message}")
+                            }
                         }
                     }
 

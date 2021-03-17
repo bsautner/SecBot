@@ -33,11 +33,11 @@ class MainActivity : AppCompatActivity() {
 
 
             val json = String(message.payload)
-            println("Message Arrived $json")
+         //   println("Message Arrived $json")
             val deviceContainer = gson.fromJson(json, DeviceContainer::class.java)
 
             vm.setValue(deviceContainer)
-            println("got mqtt data: ${gson.fromJson(json, DeviceContainer::class.java).devices.size}")
+           // println("got mqtt data: ${gson.fromJson(json, DeviceContainer::class.java).devices.size}")
         }
 
         override fun deliveryComplete(token: IMqttDeliveryToken?) {
@@ -50,7 +50,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 //        mqtt.subscribeDeviceCommands()
         setContent {
-            mainScreen(vm)
+          //  mainScreen(vm)
+            canvasDrawExample(vm)
         }
 
     }

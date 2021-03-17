@@ -1,10 +1,7 @@
 package com.secbot.core.hardware
 
- open class Device(private val deviceType: String, private val timestamp: Long = System.currentTimeMillis())  {
+interface Device {
 
-
-     fun deviceType() : DeviceType {
-         return DeviceType.valueOf(deviceType)
-     }
+    fun deviceType() : DeviceType
 }
 

@@ -5,11 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import com.secbot.core.SensorDataProcessor
-import com.secbot.core.hardware.Compass
-import com.secbot.core.hardware.Device
-import com.secbot.core.hardware.DeviceContainer
+import com.secbot.core.hardware.*
 
-import com.secbot.core.hardware.DeviceType
 import com.secbot.core.mqtt.MQTT
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -23,6 +20,7 @@ class MainViewModel : ViewModel() {
 
     var test by mutableStateOf("FOO")
     var compass by mutableStateOf(Compass())
+    var lidardata by mutableStateOf(mutableMapOf<Int, Lidar>())
 
     var sensors by mutableStateOf(mutableMapOf<DeviceType, Device>( ))
 
@@ -31,12 +29,15 @@ class MainViewModel : ViewModel() {
     fun setValue(deviceContainer: DeviceContainer) {
         test = UUID.randomUUID().toString()
         deviceContainer.devices.forEach {
-            when (it.key) {
+            when (it.deviceType()) {
 
                 DeviceType.COMPASS -> {
-                    compass = it.value as Compass
+                    compass = it as Compass
                 }
                 DeviceType.LIDAR -> {
+                    val l = it as Lidar
+                    lidardata[l.angle.toInt()] = l
+                    println("LIDAR ${l.angle} ${l.distance}")
 
                 }
             }

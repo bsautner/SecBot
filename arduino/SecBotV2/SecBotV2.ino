@@ -130,7 +130,7 @@ void loop() {
     char inChar = (char)Serial2.read();
     serial_device_input_string += inChar;
     if (inChar == '\n') {
-  //    processCommand(serial_device_input_string);
+      //    processCommand(serial_device_input_string);
       serial_device_input_string = "";
     }
   }
@@ -139,7 +139,7 @@ void loop() {
     char inChar = (char)Serial1.read();
     serial_sensor_input_string += inChar;
     if (inChar == '\n') {
-   //   processCommand(serial_sensor_input_string);
+      //   processCommand(serial_sensor_input_string);
       serial_sensor_input_string = "";
     }
   }
@@ -154,13 +154,13 @@ void loop() {
     }
   }
 
-
   readLidar();
   orientationCheck();
+  delay(100);
 }
 
 void calibrateScanningServo() {
- // log("Calibrating Scanning Servo");
+  // log("Calibrating Scanning Servo");
   scanning_servo.attach(SCANNING_SERVO_PIN);
   pinMode(SCANNING_SERVO_FEEDBACK_PIN, INPUT);
 
@@ -181,7 +181,6 @@ void calibrateScanningServo() {
 
 void readSensors() {
   // SONAR LOOP
-
 
   // if (millis() - control_loop_timestamp > 100) {
   //   orientationCheck();
@@ -232,51 +231,49 @@ void readSensors() {
   //     scanning_ir_last_cm = scanning_ir_cm;
   //   }
 
-    
   //   control_loop_timestamp = millis();
   // }
 }
 
 void readLidar() {
   if (IS_OK(lidar.waitPoint())) {
-      float distance =
-          lidar.getCurrentPoint().distance;        // distance value in mm unit
-      float angle = lidar.getCurrentPoint().angle; // anglue value in degree
-      bool startBit =
-          lidar.getCurrentPoint()
-              .startBit; // whether this point is belong to a new scan
-      byte quality =
-          lidar.getCurrentPoint().quality; // quality of the current measurement
+    float distance =
+        lidar.getCurrentPoint().distance;        // distance value in mm unit
+    float angle = lidar.getCurrentPoint().angle; // anglue value in degree
+    bool startBit = lidar.getCurrentPoint()
+                        .startBit; // whether this point is belong to a new scan
+    byte quality =
+        lidar.getCurrentPoint().quality; // quality of the current measurement
 
-      JSONVar myObject;
-      myObject["device"] =LIDAR;
-      myObject["distance"] = distance;
-      myObject["startBit"] = startBit;
-      myObject["quality"] = quality;
-      myObject["angle"] = angle;
-      sendSensorData(myObject);
+    JSONVar myObject;
+    myObject["device"] = LIDAR;
+    myObject["distance"] = distance;
+    myObject["startBit"] = startBit;
+    myObject["quality"] = quality;
+    myObject["angle"] = angle;
+    sendSensorData(myObject);
 
-    } else {
-      analogWrite(RPLIDAR_MOTOR, 0); // stop the rplidar motor
+  } else {
+    analogWrite(RPLIDAR_MOTOR, 0); // stop the rplidar motor
 
-      // try to detect RPLIDAR...
-      rplidar_response_device_info_t info;
-      if (IS_OK(lidar.getDeviceInfo(info, 100))) {
-        // detected...
-        lidar.startScan();
+    // try to detect RPLIDAR...
+    rplidar_response_device_info_t info;
+    if (IS_OK(lidar.getDeviceInfo(info, 100))) {
+      // detected...
+      lidar.startScan();
 
-        // start motor rotating at max allowed speed
-        analogWrite(RPLIDAR_MOTOR, 255);
-        delay(1000);
-      }
+      // start motor rotating at max allowed speed
+      analogWrite(RPLIDAR_MOTOR, 255);
+      delay(1000);
     }
+  }
 }
 void orientationCheck() {
   // compass
 
   sensors_event_t event;
   mag.getEvent(&event);
-   
+
   float Pi = 3.14159;
 
   // Calculate the angle of the vector y,x
@@ -287,18 +284,19 @@ void orientationCheck() {
     heading = 360 + heading;
   }
 
-  //  if (heading > lastHeading + 10 || heading < lastHeading - 10) {
-  lastHeading = heading;
- 
- 
+  if (heading > lastHeading + 3 || heading < lastHeading - 3) {
+      lastHeading = heading;
+        JSONVar myObject;
+  myObject["device"] = COMPASS;
+  myObject["x"] = event.acceleration.x;
+  myObject["y"] = event.acceleration.y;
+  myObject["z"] = event.acceleration.z;
+  myObject["heading"] = heading;
+  sendSensorData(myObject);
+  }
 
-      JSONVar myObject;
-      myObject["device"] = COMPASS;
-      myObject["x"] =event.acceleration.x;
-      myObject["y"] = event.acceleration.y;
-      myObject["z"] = event.acceleration.z;
-      myObject["heading"] = heading;
-      sendSensorData(myObject);
+
+
 }
 
 void steerServo(int newPos) {
@@ -336,7 +334,7 @@ void scanServo(int newPos) {
 // Serial Input
 void processCommand(String command) {
 
-//  log(command);
+  //  log(command);
 
   JSONVar myObject = JSON.parse(command);
   if (JSON.typeof(myObject) == "undefined") {
