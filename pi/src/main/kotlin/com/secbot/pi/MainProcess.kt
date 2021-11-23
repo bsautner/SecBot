@@ -4,14 +4,14 @@ import com.hopding.jrpicam.RPiCamera
 import com.secbot.core.SecBot
 import com.secbot.pi.Const.PHOTO_PATH
 import com.secbot.core.mqtt.MQTT
-import com.secbot.pi.io.SerialManager
+import com.secbot.pi.io.SerialPort
 import kotlinx.coroutines.*
 import java.io.File
 import java.io.IOException
 import java.util.*
 
 @ExperimentalCoroutinesApi
-class MainProcess(private val secBot: SecBot, private val sensorSerialPort: SerialManager, private val commandPort: SerialManager, private val mqtt: MQTT, private val camera : Optional<RPiCamera>)   {
+class MainProcess(private val secBot: SecBot, private val serialComm: SerialPort, private val mqtt: MQTT, private val camera : Optional<RPiCamera>)   {
 
     // private val apiClient = DefaultApiClient()
 
@@ -39,21 +39,24 @@ class MainProcess(private val secBot: SecBot, private val sensorSerialPort: Seri
         var t = System.currentTimeMillis()
 
         GlobalScope.runCatching {
-            mqtt.start().also {
-                sensorSerialPort.start()
-              //  commandPort.start()
-            }
+       //     mqtt.start().also {
+            serialComm.start()
+
+        //    }
 
         }
 
-        while (sensorSerialPort.isConnected()) {
+        var control = 1000
+        while (serialComm.isConnected()) {
             delay(10)
-            if (System.currentTimeMillis() - t > 1000) {
-                t = System.currentTimeMillis()
-              //  commandPort.sendCommand(DeviceCommand(Control.PING, t.toDouble()))
+            control -= 10
+            if (control < 0) {
+                serialComm.send("ping")
+                control = 1000
+                       }
 
-            }
         }
+        println("exiting...")
      }
 
 

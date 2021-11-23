@@ -22,5 +22,5 @@ allprojects {
         mavenLocal()
         mavenCentral()
     }
-    buildDir = File("/mnt/ram/${rootProject.name}/${project.name}")
+  //  buildDir = File("/mnt/ram/${rootProject.name}/${project.name}")
 }

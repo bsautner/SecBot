@@ -1,8 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="common-desktop-1.0">
-    <output-path>/mnt/ram/secbot/common/libs</output-path>
-    <root id="archive" name="common-desktop-1.0.jar">
-      <element id="module-output" name="secbot.common.desktopMain" />
-    </root>
+    <output-path>$PROJECT_DIR$/common/build/libs</output-path>
+    <root id="archive" name="common-desktop-1.0.jar" />
   </artifact>
 </component>

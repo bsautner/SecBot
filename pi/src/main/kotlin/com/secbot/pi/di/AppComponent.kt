@@ -1,6 +1,6 @@
 package com.secbot.pi.di
 
-import com.secbot.pi.Application
+import com.secbot.pi.Program
 import dagger.Component
 import javax.inject.Singleton
 
@@ -8,7 +8,7 @@ import javax.inject.Singleton
 @Component(modules = [AppModule::class])
 interface AppComponent {
 
-    fun inject(instance: Application)
+    fun inject(instance: Program)
 
 
 }

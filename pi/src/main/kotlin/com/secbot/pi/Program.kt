@@ -7,7 +7,7 @@ import java.io.IOException
 import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
-class Application  {
+class Program  {
 
 
 
@@ -21,14 +21,15 @@ class Application  {
 
     companion object {
 
-        private var INSTANCE: Application = Application()
+        private var INSTANCE: Program = Program()
 
 
         @Throws(InterruptedException::class, IOException::class)
         @JvmStatic
         fun main(args: Array<String>) {
 
-
+            println("hello world")
+//
             DaggerAppComponent.create().inject(INSTANCE)
 
             INSTANCE.console.promptForExit()
