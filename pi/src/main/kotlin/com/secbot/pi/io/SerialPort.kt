@@ -1,13 +1,16 @@
 package com.secbot.pi.io
 
 import com.google.gson.Gson
+import com.pi4j.io.gpio.GpioController
+import com.pi4j.io.gpio.GpioFactory
+import com.pi4j.io.gpio.GpioPinDigitalOutput
+import com.pi4j.io.gpio.RaspiPin
 import com.pi4j.io.serial.*
 import com.secbot.core.SensorDataProcessor
 import com.secbot.core.hardware.*
 import com.secbot.core.mqtt.MQTT
 import kotlinx.coroutines.*
 import java.lang.NullPointerException
-import java.util.*
 
 
 @ExperimentalCoroutinesApi
@@ -20,6 +23,11 @@ class SerialPort  (
 
 
     suspend fun start() {
+        val gpio: GpioController = GpioFactory.getInstance()
+
+        val ledPin: GpioPinDigitalOutput = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_25)
+
+        ledPin.low()
 
         println("starting serial $tty on thread: ${Thread.currentThread().name}")
         val config = SerialConfig()
@@ -35,49 +43,38 @@ class SerialPort  (
         println("Started Feedback Port")
 
 
+
         serial.addListener(SerialDataEventListener {
 
-            val deviceContainer = DeviceContainer()
-
-
-
             if (it.asciiString.isNotEmpty()) {
- 
+
                 println(it.asciiString.trim())
 
-
-                try {
-
-
-                    val split = it.asciiString.split('\n')
-                    for (s in split) {
-                        if (s.isNotBlank()) {
-                            try {
-                              //  deviceContainer.put(processor.process(s))
-                            } catch (ex: NullPointerException) {
-                               // println("FIXME - ${ex.message}")
-                            }
+                when(it.asciiString.trim()) {
+                    "pong" -> {
+                        println("blink")
+                        GlobalScope.launch {
+                            ledPin.high()
+                            delay(1000)
+                            ledPin.low()
                         }
+
+
                     }
-
-
-                } catch (ex: Exception) {
-
-                    println("Malformed Serial Data : ${it.asciiString} caused ${ex.message}")
-                    ex.printStackTrace()
-
                 }
-                if (deviceContainer.isNotEmpty()) {
-//                    GlobalScope.launch {
-//                        mqtt.publishSensorData(deviceContainer)
-//                    }
-                }
+               // println("blink")
+
+               // ledPin.blink(100, 2000)
+
+
+
+
 
             }
         })
-
     }
-    suspend fun send(command: String) {
+
+    fun send(command: String) {
 
         if (serial.isOpen) {
             kotlin.runCatching {    serial.writeln( command) }

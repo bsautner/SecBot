@@ -1,11 +1,14 @@
 package com.secbot.pi
 
 import com.hopding.jrpicam.RPiCamera
+import com.pi4j.io.gpio.*
 import com.secbot.core.SecBot
-import com.secbot.pi.Const.PHOTO_PATH
 import com.secbot.core.mqtt.MQTT
+import com.secbot.pi.Const.PHOTO_PATH
 import com.secbot.pi.io.SerialPort
-import kotlinx.coroutines.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -36,9 +39,19 @@ class MainProcess(private val secBot: SecBot, private val serialComm: SerialPort
     @Throws(IOException::class, InterruptedException::class)
     suspend fun start() {
 
-        var t = System.currentTimeMillis()
+
 
         GlobalScope.runCatching {
+       //    Runtime.getRuntime().exec("mpg123 /home/pi/speech/online.mp3")
+
+
+
+            val file = takePhoto()
+            println("Camera Working: ${file.isPresent}")
+            if (file.isPresent) {
+                println("startup photo: ${file.get().absolutePath}")
+            }
+            var t = System.currentTimeMillis()
        //     mqtt.start().also {
             serialComm.start()
 

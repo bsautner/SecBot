@@ -1,5 +1,9 @@
 package com.secbot.pi
 
+import com.pi4j.io.gpio.GpioController
+import com.pi4j.io.gpio.GpioFactory
+import com.pi4j.io.gpio.GpioPinDigitalOutput
+import com.pi4j.io.gpio.RaspiPin
 import com.pi4j.util.Console
 import com.secbot.pi.di.DaggerAppComponent
 import kotlinx.coroutines.*
@@ -29,8 +33,10 @@ class Program  {
         fun main(args: Array<String>) {
 
             println("hello world")
+
 //
             DaggerAppComponent.create().inject(INSTANCE)
+
 
             INSTANCE.console.promptForExit()
             INSTANCE.console.box("Starting Up Main Program")
