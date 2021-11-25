@@ -100,7 +100,7 @@ class AppModule {
         private var SYSTEM = System.getProperty("os.arch")
         private const val PI = "arm"
         private const val AMD =  "amd64"
-        private const val SERIAL_PORT = "ttyUSB0"
+        private const val SERIAL_PORT = "ttyUSB1"
     }
 
 }

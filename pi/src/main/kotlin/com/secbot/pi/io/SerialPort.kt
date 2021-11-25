@@ -55,7 +55,7 @@ class SerialPort  (
                         println("blink")
                         GlobalScope.launch {
                             ledPin.high()
-                            delay(1000)
+                            delay(100)
                             ledPin.low()
                         }
 

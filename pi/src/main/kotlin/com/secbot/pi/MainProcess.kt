@@ -42,7 +42,7 @@ class MainProcess(private val secBot: SecBot, private val serialComm: SerialPort
 
 
         GlobalScope.runCatching {
-       //    Runtime.getRuntime().exec("mpg123 /home/pi/speech/online.mp3")
+        Runtime.getRuntime().exec("mpg123 /home/pi/speech/online.mp3")
 
 
 

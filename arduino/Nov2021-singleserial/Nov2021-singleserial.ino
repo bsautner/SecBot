@@ -1,10 +1,15 @@
 #include <SoftwareSerial.h>
-#include "SyRenSimplified.h"
-
+#include <SyRenSimplified.h>
+#include <RPLidar.h>
 
 const int MOTOR_PIN_1 = 2;
 SoftwareSerial SWSerial1(NOT_A_PIN, MOTOR_PIN_1);
 SyRenSimplified SR1(SWSerial1);
+
+
+//LIDAR
+const int RPLIDAR_MOTOR = 4;
+RPLidar lidar;
 
 String s = "";
 
@@ -15,6 +20,11 @@ void setup() {
   pinMode(53, OUTPUT);
 
 
+  //LIDAR
+    // bind the RPLIDAR driver to the arduino hardware serial
+  lidar.begin(Serial3);
+  // set pin modes
+  pinMode(RPLIDAR_MOTOR, OUTPUT);
 }
 
 void loop() {
@@ -28,9 +38,9 @@ void loop() {
       // Serial.println(s);
       if (s == "ping") {
         digitalWrite(53, HIGH);   // turn the LED on (HIGH is the voltage level)
-        delay(1000);              // wait for a second
+        delay(100);              // wait for a second
         digitalWrite(53, LOW);    // turn the LED off by making the voltage LOW
-        delay(1000);              // wait for a second
+        
         Serial1.println("pong");
       }
       s = "";
@@ -39,6 +49,11 @@ void loop() {
     }
 
   }
+
+   readLidar();
+   delay(100);
+
+   
 //  SR1.motor(128);
 //  Serial.println(128);
 //  delay(2000);
@@ -63,7 +78,41 @@ void loop() {
 }
 
 
+void readLidar() {
+  if (IS_OK(lidar.waitPoint())) {
+    float distance =
+        lidar.getCurrentPoint().distance;        // distance value in mm unit
+    float angle = lidar.getCurrentPoint().angle; // anglue value in degree
+    bool startBit = lidar.getCurrentPoint()
+                        .startBit; // whether this point is belong to a new scan
+    byte quality = lidar.getCurrentPoint().quality; // quality of the current measurement
 
+        Serial.println(distance);
+
+//    JSONVar myObject;
+//    myObject["device"] = LIDAR;
+//    myObject["distance"] = distance;
+//    myObject["startBit"] = startBit;
+//    myObject["quality"] = quality;
+//    myObject["angle"] = angle;
+//    sendSensorData(myObject);
+
+  } else {
+    analogWrite(RPLIDAR_MOTOR, 0); // stop the rplidar motor
+
+    // try to detect RPLIDAR...
+    rplidar_response_device_info_t info;
+    if (IS_OK(lidar.getDeviceInfo(info, 100))) {
+      // detected...
+      lidar.startScan();
+
+  
+      // start motor rotating at max allowed speed
+      analogWrite(RPLIDAR_MOTOR, 255);
+   
+    }
+  }
+}
 
 //
 //   Serial.println("speeding up");
