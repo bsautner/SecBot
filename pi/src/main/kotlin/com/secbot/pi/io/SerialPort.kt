@@ -47,24 +47,26 @@ class SerialPort  (
         serial.addListener(SerialDataEventListener {
 
             if (it.asciiString.isNotEmpty()) {
+                val split = it.asciiString.trim().split('\n')
+                split.forEach { part ->
+                    println("serial data:: $part")
 
-                println(it.asciiString.trim())
+                    when(part.trim()) {
+                        "pong" -> {
+                            println("blink")
+                            GlobalScope.launch {
+                                ledPin.high()
+                                delay(100)
+                                ledPin.low()
+                            }
 
-                when(it.asciiString.trim()) {
-                    "pong" -> {
-                        println("blink")
-                        GlobalScope.launch {
-                            ledPin.high()
-                            delay(100)
-                            ledPin.low()
+
                         }
-
-
                     }
                 }
-               // println("blink")
 
-               // ledPin.blink(100, 2000)
+
+
 
 
 

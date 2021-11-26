@@ -64,6 +64,8 @@ class MainProcess(private val secBot: SecBot, private val serialComm: SerialPort
             delay(10)
             control -= 10
             if (control < 0) {
+                println("pinging")
+
                 serialComm.send("ping")
                 control = 1000
                        }
