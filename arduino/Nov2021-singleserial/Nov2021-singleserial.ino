@@ -38,7 +38,7 @@ void setup() {
 //  // Print a message to the LCD.
 //  lcd.print("hello, world!");
 
-
+  
   Serial.begin(115200);
   Serial1.begin(115200);
   pinMode(PIN_PING_PONG_LED, OUTPUT);
@@ -71,14 +71,14 @@ void setup() {
       lidar.startScan();
       Serial.println("starting lidar");
 
-
+  
       // start motor rotating at max allowed speed
       analogWrite(RPLIDAR_MOTOR, 255);
       delay(1000);
     }
 
-
-   digitalWrite(PIN_PING_PONG_LED, LOW);
+  
+   digitalWrite(PIN_PING_PONG_LED, LOW);  
 }
 
 void loop() {
@@ -107,9 +107,9 @@ void readSerial() {
 
       // Serial.println(s);
       if (s == "ping") {
-        digitalWrite(PIN_PING_PONG_LED, HIGH);
-        delay(100);
-        digitalWrite(PIN_PING_PONG_LED, LOW);
+        digitalWrite(PIN_PING_PONG_LED, HIGH);   
+        delay(100);              
+        digitalWrite(PIN_PING_PONG_LED, LOW);   
         Serial1.println("pong");
       }
       s = "";
@@ -129,7 +129,7 @@ void readLidar() {
     byte quality = lidar.getCurrentPoint().quality; // quality of the current measurement
       Serial1 << "LDR," << distance << "," << angle  << "," << startBit << ","  << quality << "\n" ;
       Serial << "LDR," << distance << "," << angle  << "," << startBit << ","  << quality << "\n" ;
-  }
+  }  
 }
 void orientationCheck() {
   
@@ -178,7 +178,7 @@ void drive(int s) {
     analogWrite(RPWM_Output, 0);
     analogWrite(LPWM_Output, forwardPWM);
   }
-
+  
 }
 
 void stop() {

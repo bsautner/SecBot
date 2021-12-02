@@ -20,10 +20,11 @@ import java.util.*
 @ExperimentalCoroutinesApi
 class MainProcess(private val serialComm: SerialPort, private val mqtt: MQTT, private val camera : Optional<RPiCamera>)   {
 
+    var compass = 0
 
     private val serialListener =  object : SerialListener {
         override fun onReceive(data: String) {
-
+            println("Serial Data: $data")
             val split = data.split(',')
             when (split[0]) {
                 Device.LDR.name -> {
@@ -37,7 +38,6 @@ class MainProcess(private val serialComm: SerialPort, private val mqtt: MQTT, pr
                             val d = it.value
                             val s = "${Device.LDR.name},$a,$d"
 
-
                             mqtt.publish(s)
                         }
 
@@ -45,7 +45,11 @@ class MainProcess(private val serialComm: SerialPort, private val mqtt: MQTT, pr
                     }
                 }
                 Device.MAG.name -> {
-
+                    val angle = BigDecimal.valueOf(split[1].toDouble()).toInt()
+                    if ((angle + 2 > compass) or (angle -2 < compass)) {
+                        compass = angle
+                        mqtt.publish("${Device.MAG.name},$compass")
+                    }
                 }
 
             }

@@ -27,7 +27,7 @@ class MQTT {
         val connOpts = MqttConnectOptions()
         connOpts.isCleanSession = true
         connOpts.userName = "ben"
-        connOpts.password = "whitecup".toCharArray()
+        connOpts.password = "$".toCharArray()
         println("Connecting to broker: $broker")
         client.connect(connOpts)
         println("Connected MQTT OK")

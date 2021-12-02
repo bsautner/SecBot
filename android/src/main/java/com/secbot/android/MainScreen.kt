@@ -2,80 +2,18 @@ package com.secbot.android
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.graphics.drawscope.inset
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.unit.dp
 
-@ExperimentalCoroutinesApi
 @Composable
-fun mainScreen(vm : MainViewModel) {
-    val rectSize = 40.dp
-    val modifier = Modifier.clipToBounds()
-
-    Canvas(modifier = modifier) {
-        translate(size.width / 2, size.height / 2) {
-            drawRect(
-                brush = SolidColor(Color.Black),
-                Offset(-(rectSize / 2).toPx(), -(rectSize / 2).toPx()),
-                Size(rectSize.toPx(), rectSize.toPx()),
-                style = Stroke(width = 2f)
-            )
-        }
-    }
-}
-
-//    MaterialTheme {
-//        Column {
-//
-//            Text(vm.test)
-//
-//            Text("Compass Heading ${vm.compass.heading}")
-//
-//
-//
-//            Button(
-//
-//                onClick = {
-//                          vm.sendCommand()
-//                          },
-//                // Assign reference "button" to the Button composable
-//                // and constrain it to the top of the ConstraintLayout
-//
-//            ) {
-//                Text("Button")
-//            }
-//
-//
-//
-//
-//        }
-//
-////        Button(onClick = {
-////            text = "Hello, ${getPlatformName()}"
-////        }) {
-////            Text(text)
-////        }
-//    }
-
-//    @Preview(showBackground = true)
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @Composable
     fun canvasDrawExample(vm : MainViewModel) {
         MaterialTheme {
             Column {
@@ -100,9 +38,11 @@ fun mainScreen(vm : MainViewModel) {
                       }
 
 
-                    vm.lidardata.forEach { (angle, distance) ->
 
-                       // if (lidar.distance.toFloat() < 1000) {
+                    try {
+                        vm.lidardata.forEach { (angle, distance) ->
+
+                            // if (lidar.distance.toFloat() < 1000) {
                             rotate(
                                 degrees = fixAngle(angle.toFloat(), vm.compass),
                                 pivot = Offset((this.size.width / 2), (this.size.height / 2))
@@ -111,11 +51,15 @@ fun mainScreen(vm : MainViewModel) {
                                 drawLine(
                                     Color.Green,
                                     Offset((this.size.width / 2), (this.size.height / 2)),
-                                    Offset((this.size.width / 2), (this.size.height / 2) + distance),
+                                    Offset((this.size.width / 2), (this.size.height / 2) + (distance * 10)),
                                     strokeWidth = 5f
                                 )
                             }
                         }
+                    } catch (ex: Exception) {
+                        ex.printStackTrace()
+                        println("BEN:: error using lidar data ${ex.message}")
+                    }
 
 
                   //  }

@@ -8,7 +8,7 @@ object LidarBuffer {
     private var timestamp = 0L
 
     fun update(angle: Int, distance: Int): Map<Int, Int> {
-
+        if (distance < 100) {
         if (!data.containsKey(angle)) {
             data[angle] = distance
             changed[angle] = distance
@@ -26,6 +26,9 @@ object LidarBuffer {
 
         } else {
             emptyMap()
+        }
+        } else {
+            return emptyMap()
         }
 
 

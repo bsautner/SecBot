@@ -13,7 +13,6 @@ import kotlinx.coroutines.launch
 
 
 
-@ExperimentalCoroutinesApi
 class MainViewModel : ViewModel() {
 
 

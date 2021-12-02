@@ -34,7 +34,9 @@ class MainActivity : AppCompatActivity() {
             println("Message Arrived $json")
             val payload = gson.fromJson(json, Payload::class.java)
 
+            vm.timestamp = System.currentTimeMillis()
             vm.setValue(payload)
+
            // println("got mqtt data: ${gson.fromJson(json, DeviceContainer::class.java).devices.size}")
         }
 
