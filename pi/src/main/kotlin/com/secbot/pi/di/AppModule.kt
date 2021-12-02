@@ -7,8 +7,6 @@ import com.hopding.jrpicam.enums.Exposure
 import com.pi4j.io.serial.Serial
 import com.pi4j.io.serial.SerialFactory
 import com.pi4j.util.Console
-import com.secbot.core.SecBot
-import com.secbot.core.SensorDataProcessor
 import com.secbot.pi.Const.PHOTO_PATH
 import com.secbot.pi.io.SerialPort
 import com.secbot.pi.MainProcess
@@ -24,15 +22,11 @@ import javax.inject.Singleton
 @Module
 class AppModule {
 
-    @Provides
-    @Singleton
-    fun provideSecBot() : SecBot {
-        return SecBot()
-    }
+
 
     @Provides
-    fun provideMainProcess(secBot: SecBot, serialComm: SerialPort,  camera: Optional<RPiCamera>, mqtt: MQTT) : MainProcess {
-        return MainProcess(secBot, serialComm, mqtt, camera)
+    fun provideMainProcess(serialComm: SerialPort,  camera: Optional<RPiCamera>, mqtt: MQTT) : MainProcess {
+        return MainProcess(serialComm, mqtt, camera)
     }
 
     @Provides @Singleton
@@ -46,14 +40,11 @@ class AppModule {
         return GsonBuilder().create()
     }
 
-    @Provides @Reusable
-    fun provideSensorDataProcessor(gson: Gson) : SensorDataProcessor {
-        return SensorDataProcessor(gson)
-    }
+
 
     @Provides
-    fun provideSerialPort(sensorDataProcessor: SensorDataProcessor, io: Serial, mqtt: MQTT, gson: Gson) : SerialPort {
-        return SerialPort(sensorDataProcessor, io, mqtt, SERIAL_PORT, gson)
+    fun provideSerialPort(io: Serial ) : SerialPort {
+        return SerialPort(io, SERIAL_PORT)
     }
 
     @Provides

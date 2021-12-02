@@ -10,12 +10,18 @@ class MqttService(private val mqtt: MQTT, private val feedbackListener: MqttCall
 
 
     suspend fun monitor() {
-        mqtt.start()
-        delay(1000)
-        mqtt.subscribeSensorData(feedbackListener)
-        while (true) {
-            delay(10)
+        try {
+//            println("mqtt started")
+//            mqtt.start()
+//            delay(1000)
+            mqtt.subscribe(feedbackListener)
+            while (true) {
+                delay(10)
+            }
+        } catch (ex: Exception) {
+            println("BEN:: ${ex.message}")
+            ex.printStackTrace()
         }
-        println("mqtt closed")
+        println("BEN:: mqtt closed")
     }
 }

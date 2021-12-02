@@ -1,25 +1,18 @@
 package com.secbot.pi.io
 
-import com.google.gson.Gson
 import com.pi4j.io.gpio.GpioController
 import com.pi4j.io.gpio.GpioFactory
 import com.pi4j.io.gpio.GpioPinDigitalOutput
 import com.pi4j.io.gpio.RaspiPin
 import com.pi4j.io.serial.*
-import com.secbot.core.SensorDataProcessor
-import com.secbot.core.hardware.*
-import com.secbot.core.mqtt.MQTT
 import kotlinx.coroutines.*
-import java.lang.NullPointerException
 
 
 @ExperimentalCoroutinesApi
-class SerialPort  (
-    private val processor: SensorDataProcessor,
-    private val serial: Serial,
-    private val mqtt: MQTT,
-    private val tty: String,
-    private val gson: Gson) {
+class SerialPort(private val serial: Serial, private val tty: String) {
+
+    lateinit var listener: SerialListener
+
 
 
     suspend fun start() {
@@ -37,6 +30,7 @@ class SerialPort  (
             .parity(Parity.NONE)
             .stopBits(StopBits._1)
             .flowControl(FlowControl.NONE)
+
         serial.open(config)
         serial.flush()
         delay(100)
@@ -49,11 +43,10 @@ class SerialPort  (
             if (it.asciiString.isNotEmpty()) {
                 val split = it.asciiString.trim().split('\n')
                 split.forEach { part ->
-                    println("serial data:: $part")
+                    //println("serial data:: $part")
 
                     when(part.trim()) {
                         "pong" -> {
-                            println("blink")
                             GlobalScope.launch {
                                 ledPin.high()
                                 delay(100)
@@ -61,6 +54,9 @@ class SerialPort  (
                             }
 
 
+                        }
+                        else -> {
+                            listener.onReceive(part)
                         }
                     }
                 }

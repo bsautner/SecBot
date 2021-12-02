@@ -4,44 +4,38 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
-import com.secbot.core.SensorDataProcessor
-import com.secbot.core.hardware.*
+import com.secbot.core.Device
 
-import com.secbot.core.mqtt.MQTT
+import com.secbot.core.mqtt.Payload
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.util.*
+
 
 
 @ExperimentalCoroutinesApi
 class MainViewModel : ViewModel() {
 
 
-    var test by mutableStateOf("FOO")
-    var compass by mutableStateOf(Compass())
-    var lidardata by mutableStateOf(mutableMapOf<Int, Lidar>())
+    var compass by mutableStateOf(0.0F)
+    var lidardata by mutableStateOf(mutableMapOf<Int, Int>())
+    var timestamp by mutableStateOf(0L)
 
-    var sensors by mutableStateOf(mutableMapOf<DeviceType, Device>( ))
+    fun setValue(payload: Payload) {
 
+        timestamp = System.currentTimeMillis()
 
-
-    fun setValue(deviceContainer: DeviceContainer) {
-        test = UUID.randomUUID().toString()
-        deviceContainer.devices.forEach {
-            when (it.deviceType()) {
-
-                DeviceType.COMPASS -> {
-                    compass = it as Compass
-                }
-                DeviceType.LIDAR -> {
-                    val l = it as Lidar
-                    lidardata[l.angle.toInt()] = l
-                    println("LIDAR ${l.angle} ${l.distance}")
-
-                }
+        val split = payload.data.split(',')
+        when (split[0]) {
+            Device.MAG.name -> {
+                compass = split[1].toFloat()
+            }
+            Device.LDR.name -> {
+                lidardata[split[1].toInt()] = split[2].toInt()
             }
         }
+
+
 
     }
 

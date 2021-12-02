@@ -5,10 +5,8 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.platform.setContent
 import com.google.gson.GsonBuilder
-import com.secbot.core.hardware.Device
-import com.secbot.core.hardware.DeviceContainer
-import com.secbot.core.mqtt.DeviceInstanceCreator
 import com.secbot.core.mqtt.MQTT
+import com.secbot.core.mqtt.Payload
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -21,7 +19,7 @@ class MainActivity : AppCompatActivity() {
 
     private val vm by viewModels<MainViewModel>()
     private val mqtt = MQTT()
-    private val gson = GsonBuilder().registerTypeAdapter(Device::class.java, DeviceInstanceCreator()).create()
+    private val gson = GsonBuilder().create()
     private val feedbackListener = object : MqttCallback {
 
         override fun connectionLost(cause: Throwable) {
@@ -33,10 +31,10 @@ class MainActivity : AppCompatActivity() {
 
 
             val json = String(message.payload)
-         //   println("Message Arrived $json")
-            val deviceContainer = gson.fromJson(json, DeviceContainer::class.java)
+            println("Message Arrived $json")
+            val payload = gson.fromJson(json, Payload::class.java)
 
-            vm.setValue(deviceContainer)
+            vm.setValue(payload)
            // println("got mqtt data: ${gson.fromJson(json, DeviceContainer::class.java).devices.size}")
         }
 
@@ -48,7 +46,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        mqtt.subscribeDeviceCommands()
         setContent {
           //  mainScreen(vm)
             canvasDrawExample(vm)
@@ -58,7 +55,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-
+        println("BEN::channel opening")
 
 
         GlobalScope.launch {
@@ -66,7 +63,7 @@ class MainActivity : AppCompatActivity() {
 
 
         }
-        println("channel closed")
+        println("BEN:: channel closed")
     }
 
 

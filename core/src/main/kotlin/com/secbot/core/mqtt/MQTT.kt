@@ -1,9 +1,6 @@
 package com.secbot.core.mqtt
 
 import com.google.gson.GsonBuilder
-import com.secbot.core.hardware.Device
-import com.secbot.core.hardware.DeviceContainer
-import com.secbot.core.hardware.DeviceType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.eclipse.paho.client.mqttv3.MqttCallback
 import org.eclipse.paho.client.mqttv3.MqttClient
@@ -18,44 +15,38 @@ class MQTT {
 
 
     private val qos = 2
-    private val broker = "tcp://192.168.1.30:1883"
+    private val broker = "tcp://54.167.121.102:1883"
     private val clientId = UUID.randomUUID().toString()
     private val persistence = MemoryPersistence()
     private val client = MqttClient(broker, clientId, persistence)
     private val gson = GsonBuilder().create()
 
+
+
     fun start() {
         val connOpts = MqttConnectOptions()
         connOpts.isCleanSession = true
+        connOpts.userName = "ben"
+        connOpts.password = "whitecup".toCharArray()
         println("Connecting to broker: $broker")
         client.connect(connOpts)
         println("Connected MQTT OK")
     }
 
-    fun publishSensorData(deviceContainer: DeviceContainer) {
+    fun publish(data: String) {
 
         checkConnection()
-        val message = MqttMessage(gson.toJson(deviceContainer).toByteArray())
+        val payload = Payload(data)
+        val message = MqttMessage(gson.toJson(payload).toByteArray())
         message.qos = qos
-        client.publish(sensorTopic, message)
-    }
-
-    fun publishDeviceCommand(command: Device) {
-        checkConnection()
-        client.publish(controlTopic, gson.toJson(command).toByteArray(), 2, false)
-    }
-
-
-    fun subscribeDeviceCommands(callback: MqttCallback) {
-        checkConnection()
-        client.subscribe(controlTopic)
-        client.setCallback(callback)
+        client.publish(topic, message)
+         println("published [$payload] to $topic")
 
     }
 
-    fun subscribeSensorData(callback: MqttCallback) {
+    fun subscribe(callback: MqttCallback) {
         checkConnection()
-        client.subscribe(sensorTopic)
+        client.subscribe(topic)
         client.setCallback(callback)
 
     }
@@ -67,13 +58,9 @@ class MQTT {
         }
     }
 
-    fun isConnected(): Boolean {
-       return client.isConnected
-    }
-
     companion object {
-        private const val sensorTopic = "sensor"
-        private const val controlTopic = "control"
+        private const val topic = "topic"
+
     }
 
 

@@ -1,22 +1,58 @@
 package com.secbot.pi
 
+import com.google.gson.GsonBuilder
 import com.hopding.jrpicam.RPiCamera
-import com.pi4j.io.gpio.*
-import com.secbot.core.SecBot
+import com.secbot.core.Device
 import com.secbot.core.mqtt.MQTT
+import com.secbot.core.mqtt.Payload
 import com.secbot.pi.Const.PHOTO_PATH
+import com.secbot.pi.io.SerialListener
 import com.secbot.pi.io.SerialPort
+import com.secbot.pi.lidar.LidarBuffer
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import java.io.File
 import java.io.IOException
+import java.math.BigDecimal
 import java.util.*
 
 @ExperimentalCoroutinesApi
-class MainProcess(private val secBot: SecBot, private val serialComm: SerialPort, private val mqtt: MQTT, private val camera : Optional<RPiCamera>)   {
+class MainProcess(private val serialComm: SerialPort, private val mqtt: MQTT, private val camera : Optional<RPiCamera>)   {
 
-    // private val apiClient = DefaultApiClient()
+
+    private val serialListener =  object : SerialListener {
+        override fun onReceive(data: String) {
+
+            val split = data.split(',')
+            when (split[0]) {
+                Device.LDR.name -> {
+                    val distance = BigDecimal.valueOf(split[1].toDouble()).toInt()
+                    val angle = BigDecimal.valueOf(split[2].toDouble()).toInt()
+                    val buffer = LidarBuffer.update(angle, distance)
+                    if (buffer.isNotEmpty()) {
+                        println("ready to transmit lidar changes: ${buffer.size}")
+                        buffer.forEach {
+                            val a = it.key
+                            val d = it.value
+                            val s = "${Device.LDR.name},$a,$d"
+
+
+                            mqtt.publish(s)
+                        }
+
+
+                    }
+                }
+                Device.MAG.name -> {
+
+                }
+
+            }
+        }
+
+
+    }
 
 
     private fun takePhoto() : Optional<File> {
@@ -39,10 +75,10 @@ class MainProcess(private val secBot: SecBot, private val serialComm: SerialPort
     @Throws(IOException::class, InterruptedException::class)
     suspend fun start() {
 
-
+        serialComm.listener = serialListener
 
         GlobalScope.runCatching {
-        Runtime.getRuntime().exec("mpg123 /home/pi/speech/online.mp3")
+      //  Runtime.getRuntime().exec("mpg123 /home/pi/speech/online.mp3")
 
 
 
@@ -51,11 +87,10 @@ class MainProcess(private val secBot: SecBot, private val serialComm: SerialPort
             if (file.isPresent) {
                 println("startup photo: ${file.get().absolutePath}")
             }
-            var t = System.currentTimeMillis()
-       //     mqtt.start().also {
+            mqtt.start().also {
             serialComm.start()
 
-        //    }
+            }
 
         }
 
@@ -64,7 +99,6 @@ class MainProcess(private val secBot: SecBot, private val serialComm: SerialPort
             delay(10)
             control -= 10
             if (control < 0) {
-                println("pinging")
 
                 serialComm.send("ping")
                 control = 1000

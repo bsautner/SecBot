@@ -89,7 +89,7 @@ fun mainScreen(vm : MainViewModel) {
 
 
 
-                      rotate(degrees = vm.compass.heading.toFloat(), pivot = Offset((this.size.width / 2), (this.size.height / 2))) {
+                      rotate(degrees = vm.compass, pivot = Offset((this.size.width / 2), (this.size.height / 2))) {
                         drawRect(Color.Blue, topLeft = Offset((this.size.width / 2) - 100, (this.size.height / 2) -100), size = Size(200F, 200F))
                           drawLine(
                               Color.Red,
@@ -100,18 +100,18 @@ fun mainScreen(vm : MainViewModel) {
                       }
 
 
-                    vm.lidardata.forEach { (angle, lidar) ->
+                    vm.lidardata.forEach { (angle, distance) ->
 
                        // if (lidar.distance.toFloat() < 1000) {
                             rotate(
-                                degrees = fixAngle(angle.toFloat(), vm.compass.heading.toFloat()),
+                                degrees = fixAngle(angle.toFloat(), vm.compass),
                                 pivot = Offset((this.size.width / 2), (this.size.height / 2))
                             ) {
 
                                 drawLine(
                                     Color.Green,
                                     Offset((this.size.width / 2), (this.size.height / 2)),
-                                    Offset((this.size.width / 2), (this.size.height / 2) + lidar.distance.toFloat()),
+                                    Offset((this.size.width / 2), (this.size.height / 2) + distance),
                                     strokeWidth = 5f
                                 )
                             }
@@ -121,18 +121,18 @@ fun mainScreen(vm : MainViewModel) {
                   //  }
 
                 }
-                Text("Compass Heading ${vm.compass.heading.toInt()}")
+                Text("Compass Heading ${vm.compass}  ${vm.timestamp}")
 
-                vm.lidardata.forEach { (angle, lidar) ->
-                    if (vm.compass.heading.toInt() == angle) {
-                        Text("LIDAR matched heading ${lidar.distance}")
-                    }
-                    if (vm.compass.heading.toInt() == angle - vm.compass.heading.toInt()) {
-                        Text("LIDAR minus heading ${lidar.distance}")
-                    }
-                    if (vm.compass.heading.toInt() == angle + vm.compass.heading.toInt()) {
-                        Text("LIDAR plus heading ${lidar.distance}")
-                    }
+                vm.lidardata.forEach { (angle, distance) ->
+//                    if (vm.compass == angle) {
+//                        Text("LIDAR matched heading $distance")
+//                    }
+//                    if (vm.compass == angle - vm.compass) {
+//                        Text("LIDAR minus heading $distance")
+//                    }
+//                    if (vm.compass == angle + vm.compass) {
+//                        Text("LIDAR plus heading $distance")
+//                    }
                 }
 
             }
