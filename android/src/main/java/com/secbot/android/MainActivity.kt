@@ -5,11 +5,11 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.platform.setContent
 import com.google.gson.GsonBuilder
+import com.secbot.core.DeviceScope
 import com.secbot.core.mqtt.MQTT
 import com.secbot.core.mqtt.Payload
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
 import org.eclipse.paho.client.mqttv3.MqttCallback
 import org.eclipse.paho.client.mqttv3.MqttMessage
@@ -17,9 +17,10 @@ import org.eclipse.paho.client.mqttv3.MqttMessage
 @ExperimentalCoroutinesApi
 class MainActivity : AppCompatActivity() {
 
+    val scope: DeviceScope = DeviceScope()
     private val vm by viewModels<MainViewModel>()
-    private val mqtt = MQTT()
     private val gson = GsonBuilder().create()
+
     private val feedbackListener = object : MqttCallback {
 
         override fun connectionLost(cause: Throwable) {
@@ -31,7 +32,7 @@ class MainActivity : AppCompatActivity() {
 
 
             val json = String(message.payload)
-            println("Message Arrived $json")
+            println("MQTT Message Arrived $json")
             val payload = gson.fromJson(json, Payload::class.java)
 
             vm.timestamp = System.currentTimeMillis()
@@ -58,15 +59,21 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         println("BEN::channel opening")
+        scope.async {
+            MQTT.start(AndroidDeviceListener(vm))
+        }.start()
 
 
-        GlobalScope.launch {
-               MqttService(mqtt, feedbackListener).monitor()
 
-
-        }
         println("BEN:: channel closed")
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        MQTT.stop()
+    }
+
+
 
 
 }

@@ -4,10 +4,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
-import com.secbot.core.Device
+import com.secbot.core.Source
 
 import com.secbot.core.mqtt.Payload
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -26,10 +25,10 @@ class MainViewModel : ViewModel() {
 
         val split = payload.data.split(',')
         when (split[0]) {
-            Device.MAG.name -> {
+            Source.MAG.name -> {
                 compass = split[1].toFloat()
             }
-            Device.LDR.name -> {
+            Source.LDR.name -> {
                 lidardata[split[1].toInt()] = split[2].toInt()
             }
         }

@@ -37,6 +37,8 @@ dependencies {
     implementation("com.github.Hopding:JRPiCam:1.1.1")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.20")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:1.5.0")
+
     implementation("com.diozero:diozero-provider-wiringpi:0.11")
     implementation("com.diozero:diozero-core:0.11")
     implementation("com.pi4j:pi4j-core:1.2")

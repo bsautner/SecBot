@@ -1,4 +1,4 @@
-package com.secbot.pi.lidar
+package com.secbot.pi.devices.lidar
 
 object LidarBuffer {
 

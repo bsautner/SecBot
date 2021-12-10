@@ -1,53 +1,48 @@
 package com.secbot.pi
 
-import com.pi4j.io.gpio.GpioController
-import com.pi4j.io.gpio.GpioFactory
-import com.pi4j.io.gpio.GpioPinDigitalOutput
-import com.pi4j.io.gpio.RaspiPin
-import com.pi4j.util.Console
-import com.secbot.pi.di.DaggerAppComponent
+import com.secbot.core.DeviceListener
+import com.secbot.pi.devices.C
+import com.secbot.pi.devices.Robot
 import kotlinx.coroutines.*
 import java.io.IOException
-import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
-class Program  {
+object Program {
 
 
 
-    @Inject
-    lateinit var mainProcess : MainProcess
 
-    @Inject
-    lateinit var console: Console
-
-
-
-    companion object {
-
-        private var INSTANCE: Program = Program()
-
-
-        @Throws(InterruptedException::class, IOException::class)
-        @JvmStatic
-        fun main(args: Array<String>) {
-
-            println("hello world")
-
-//
-            DaggerAppComponent.create().inject(INSTANCE)
-
-
-            INSTANCE.console.promptForExit()
-            INSTANCE.console.box("Starting Up Main Program")
-
-             runBlocking {
-
-                INSTANCE.mainProcess.start()
-             }
-
+    var listener = object : DeviceListener {
+        override suspend fun onReceive(data: String) {
+          //  C.print(data)
         }
+
     }
 
 
+    @Throws(InterruptedException::class, IOException::class)
+    @JvmStatic
+    fun main(args: Array<String>) {
+
+
+        C.promptForExit()
+        C.box("Starting Up Main Program")
+
+        CoroutineScope(Dispatchers.IO).launch {
+            runCatching{
+                C.print("Starting Robot")
+                Robot.start(listener)
+            }
+        }
+
+        while (Robot.stopped.not()) {
+            Thread.sleep(100)
+        }
+
+
+
+
+    }
 }
+
+

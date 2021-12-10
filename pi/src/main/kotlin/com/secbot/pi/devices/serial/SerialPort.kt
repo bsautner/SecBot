@@ -1,21 +1,32 @@
-package com.secbot.pi.io
+package com.secbot.pi.devices.serial
 
 import com.pi4j.io.gpio.GpioController
 import com.pi4j.io.gpio.GpioFactory
 import com.pi4j.io.gpio.GpioPinDigitalOutput
 import com.pi4j.io.gpio.RaspiPin
 import com.pi4j.io.serial.*
+import com.secbot.core.AbstractDevice
+import com.secbot.core.DeviceListener
 import kotlinx.coroutines.*
 
 
 @ExperimentalCoroutinesApi
-class SerialPort(private val serial: Serial, private val tty: String) {
+object SerialPort : AbstractDevice() {
 
-    lateinit var listener: SerialListener
+    private const val tty = "ttyUSB0"
 
+    private val serial: Serial = SerialFactory.createInstance()
 
+    override suspend fun start(deviceListener: DeviceListener) {
+        scope.launch {
+            read()
+            while (stopped.not()) {
 
-    suspend fun start() {
+                delay(100)
+            }
+        }
+    }
+    private suspend fun read() {
         val gpio: GpioController = GpioFactory.getInstance()
 
         val ledPin: GpioPinDigitalOutput = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_25)
@@ -45,9 +56,10 @@ class SerialPort(private val serial: Serial, private val tty: String) {
                 split.forEach { part ->
                     //println("serial data:: $part")
 
+
                     when(part.trim()) {
                         "pong" -> {
-                            GlobalScope.launch {
+                            scope.launch {
                                 ledPin.high()
                                 delay(100)
                                 ledPin.low()
@@ -56,7 +68,8 @@ class SerialPort(private val serial: Serial, private val tty: String) {
 
                         }
                         else -> {
-                            listener.onReceive(part)
+
+                            postPart(part)
                         }
                     }
                 }
@@ -72,19 +85,26 @@ class SerialPort(private val serial: Serial, private val tty: String) {
         })
     }
 
+    private fun postPart(part: String) {
+        scope.launch {
+            deviceListener.onReceive(part)
+        }
+
+    }
     fun send(command: String) {
 
         if (serial.isOpen) {
-            kotlin.runCatching {    serial.writeln( command) }
+            scope.runCatching {    serial.writeln( command) }
 
         } else {
-            println("Can't send serial command because port is closed")
+           // println("Can't send serial command because port is closed")
         }
     }
 
     fun isConnected(): Boolean {
         return serial.isOpen
     }
+
 
 
 
