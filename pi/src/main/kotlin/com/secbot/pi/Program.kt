@@ -12,12 +12,7 @@ object Program {
 
 
 
-    var listener = object : DeviceListener {
-        override suspend fun onReceive(data: String) {
-          //  C.print(data)
-        }
 
-    }
 
 
     @Throws(InterruptedException::class, IOException::class)
@@ -31,7 +26,7 @@ object Program {
         CoroutineScope(Dispatchers.IO).launch {
             runCatching{
                 C.print("Starting Robot")
-                Robot.start(listener)
+                Robot.start(PiDeviceListener())
             }
         }
 

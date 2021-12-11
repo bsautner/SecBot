@@ -2,9 +2,12 @@ package com.secbot.pi.devices
 
 import com.secbot.core.AbstractDevice
 import com.secbot.core.DeviceListener
+import com.secbot.core.Source
 import com.secbot.core.mqtt.MQTT
 import com.secbot.pi.devices.audio.Speaker
 import com.secbot.pi.devices.camera.Camera
+import com.secbot.pi.devices.led.ArduinoPongLed
+import com.secbot.core.devices.lidar.Lidar
 import com.secbot.pi.devices.mag.MagnetometerAccelerometer
 import com.secbot.pi.devices.serial.SerialPort
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -31,10 +34,12 @@ object Robot : AbstractDevice() {
                 C.print("starting devices")
 
                 devices.add(MQTT)
-                devices.add(SerialPort)
                 devices.add(Camera)
                 devices.add(Speaker)
                 devices.add(MagnetometerAccelerometer)
+                devices.add(SerialPort)
+                devices.add(ArduinoPongLed)
+                devices.add(Lidar)
 
                 devices.forEach {
                     it.start(deviceListener)
@@ -46,7 +51,7 @@ object Robot : AbstractDevice() {
 
         while (stopped.not()) {
             delay(1000)
-            SerialPort.send("ping")
+            SerialPort.send(Source.PING.name)
         }
 
 

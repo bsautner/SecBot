@@ -5,13 +5,14 @@ package com.secbot.core
  */
 
 enum class Source {
+    PING,
+    PONG,
     LDR,
-    MAG,
+    MAG_SERIAL,
+    MAG_PI,
     CMP,
-    ACC,
+    ACC_PI,
+    ACC_SERIAL,
     MQTT;
 
-    fun matches(txt: String) : Boolean {
-        return (this.name == txt)
-    }
 }

@@ -12,7 +12,7 @@ import java.util.*
 object MQTT : AbstractDevice() {
     private const val topic = "topic"
     private const val qos = 2
-    private const val broker = "tcp://54.167.121.102:1883"
+    private const val broker = "tcp://10.0.0.205:1883"
     private val clientId = UUID.randomUUID().toString()
     private val persistence = MemoryPersistence()
     private val client = MqttClient(broker, clientId, persistence)
@@ -47,7 +47,7 @@ object MQTT : AbstractDevice() {
         scope.async {
             val connOpts = MqttConnectOptions()
             connOpts.isCleanSession = true
-            connOpts.userName = "secbot"
+            connOpts.userName = "ben"
             connOpts.password = "imarobot".toCharArray()
             println("MQTT Connecting to broker: $broker")
             client.connect(connOpts)

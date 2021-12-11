@@ -7,12 +7,13 @@ class AndroidDeviceListener(private val vm: MainViewModel) : DeviceListener {
     override suspend fun onReceive(data: String) {
 
         val split = data.split(',')
-        val source = Source.valueOf(split[0])
 
-        when (source) {
-            Source.LDR -> {}
-            Source.MAG -> {}
-            Source.ACC -> {}
+        when (Source.valueOf(split[0])) {
+            Source.LDR -> {
+               vm.lidardata.update(split)
+            }
+            Source.MAG_SERIAL -> {}
+            Source.ACC_PI -> {}
             Source.CMP -> {
                vm.compass = split[1].toFloat()
             }
