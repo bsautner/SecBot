@@ -1,37 +1,43 @@
 package com.secbot.core.devices.lidar
 
 import com.secbot.core.AbstractDevice
-import com.secbot.core.Source
 import com.secbot.core.mqtt.MQTT
 import kotlinx.coroutines.async
+import java.math.BigDecimal
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
 
 object Lidar : AbstractDevice() {
 
+    const val relevance = 100
 
-    val data = HashMap<Int, AtomicInteger>()
+    val data = HashMap<Int, LidarPoint>()
+
 
     init {
-        for (i in 0..360) {
-            data[i] = AtomicInteger(0)
+        for (i in 1..(360 * relevance)) {
+            data[i] = LidarPoint(AtomicInteger(0))
+
         }
     }
 
 
-    fun update(split: List<String>) {
-        val angle = split[1].toBigDecimal().toInt()
-        val distance =  split[2].toBigDecimal().toInt()
-        data[angle]?.set(distance)
-        send(angle, distance)
+    fun update(line: List<String>, mqttPub: Boolean) {
+        val angle = line[1].toBigDecimal().times(BigDecimal(relevance)).toInt()
+        val distance =  line[2].toBigDecimal().times(BigDecimal(relevance)).toInt()
+        data[angle]?.distance?.set(distance)
+        data[angle]?.timestamp?.set(System.currentTimeMillis())
+
+        if (mqttPub) {
+            scope.async {
+                MQTT.publish(line.joinToString(separator = ",") { it })
+            }.start()
+        }
 
 
     }
 
-    private fun send(angle: Int, distance: Int) {
-        scope.async {
-            MQTT.publish("${Source.LDR},$angle,$distance")
-        }.start()
-    }
+
 
 
 }

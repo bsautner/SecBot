@@ -25,8 +25,8 @@ object MQTT : AbstractDevice() {
 
         override fun messageArrived(topic: String?, message: MqttMessage?) {
 
-            message.let {
-           //     println("MQTT Message Arrived $it")
+            message?.let {
+//                println("MQTT Message Arrived $it")
                 scope.async {
                     deviceListener.onReceive(it.toString())
                 }

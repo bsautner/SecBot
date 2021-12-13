@@ -1,6 +1,7 @@
 package com.secbot.android
 
 import android.os.Bundle
+import android.util.DisplayMetrics
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.platform.setContent
@@ -10,20 +11,21 @@ import com.secbot.core.mqtt.MQTT
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 
+
 @ExperimentalCoroutinesApi
 class MainActivity : AppCompatActivity() {
 
-    val scope: DeviceScope = DeviceScope()
+    private val scope: DeviceScope = DeviceScope()
     private val vm by viewModels<MainViewModel>()
-
-
-        private lateinit var compass: Compass
+    private lateinit var compass: Compass
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setupCompass()
+        val displayMetrics: DisplayMetrics =  resources.displayMetrics
+        vm.screenHeight = displayMetrics.heightPixels / displayMetrics.density
+        vm.screenWidth = displayMetrics.widthPixels / displayMetrics.density
         setContent {
-          //  mainScreen(vm)
             lidarComposable(vm)
         }
 
@@ -57,7 +59,7 @@ class MainActivity : AppCompatActivity() {
     private fun getCompassListener(): CompassListener {
         return object : CompassListener {
             override fun onNewAzimuth(azimuth: Float) {
-             //   println("Compass: $azimuth")
+           //     println("Compass: $azimuth")
                 vm.compass = azimuth
             }
         }

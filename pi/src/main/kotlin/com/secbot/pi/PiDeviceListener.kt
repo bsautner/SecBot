@@ -14,7 +14,7 @@ class PiDeviceListener : DeviceListener {
 
         when (Source.valueOf(split[0])) {
             Source.LDR -> {
-              Lidar.update(split)
+              Lidar.update(split, true)
             }
             Source.MAG_SERIAL -> {
                 MagnetometerAccelerometer.process(data)
@@ -31,7 +31,9 @@ class PiDeviceListener : DeviceListener {
                 ArduinoPongLed.blink(100)
                 SerialPort.send("${Source.PONG}")
             }
-            Source.MQTT -> {}
+            Source.MQTT -> {
+
+            }
 
 
         }

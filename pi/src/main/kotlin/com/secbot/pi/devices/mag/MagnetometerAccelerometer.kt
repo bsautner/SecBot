@@ -40,11 +40,11 @@ object MagnetometerAccelerometer : AbstractDevice() {
             println("MAG PROC $data")
             val magX = split[1].toFloat()
             val magY = split[2].toFloat()
-            var newHeading: Int = (360 * kotlin.math.atan2(magY, magX) / PI).roundToInt()
+            var newHeading: Double = (360 * kotlin.math.atan2(magY, magX) / PI)
             if (newHeading < 0) {
                 newHeading += 360
             }
-            println("$data:::: $newHeading")
+           // println("$data:::: $newHeading")
 
 
                 if ((newHeading > (heading[source]?.plus(5) ?: -1)).or(newHeading < (heading[source]?.minus(5) ?: -1))) {

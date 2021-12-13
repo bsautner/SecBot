@@ -10,7 +10,7 @@ class AndroidDeviceListener(private val vm: MainViewModel) : DeviceListener {
 
         when (Source.valueOf(split[0])) {
             Source.LDR -> {
-               vm.lidardata.update(split)
+               vm.lidardata.update(split, false)
             }
             Source.MAG_SERIAL -> {}
             Source.ACC_PI -> {}
