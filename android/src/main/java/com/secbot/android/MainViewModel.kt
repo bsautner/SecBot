@@ -16,15 +16,26 @@ import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
 
+    val maxRelevantAge = 5000
 
     var screenHeight: Float = 0.0F
     var screenWidth:  Float = 0.0F
 
     var compass by mutableStateOf(0.0F)
-    var lidardata by mutableStateOf(Lidar)
+    var lidar by mutableStateOf(Lidar)
+
+    fun getClosestObstacle() : Double {
+        var result = Double.MAX_VALUE
+
+        lidar.data.filterValues {
+            (it.distance > 0.0) and (System.currentTimeMillis() - it.timestamp < maxRelevantAge)
+        }.forEach {
+            if (it.value.distance < result) { result = it.value.distance }
+        }
 
 
-
+        return result
+    }
 
 
 }

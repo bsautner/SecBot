@@ -37,7 +37,7 @@ class Compass(context: Context) : SensorEventListener {
         sensorManager.unregisterListener(this)
     }
 
-    fun setAzimuthFix(fix: Float) {
+    private fun setAzimuthFix(fix: Float) {
         azimuthFix = fix
     }
 

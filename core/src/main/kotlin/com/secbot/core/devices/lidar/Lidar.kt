@@ -9,24 +9,28 @@ import java.util.concurrent.atomic.AtomicLong
 
 object Lidar : AbstractDevice() {
 
-    const val relevance = 100
 
     val data = HashMap<Int, LidarPoint>()
 
 
     init {
-        for (i in 1..(360 * relevance)) {
-            data[i] = LidarPoint(AtomicInteger(0))
+        for (i in 1..(36000)) {
+            data[i] = LidarPoint()
 
         }
     }
 
 
     fun update(line: List<String>, mqttPub: Boolean) {
-        val angle = line[1].toBigDecimal().times(BigDecimal(relevance)).toInt()
-        val distance =  line[2].toBigDecimal().times(BigDecimal(relevance)).toInt()
-        data[angle]?.distance?.set(distance)
-        data[angle]?.timestamp?.set(System.currentTimeMillis())
+        val index = line[1].toBigDecimal().times(BigDecimal(100)).toInt()
+
+        data[index]?.let {
+            it.timestamp = System.currentTimeMillis()
+            it.angle = line[1].toBigDecimal().toDouble()
+            it.distance = line[2].toBigDecimal().toDouble()
+
+        }
+
 
         if (mqttPub) {
             scope.async {

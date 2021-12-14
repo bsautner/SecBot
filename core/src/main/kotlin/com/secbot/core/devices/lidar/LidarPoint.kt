@@ -1,6 +1,4 @@
 package com.secbot.core.devices.lidar
 
-import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.atomic.AtomicLong
+data class LidarPoint(var angle: Double = 0.0, var distance : Double = 0.0, var timestamp: Long = System.currentTimeMillis())
 
-data class LidarPoint(val distance : AtomicInteger, val timestamp: AtomicLong = AtomicLong(System.currentTimeMillis()))
