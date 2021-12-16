@@ -13,6 +13,7 @@ enum class Source {
     CMP,
     ACC_PI,
     ACC_SERIAL,
+    STEER,
     MQTT;
 
 }

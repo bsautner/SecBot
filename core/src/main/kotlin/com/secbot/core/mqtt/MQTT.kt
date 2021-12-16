@@ -12,11 +12,11 @@ import java.util.*
 object MQTT : AbstractDevice() {
     private const val topic = "topic"
     private const val qos = 2
-    private const val broker = "tcp://10.0.0.205:1883"
+
     private val clientId = UUID.randomUUID().toString()
     private val persistence = MemoryPersistence()
-    private val client = MqttClient(broker, clientId, persistence)
-
+    private lateinit var client : MqttClient
+    lateinit var broker : String
 
     private val listener = object : MqttCallback {
         override fun connectionLost(cause: Throwable?) {
@@ -43,6 +43,7 @@ object MQTT : AbstractDevice() {
 
     override suspend fun start(deviceListener: DeviceListener) {
         super.start(deviceListener)
+        client = MqttClient(broker, clientId, persistence)
 
         scope.async {
             val connOpts = MqttConnectOptions()

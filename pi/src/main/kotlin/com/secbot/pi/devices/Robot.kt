@@ -13,7 +13,6 @@ import com.secbot.pi.devices.serial.SerialPort
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.io.IOException
 import kotlin.collections.ArrayList
 
@@ -21,12 +20,12 @@ import kotlin.collections.ArrayList
 object Robot : AbstractDevice() {
 
     private val devices: MutableList<AbstractDevice> = ArrayList()
-
+    private val broker = "tcp://localhost:1883"
 
     @Throws(IOException::class, InterruptedException::class)
     override suspend fun start(deviceListener: DeviceListener) {
         super.start(deviceListener)
-
+        MQTT.broker = broker
 
         scope.async {
 
@@ -51,7 +50,7 @@ object Robot : AbstractDevice() {
 
         while (stopped.not()) {
             delay(1000)
-            SerialPort.send(Source.PING.name)
+
         }
 
 

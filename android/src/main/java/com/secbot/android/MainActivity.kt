@@ -18,9 +18,11 @@ class MainActivity : AppCompatActivity() {
     private val scope: DeviceScope = DeviceScope()
     private val vm by viewModels<MainViewModel>()
     private lateinit var compass: Compass
+    private val broker = "tcp://10.0.0.205:1883"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        MQTT.broker = broker
         setupCompass()
         val displayMetrics: DisplayMetrics =  resources.displayMetrics
         vm.screenHeight = displayMetrics.heightPixels / displayMetrics.density

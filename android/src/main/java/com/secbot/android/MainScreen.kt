@@ -1,22 +1,32 @@
-@file:OptIn(ExperimentalStdlibApi::class)
+@file:OptIn(ExperimentalStdlibApi::class, ExperimentalPointerInput::class)
 
 package com.secbot.android
 
 import android.graphics.Paint
+import android.view.MotionEvent
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.gesture.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PointMode
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.pointer.*
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
+import com.secbot.core.devices.SteeringServo
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -30,13 +40,26 @@ fun lidarComposable(vm: MainViewModel) {
     paint.textSize = 45f
     paint.color = Color.White.toArgb()
 
+
+    var  canvasWidth = 0.0F
+    var canvasHeight = 0.0F
+    var center = Offset(0F, 0F)
+
     MaterialTheme {
         Column {
-            Canvas(modifier = Modifier.fillMaxSize(), onDraw = {
+
+
+            Box(modifier = Modifier.fillMaxWidth().height((vm.screenHeight * .75).dp)) {
+
+
+            Canvas(modifier = Modifier.fillMaxSize() , onDraw = {
                 val obs = vm.getClosestObstacle()
                 val padding = 50
-                val canvasWidth = size.width - padding
-                val canvasHeight = size.height - padding
+                 canvasWidth = size.width - padding
+                 canvasHeight = size.height - padding
+                 center = this.center
+
+
 
                 val botColor : () -> Color = {
                     if (obs < 20) {  Color.Red} else { Color.Blue }
@@ -104,12 +127,62 @@ fun lidarComposable(vm: MainViewModel) {
                     drawPoints(surroundings, PointMode.Points, Color.Cyan, strokeWidth = 15f)
 
 
+
+
+
                 drawContext.canvas.nativeCanvas.drawText(
                     "clearance: ${obs.toInt()}mm", canvasWidth / 2, canvasHeight-20, paint
                 )
             })
         }
+
+            Box(modifier = Modifier.fillMaxSize().background(Color.DarkGray)) {
+                var center = Offset(0f, 0f)
+                Canvas(modifier = Modifier.fillMaxSize().longPressDragGestureFilter(longPressDragObserver = object : LongPressDragObserver {
+
+
+                    override fun onStop(velocity: Offset) {
+                        super.onStop(velocity)
+                        vm.dragX = center.x
+                        vm.dragY = center.y
+                        SteeringServo.turn(SteeringServo.Direction.FORWARD)
+                    }
+                }).dragGestureFilter(dragObserver = object : DragObserver {
+
+
+                }).pointerInput {
+
+                           this.detectDragGestures { change, dragAmount ->
+
+
+                               vm.dragX += dragAmount.x
+                               vm.dragY += dragAmount.y
+
+                               if (vm.dragX < center.x - 20) {
+                                   SteeringServo.turn(SteeringServo.Direction.LEFT)
+                               }
+                               else if (vm.dragX > center.x + 20) {
+                                   SteeringServo.turn(SteeringServo.Direction.RIGHT)
+                               }
+                               else {
+                                   SteeringServo.turn(SteeringServo.Direction.FORWARD)
+                               }
+
+                           }
+
+                }, onDraw = {
+                    center = this.center
+                    if (vm.dragX.equals(0.0F)) {
+                        vm.dragX = this.center.x
+                        vm.dragY = this.center.y
+                    }
+                    drawCircle(Color.Blue, 50F, Offset(vm.dragX, vm.dragY))
+                })
+
+
+        }
     }
+}
 }
 
 

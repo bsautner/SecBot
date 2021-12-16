@@ -32,8 +32,9 @@ object Lidar : AbstractDevice() {
         }
 
 
-        if (mqttPub) {
+        if (mqttPub and (line[2].toBigDecimal().toDouble() > 0.0)) {
             scope.async {
+
                 MQTT.publish(line.joinToString(separator = ",") { it })
             }.start()
         }

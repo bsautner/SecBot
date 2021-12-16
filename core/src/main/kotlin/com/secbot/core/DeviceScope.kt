@@ -10,6 +10,6 @@ class DeviceScope : CoroutineScope {
     private val job = SupervisorJob()
 
     override val coroutineContext: CoroutineContext
-        get() = Dispatchers.IO + job
+        get() = Dispatchers.Default + job
 
 }

@@ -18,6 +18,9 @@ class MainViewModel : ViewModel() {
 
     val maxRelevantAge = 5000
 
+    var dragX by  mutableStateOf(0F)
+    var dragY by  mutableStateOf(0F)
+
     var screenHeight: Float = 0.0F
     var screenWidth:  Float = 0.0F
 
