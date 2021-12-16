@@ -4,52 +4,41 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
-import com.secbot.core.SensorDataProcessor
-import com.secbot.core.hardware.*
+import androidx.compose.runtime.remember
+import com.secbot.core.Source
+import com.secbot.core.devices.lidar.Lidar
 
-import com.secbot.core.mqtt.MQTT
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.secbot.core.mqtt.Payload
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.util.*
 
 
-@ExperimentalCoroutinesApi
+
 class MainViewModel : ViewModel() {
 
+    val maxRelevantAge = 5000
 
-    var test by mutableStateOf("FOO")
-    var compass by mutableStateOf(Compass())
-    var lidardata by mutableStateOf(mutableMapOf<Int, Lidar>())
+    var dragX by  mutableStateOf(0F)
+    var dragY by  mutableStateOf(0F)
 
-    var sensors by mutableStateOf(mutableMapOf<DeviceType, Device>( ))
+    var screenHeight: Float = 0.0F
+    var screenWidth:  Float = 0.0F
 
+    var compass by mutableStateOf(0.0F)
+    var lidar by mutableStateOf(Lidar)
 
+    fun getClosestObstacle() : Double {
+        var result = Double.MAX_VALUE
 
-    fun setValue(deviceContainer: DeviceContainer) {
-        test = UUID.randomUUID().toString()
-        deviceContainer.devices.forEach {
-            when (it.deviceType()) {
-
-                DeviceType.COMPASS -> {
-                    compass = it as Compass
-                }
-                DeviceType.LIDAR -> {
-                    val l = it as Lidar
-                    lidardata[l.angle.toInt()] = l
-                    println("LIDAR ${l.angle} ${l.distance}")
-
-                }
-            }
+        lidar.data.filterValues {
+            (it.distance > 0.0) and (System.currentTimeMillis() - it.timestamp < maxRelevantAge)
+        }.forEach {
+            if (it.value.distance < result) { result = it.value.distance }
         }
 
+
+        return result
     }
 
 
-    fun sendCommand() {
-        GlobalScope.launch {
-           // mqtt.publishDeviceCommand(DeviceCommand(Control.SCANNING_SERVO, 30.0))
-        }
-
-    }
 }

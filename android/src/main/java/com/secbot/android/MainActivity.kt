@@ -1,73 +1,78 @@
 package com.secbot.android
 
 import android.os.Bundle
+import android.util.DisplayMetrics
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.platform.setContent
-import com.google.gson.GsonBuilder
-import com.secbot.core.hardware.Device
-import com.secbot.core.hardware.DeviceContainer
-import com.secbot.core.mqtt.DeviceInstanceCreator
+import com.secbot.android.Compass.CompassListener
+import com.secbot.core.DeviceScope
 import com.secbot.core.mqtt.MQTT
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
-import org.eclipse.paho.client.mqttv3.MqttCallback
-import org.eclipse.paho.client.mqttv3.MqttMessage
+import kotlinx.coroutines.async
+
 
 @ExperimentalCoroutinesApi
 class MainActivity : AppCompatActivity() {
 
+    private val scope: DeviceScope = DeviceScope()
     private val vm by viewModels<MainViewModel>()
-    private val mqtt = MQTT()
-    private val gson = GsonBuilder().registerTypeAdapter(Device::class.java, DeviceInstanceCreator()).create()
-    private val feedbackListener = object : MqttCallback {
-
-        override fun connectionLost(cause: Throwable) {
-            println("MQTT Connection Lost")
-            cause.printStackTrace()
-        }
-
-        override fun messageArrived(topic: String, message: MqttMessage) {
-
-
-            val json = String(message.payload)
-         //   println("Message Arrived $json")
-            val deviceContainer = gson.fromJson(json, DeviceContainer::class.java)
-
-            vm.setValue(deviceContainer)
-           // println("got mqtt data: ${gson.fromJson(json, DeviceContainer::class.java).devices.size}")
-        }
-
-        override fun deliveryComplete(token: IMqttDeliveryToken?) {
-            TODO("Not yet implemented")
-        }
-    }
-
+    private lateinit var compass: Compass
+    private val broker = "tcp://10.0.0.205:1883"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        mqtt.subscribeDeviceCommands()
+        MQTT.broker = broker
+        setupCompass()
+        val displayMetrics: DisplayMetrics =  resources.displayMetrics
+        vm.screenHeight = displayMetrics.heightPixels / displayMetrics.density
+        vm.screenWidth = displayMetrics.widthPixels / displayMetrics.density
         setContent {
-          //  mainScreen(vm)
-            canvasDrawExample(vm)
+            lidarComposable(vm)
         }
 
     }
 
     override fun onResume() {
         super.onResume()
+        println("BEN::channel opening")
+        compass.start()
+        scope.async {
+            MQTT.start(AndroidDeviceListener(vm))
+        }.start()
 
 
 
-        GlobalScope.launch {
-               MqttService(mqtt, feedbackListener).monitor()
-
-
-        }
-        println("channel closed")
+        println("BEN:: channel closed")
     }
+
+    override fun onPause() {
+        super.onPause()
+        compass.stop()
+    }
+
+
+    private fun setupCompass() {
+        compass = Compass(this)
+        val cl: CompassListener = getCompassListener()
+        compass.setListener(cl)
+    }
+
+    private fun getCompassListener(): CompassListener {
+        return object : CompassListener {
+            override fun onNewAzimuth(azimuth: Float) {
+           //     println("Compass: $azimuth")
+                vm.compass = azimuth
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        MQTT.stop()
+    }
+
+
 
 
 }
