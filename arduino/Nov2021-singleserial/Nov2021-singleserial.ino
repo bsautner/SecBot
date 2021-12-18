@@ -4,7 +4,7 @@
 #include <Adafruit_LSM303_Accel.h>
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
-#include <SoftwareSerial.h> 
+#include <SoftwareSerial.h>
 
 const int MOTOR_PIN_1 = 2;
 const int STEERING_SERVO_PIN = 3;
@@ -16,33 +16,33 @@ const int PIN_PING_PONG_LED = 50;
 
 
 Servo steering_servo;
+int lastSteer = 0;
 RPLidar lidar;
 String s = "";
 
 boolean pingLedOn = false;
 
 void setup() {
- 
+
+  pinMode(PIN_PING_PONG_LED, OUTPUT);
+  digitalWrite(PIN_PING_PONG_LED, HIGH);
+
+  
+  steering_servo.attach(STEERING_SERVO_PIN);
 
   pinMode(RPWM_Output, OUTPUT);
   pinMode(LPWM_Output, OUTPUT);
- 
+
 
   Serial.begin(115200);
   Serial1.begin(115200);
-  pinMode(PIN_PING_PONG_LED, OUTPUT);
-  digitalWrite(PIN_PING_PONG_LED, HIGH);
+ 
   Serial1.println("PONG");
   lidar.begin(Serial3);
 
   pinMode(RPLIDAR_MOTOR, OUTPUT);
-  //
-  //
-  //  steerServo(20);
-  //  delay(1000);
-  //  steerServo(70);
-  //  delay(1000);
-  //  steerServo(45);
+
+
 
 
   Serial.println("stopping lidar");
@@ -61,50 +61,62 @@ void setup() {
     delay(1000);
   }
 
-
+  steering_servo.write(45);
+  delay(1000);
+  steering_servo.write(20);
+  delay(1000);
+  steering_servo.write(45);
+  delay(1000);
+  steering_servo.write(70);
+  delay(1000);
+  steering_servo.write(45);
+  delay(1000);
+  //  steering_servo.write(0);
   digitalWrite(PIN_PING_PONG_LED, LOW);
 }
 
 void loop() {
 
+ 
+  drive(600);
+  delay(1000);
+  //readSerial();
+  // readLidar();
 
-  readSerial();
- // readLidar();
 
-  //delay(100);
 
 }
 
 void readSerial() {
 
-    
+
   while (Serial1.available() ) {
     char inChar = (char)Serial1.read();
-   
+
     if (inChar == '\n') {
-    Serial.println(s);    
+      Serial.println(s);
       if (s == "PING") {
-         if (pingLedOn) {
-              digitalWrite(PIN_PING_PONG_LED, LOW);
-              pingLedOn = false;
-         }
-         else {
-              digitalWrite(PIN_PING_PONG_LED, HIGH);
-              pingLedOn = true;
-         }
-         Serial1.println("PONG");
+        if (pingLedOn) {
+          digitalWrite(PIN_PING_PONG_LED, LOW);
+          pingLedOn = false;
+        }
+        else {
+          digitalWrite(PIN_PING_PONG_LED, HIGH);
+          pingLedOn = true;
+        }
+        Serial1.println("PONG");
       }
-      else if (s = "STEER,RIGHT") {
+      else if (s == "STEER,RIGHT") {
         steerServo(20);
       }
-        else if (s = "STEER,LEFT") {
+      else if (s == "STEER,LEFT") {
         steerServo(70);
       }
-         else if (s = "STEER,FORWARD") {
+      else if (s == "STEER,FORWARD") {
         steerServo(45);
       }
       else {
-        Serial.println(s);    
+        Serial.println(s);
       }
       s = "";
     } else {
@@ -134,12 +146,13 @@ void readLidar() {
 
 void steerServo(int newPos) {
   //  log("steerServo");
-  if (newPos <= 70 && newPos >= 20) {
-    steering_servo.attach(STEERING_SERVO_PIN);
-    delay(100);
-    steering_servo.write(newPos);
-    delay(1000);
-    steering_servo.detach();
+  if (lastSteer != newPos) {
+    if (newPos <= 70 && newPos >= 20) {
+      lastSteer = newPos;
+      Serial << "Steering " << newPos;
+      steering_servo.write(newPos);
+
+    }
   }
 }
 
