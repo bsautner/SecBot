@@ -25,12 +25,12 @@ void setup()
  
 void loop()
 {
-drive(450);
-delay(2000);
-drive(512);
-delay(2000);
-drive(600);
-delay(2000);
+//drive(450);
+//delay(2000);
+//drive(512);
+//delay(2000);
+//drive(600);
+//delay(2000);
 }
 
 void drive(int sensorValue) {

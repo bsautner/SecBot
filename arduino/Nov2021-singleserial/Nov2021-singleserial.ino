@@ -5,33 +5,49 @@
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
 #include <SoftwareSerial.h>
+#include <SharpIR.h>
 
-const int MOTOR_PIN_1 = 2;
-const int STEERING_SERVO_PIN = 3;
+const int SCANNING_IR_PIN = A0;
 const int RPLIDAR_MOTOR = 8;
 
-const int RPWM_Output = 5; // Arduino PWM output pin 5; connect to IBT-2 pin 1 (RPWM)
-const int LPWM_Output = 6; // Arduino PWM output pin 6; connect to IBT-2 pin 2 (LPWM)
+const int RPWM2_Output = 7;  
+const int LPWM2_Output = 6; 
+
+const int RPWM1_Output = 5;  
+const int LPWM1_Output = 4;  
+const int STEERING_SERVO_PIN = 3;
+
 const int PIN_PING_PONG_LED = 50;
 
+const int speedModifier = 150;
+const int maxForward = 512 + speedModifier;
+const int maxReverse = 512 - speedModifier;
 
+SharpIR IR_prox(SharpIR::GP2Y0A02YK0F, SCANNING_IR_PIN);
 Servo steering_servo;
 int lastSteer = 0;
 RPLidar lidar;
 String s = "";
 
+long scanning_ir_duration;
+
+long scanning_ir_last_cm = 0;
+
 boolean pingLedOn = false;
 
 void setup() {
-
+  
+  pinMode(SCANNING_IR_PIN, INPUT);
   pinMode(PIN_PING_PONG_LED, OUTPUT);
   digitalWrite(PIN_PING_PONG_LED, HIGH);
 
   
   steering_servo.attach(STEERING_SERVO_PIN);
 
-  pinMode(RPWM_Output, OUTPUT);
-  pinMode(LPWM_Output, OUTPUT);
+  pinMode(RPWM1_Output, OUTPUT);
+  pinMode(LPWM1_Output, OUTPUT);
+  pinMode(RPWM2_Output, OUTPUT);
+  pinMode(LPWM2_Output, OUTPUT);
 
 
   Serial.begin(115200);
@@ -61,30 +77,37 @@ void setup() {
     delay(1000);
   }
 
-  steering_servo.write(45);
+
+ // steering_servo.write(45);
   delay(1000);
-  steering_servo.write(20);
-  delay(1000);
-  steering_servo.write(45);
-  delay(1000);
-  steering_servo.write(70);
-  delay(1000);
-  steering_servo.write(45);
-  delay(1000);
-  //  steering_servo.write(0);
+    stop();
   digitalWrite(PIN_PING_PONG_LED, LOW);
 }
 
 void loop() {
 
  
-  drive(600);
-  delay(1000);
-  //readSerial();
-  // readLidar();
+  readSerial();
+  readLidar();
+  readForwardIR();
+
+delay(10);
 
 
+}
 
+void readForwardIR() {
+  
+    int scanning_ir_cm = IR_prox.getDistance();
+
+     if (scanning_ir_cm != scanning_ir_last_cm &&
+         scanning_ir_cm != scanning_ir_last_cm - 1 &&
+         scanning_ir_cm != scanning_ir_last_cm + 1) {
+      // sendSensorData(SCANNING_IR, scanning_ir_cm);
+       scanning_ir_last_cm = scanning_ir_cm;
+       Serial1 << "FORWARD_IR," <<  scanning_ir_cm << "\n";
+       Serial << "FORWARD_IR," <<  scanning_ir_cm << "\n";
+     }
 }
 
 void readSerial() {
@@ -106,13 +129,33 @@ void readSerial() {
         }
         Serial1.println("PONG");
       }
-      else if (s == "STEER,RIGHT") {
-        steerServo(20);
+       else if (s == "MOTOR,STOP") {
+        stop();
+         steerServo(45);
       }
-      else if (s == "STEER,LEFT") {
+      else if (s == "MOTOR,FORWARD") {
+        drive(maxForward, 1);
+        steerServo(45);
+      }
+      else if (s == "MOTOR,RIGHT_FORWARD") {
+        drive(maxForward, 1);
         steerServo(70);
       }
-      else if (s == "STEER,FORWARD") {
+        else if (s == "MOTOR,LEFT_FORWARD") {
+          drive(maxForward, 1);
+          steerServo(20);
+          
+      }
+        else if (s == "MOTOR,LEFT_REVERSE") {
+         drive(maxReverse, 1);
+         steerServo(20);
+      }
+        else if (s == "MOTOR,RIGHT_REVERSE") {
+        drive(maxReverse, 1);
+        steerServo(70);
+      }
+        else if (s == "MOTOR,REVERSE") {
+        drive(maxReverse, 1);
         steerServo(45);
       }
       else {
@@ -137,7 +180,7 @@ void readLidar() {
     byte quality = lidar.getCurrentPoint().quality; // quality of the current measurement
     if (! startBit && quality >= 15) {
       Serial1 << "LDR," << angle << "," << distance  << "," << startBit << ","  << quality << "\n" ;
-      Serial << "LDR," << angle << "," << distance  << "," << startBit << ","  << quality << "\n" ;
+     // Serial << "LDR," << angle << "," << distance  << "," << startBit << ","  << quality << "\n" ;
     }
   }
 }
@@ -148,6 +191,8 @@ void steerServo(int newPos) {
   //  log("steerServo");
   if (lastSteer != newPos) {
     if (newPos <= 70 && newPos >= 20) {
+       steering_servo.attach(STEERING_SERVO_PIN);
+      delay(10);
       lastSteer = newPos;
       Serial << "Steering " << newPos;
       steering_servo.write(newPos);
@@ -156,7 +201,8 @@ void steerServo(int newPos) {
   }
 }
 
-void drive(int s) {
+
+void drive(int s, int m) {
 
 
 
@@ -164,22 +210,36 @@ void drive(int s) {
   {
     // reverse rotation
     int reversePWM = -(s - 511) / 2;
-    analogWrite(LPWM_Output, 0);
-    analogWrite(RPWM_Output, reversePWM);
+    if (m == 1) {
+    analogWrite(LPWM1_Output, 0);
+    analogWrite(RPWM1_Output, reversePWM);
+    } else {
+          analogWrite(LPWM2_Output, 0);
+    analogWrite(RPWM2_Output, reversePWM);
+    }
   }
   else
   {
     // forward rotation
     int forwardPWM = (s - 512) / 2;
-    analogWrite(RPWM_Output, 0);
-    analogWrite(LPWM_Output, forwardPWM);
+    if (m == 1) {
+    analogWrite(RPWM1_Output, 0);
+    analogWrite(LPWM1_Output, forwardPWM);
+    } else {
+        analogWrite(RPWM2_Output, 0);
+    analogWrite(LPWM2_Output, forwardPWM);
+    }
   }
 
 }
 
 void stop() {
-  analogWrite(LPWM_Output, 0);
-  analogWrite(RPWM_Output, 0);
+   steering_servo.detach();
+
+  analogWrite(LPWM1_Output, 0);
+  analogWrite(RPWM1_Output, 0);
+   analogWrite(LPWM2_Output, 0);
+  analogWrite(RPWM2_Output, 0);
 }
 
 
