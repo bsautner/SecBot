@@ -2,29 +2,26 @@ package com.secbot.pi.devices.mag
 
 
 import com.secbot.core.AbstractDevice
+import com.secbot.core.Bus
 import com.secbot.core.Source
 import com.secbot.core.DeviceListener
-import com.secbot.core.mqtt.MQTT
-import com.secbot.pi.devices.C
 import kotlinx.coroutines.*
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.lang.Math.PI
-import java.lang.Math.atan2
-import kotlin.math.roundToInt
 
 
 /**
  * ACC:X=0.268 Y=-0.727 Z=10.518
  * MAG:X=-9.818 Y=9.091 Z=-80.000
  */
-object MagnetometerAccelerometer : AbstractDevice() {
+object MagnetometerAccelerometer : AbstractDevice<String>() {
 
 
     private var heading = mutableMapOf(Pair(Source.MAG_SERIAL, 0), Pair(Source.MAG_PI, 0))
 
-    override suspend fun start(deviceListener: DeviceListener) {
-        super.start(deviceListener)
+    override  fun start() {
+        super.start()
         scope.async {
             while (stopped.not()) {
                 readPython()
@@ -33,7 +30,7 @@ object MagnetometerAccelerometer : AbstractDevice() {
         }.start()
     }
 
-    internal fun process(data: String) {
+    override fun update(data: String) {
         val split = data.split(',')
         val source = Source.valueOf(split[0])
         if (heading.containsKey(source)) {
@@ -71,8 +68,7 @@ object MagnetometerAccelerometer : AbstractDevice() {
         bufferedReader.lines().forEach {
 
             scope.async {
-
-                deviceListener.onReceive(it)
+                Bus.post(it)
              }.start()
 
         }

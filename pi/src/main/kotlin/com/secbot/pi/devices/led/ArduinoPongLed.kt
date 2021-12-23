@@ -9,17 +9,17 @@ import com.secbot.core.DeviceListener
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 
-object ArduinoPongLed : AbstractDevice() {
+object ArduinoPongLed : AbstractDevice<Long>() {
     private val gpio: GpioController = GpioFactory.getInstance()
 
     private val ledPin: GpioPinDigitalOutput = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_25)
 
-    override suspend fun start(deviceListener: DeviceListener) {
-        super.start(deviceListener)
-        blink(2000)
+    override  fun start( ) {
+        super.start()
+        update(2000)
     }
 
-    suspend fun blink(delay: Long) {
+    override fun update(delay: Long) {
         scope.async {
             ledPin.high()
             delay(delay)
@@ -27,9 +27,7 @@ object ArduinoPongLed : AbstractDevice() {
         }.start()
     }
 
-//    scope.launch {
 
-//    }
 
 
 }

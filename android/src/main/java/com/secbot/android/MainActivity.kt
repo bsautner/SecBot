@@ -7,6 +7,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.platform.setContent
 import com.secbot.android.Compass.CompassListener
 import com.secbot.core.DeviceScope
+import com.secbot.core.devices.InfraredRange
+import com.secbot.core.devices.lidar.Lidar
 import com.secbot.core.mqtt.MQTT
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -23,6 +25,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         MQTT.broker = broker
+        MQTT.topics.add(InfraredRange)
+        MQTT.topics.add(Lidar)
         setupCompass()
         val displayMetrics: DisplayMetrics =  resources.displayMetrics
         vm.screenHeight = displayMetrics.heightPixels / displayMetrics.density
@@ -37,9 +41,7 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         println("BEN::channel opening")
         compass.start()
-        scope.async {
-            MQTT.start(AndroidDeviceListener(vm))
-        }.start()
+        MQTT.start()
 
 
 

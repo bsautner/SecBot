@@ -7,7 +7,7 @@ import com.secbot.core.AbstractDevice
 import java.io.File
 import java.util.*
 
-object Camera : AbstractDevice() {
+object Camera : AbstractDevice<Optional<File>>() {
 
     private var cam: RPiCamera = RPiCamera(Const.PHOTO_PATH)
         .setWidth(300).setHeight(200)
@@ -25,14 +25,20 @@ object Camera : AbstractDevice() {
 
     }
 
-    private fun takePhoto(): Optional<File> {
+    private suspend fun takePhoto() {
 
 
         val file = "${UUID.randomUUID()}.jpg"
         cam.takeStill(file, 500, 500)
         println("Took a photo of obstruction $file")
-        return Optional.of(File("${Const.PHOTO_PATH}/$file"))
+
+        update(Optional.of(File("${Const.PHOTO_PATH}/$file")))
 
 
+    }
+
+
+    override fun update(payload: Optional<File>) {
+        TODO("Not yet implemented")
     }
 }

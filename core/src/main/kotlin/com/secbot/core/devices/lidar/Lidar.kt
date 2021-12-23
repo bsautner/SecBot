@@ -7,7 +7,7 @@ import java.math.BigDecimal
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 
-object Lidar : AbstractDevice() {
+object Lidar : AbstractDevice<List<String>>() {
 
 
     val data = HashMap<Int, LidarPoint>()
@@ -21,7 +21,7 @@ object Lidar : AbstractDevice() {
     }
 
 
-    fun update(line: List<String>, mqttPub: Boolean) {
+    override fun update(line: List<String>) {
         val index = line[1].toBigDecimal().times(BigDecimal(100)).toInt()
 
         data[index]?.let {
@@ -29,14 +29,6 @@ object Lidar : AbstractDevice() {
             it.angle = line[1].toBigDecimal().toDouble()
             it.distance = line[2].toBigDecimal().toDouble()
 
-        }
-
-
-        if (mqttPub and (line[2].toBigDecimal().toDouble() > 0.0)) {
-            scope.async {
-
-                MQTT.publish(line.joinToString(separator = ",") { it })
-            }.start()
         }
 
 

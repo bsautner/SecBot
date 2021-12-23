@@ -82,7 +82,7 @@ void readSerial() {
     char inChar = (char)Serial1.read();
    
     if (inChar == '\n') {
-    Serial.println(s);    
+  //  Serial.println(s);
       if (s == "PING") {
          if (pingLedOn) {
               digitalWrite(PIN_PING_PONG_LED, LOW);
@@ -104,7 +104,7 @@ void readSerial() {
         steerServo(45);
       }
       else {
-        Serial.println(s);    
+       // Serial.println("unhandled serial input $s);
       }
       s = "";
     } else {

@@ -14,6 +14,9 @@ enum class Source {
     ACC_PI,
     ACC_SERIAL,
     STEER,
-    MQTT;
+    MQTT,
+    MOTOR,
+    FORWARD_IR,
+    COMPASS;
 
 }

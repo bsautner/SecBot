@@ -2,34 +2,31 @@ package com.secbot.pi.devices.serial
 
 import com.pi4j.io.serial.*
 import com.secbot.core.AbstractDevice
-import com.secbot.core.DeviceListener
+import com.secbot.core.Bus
 import com.secbot.core.Source
 import com.secbot.pi.devices.C
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.*
 
 
-object SerialPort : AbstractDevice() {
+object SerialPort : AbstractDevice<String>() {
 
     private const val ttyUSB0 = "ttyUSB0"
     private const val ttyUSB1 = "ttyUSB1"
 
-    private val queue : Queue<String> = LinkedList()
     private val serial: Serial = SerialFactory.createInstance()
 
-    override suspend fun start(deviceListener: DeviceListener) {
-        super.start(deviceListener)
-        //delay(10)
-        withContext(scope.coroutineContext) {
+    override fun start() {
+        super.start()
+        scope.launch {
             read()
-            while (stopped.not()) {
-              //  send()
-             //   delay(100)
-            }
         }
+
+
 
 
     }
@@ -64,7 +61,7 @@ object SerialPort : AbstractDevice() {
             serial.discardAll()
 
             println("Started Serial Port ${serial.isOpen}")
-            enqueue(Source.PING.name)
+        update(Source.PING.name)
 
 
         serial.addListener(SerialDataEventListener {
@@ -75,8 +72,9 @@ object SerialPort : AbstractDevice() {
                 split.forEach { part ->
 
                     scope.async {
-                         println("serial <- $part")
-                       deviceListener.onReceive(part.trim())
+                        println("serial RX $part")
+
+                       Bus.post(part.trim())
                     }.start()
 
                 }
@@ -85,12 +83,12 @@ object SerialPort : AbstractDevice() {
     }
 
 
-    fun enqueue(it: String) {
+    override fun update(payload: String) {
 
         if (serial.isOpen) {
-            println("Serial -> $it")
+            println("Serial TX $payload")
 
-            serial.writeln(it)
+            serial.writeln(payload)
 
         } else {
             C.print("Can't send serial command because port is closed")

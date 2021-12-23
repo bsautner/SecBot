@@ -5,17 +5,17 @@ import com.secbot.core.Source
 import com.secbot.core.mqtt.MQTT
 import kotlinx.coroutines.async
 
-object SteeringServo : AbstractDevice() {
+object SteeringServo : AbstractDevice<SteeringServo.Direction>() {
 
     enum class Direction {
        LEFT, RIGHT, FORWARD
     }
 
-    fun turn(pos: Direction) {
-        scope.async {
-            MQTT.publish("${Source.STEER},$pos")
-        }.start()
 
+    override fun update(payload: Direction) {
+        scope.async {
+            MQTT.publish(SteeringServo, "${Source.STEER},$payload")
+        }.start()
     }
 
 }
