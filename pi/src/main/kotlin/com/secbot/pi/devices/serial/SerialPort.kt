@@ -23,7 +23,12 @@ object SerialPort : AbstractDevice<String>() {
     override fun start() {
         super.start()
         scope.launch {
-            read()
+            runCatching {
+                read()
+            }.exceptionOrNull()?.let {
+                println(it.message)
+            }
+
         }
 
 
@@ -41,6 +46,7 @@ object SerialPort : AbstractDevice<String>() {
         } else if (tty1.exists()) {
             ttyUSB1
         } else {
+
             throw RuntimeException("Can't find a serial port :(")
         }
 

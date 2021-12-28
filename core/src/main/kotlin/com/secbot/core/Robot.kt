@@ -9,13 +9,16 @@ import kotlin.collections.ArrayList
 @ExperimentalCoroutinesApi
 object Robot : AbstractDevice<Device>() {
 
-    private val devices : MutableList<Device> = ArrayList()
+    val devices : MutableList<Device> = ArrayList()
 
 
 
     @Throws(IOException::class, InterruptedException::class)
     override fun start() {
         super.start()
+        devices.forEach {
+            it.start()
+        }
 
     }
 

@@ -18,9 +18,9 @@ abstract class AbstractDevice<T> : Device {
 
      override fun start() {
 
-          Robot.update(this)
+          //Robot.update(this)
 
-          val cls = this::javaClass.name
+          val cls = this::class.java.name
           scope.launch(newSingleThreadContext(cls)) {
                println("Starting $cls Thread: ${Thread.currentThread().name}")
                while (!stopped) {

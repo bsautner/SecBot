@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import com.secbot.core.devices.InfraredRange
+import com.secbot.core.devices.Sonar
 import com.secbot.core.devices.lidar.Lidar
 
 
@@ -21,6 +22,7 @@ class MainViewModel : ViewModel() {
     var compass by mutableStateOf(0.0F)
     var lidar by mutableStateOf(Lidar)
     var infraredRange by mutableStateOf(InfraredRange)
+    var sonar by mutableStateOf(Sonar)
 
     fun getClosestObstacle() : Double {
         var result = Double.MAX_VALUE

@@ -21,6 +21,10 @@ class AndroidDeviceListener(private val vm: MainViewModel) : DeviceListener {
             Source.FORWARD_IR -> {
                 vm.infraredRange.update(split[1].toFloat())
             }
+            Source.SONAR -> {
+                println("sonar: ${data}")
+                vm.sonar.update(split[1].toFloat())
+            }
 
             else -> {
                 println("error: unhandled incoming data:: $data")

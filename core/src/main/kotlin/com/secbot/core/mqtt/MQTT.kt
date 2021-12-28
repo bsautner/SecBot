@@ -3,6 +3,7 @@ package com.secbot.core.mqtt
 import com.secbot.core.AbstractDevice
 import com.secbot.core.Bus
 import com.secbot.core.Device
+import com.secbot.core.Robot
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.eclipse.paho.client.mqttv3.*
@@ -18,7 +19,6 @@ object MQTT : AbstractDevice<String>() {
     private val persistence = MemoryPersistence()
     private lateinit var client : MqttClient
     lateinit var broker : String
-    val topics : MutableList<Device> = ArrayList()
 
     private val listener = object : MqttCallback {
         override fun connectionLost(cause: Throwable?) {
@@ -61,9 +61,10 @@ object MQTT : AbstractDevice<String>() {
                 delay(10)
             }
             println("MQTT Connected MQTT OK")
-               topics.forEach {
-                   subscribe(it.topic())
-               }
+            Robot.devices.forEach {
+                subscribe(it.topic())
+            }
+
 
         }
 

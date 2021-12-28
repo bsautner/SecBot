@@ -5,6 +5,7 @@ import com.secbot.core.DeviceScope
 import com.secbot.pi.devices.C
 import com.secbot.core.Robot
 import com.secbot.core.devices.Motor
+import com.secbot.core.devices.Sonar
 import com.secbot.core.mqtt.MQTT
 import com.secbot.pi.devices.serial.SerialPort
 import kotlinx.coroutines.*
@@ -25,17 +26,18 @@ object Program  {
         C.box("Starting Up Main Program")
         Bus.deviceListener = PiDeviceListener()
         MQTT.broker = broker
-        MQTT.topics.add(Motor)
 
 
-            Robot.start()
-            MQTT.start()
-            SerialPort.start()
+
+
+
 
             Robot.update(SerialPort)
             Robot.update(MQTT)
+            Robot.update(Sonar)
+            Robot.update(Motor)
 
-
+            Robot.start()
 
 
 

@@ -48,6 +48,7 @@ fun lidarComposable(vm: MainViewModel) {
                 Canvas(modifier = Modifier.fillMaxSize(), onDraw = {
                     val obs = vm.getClosestObstacle()
                     val ir = vm.infraredRange.rangeCm
+                    val son = vm.sonar.rangeCm
                     val padding = 50
                     canvasWidth = size.width - padding
                     canvasHeight = size.height - padding
@@ -141,7 +142,7 @@ fun lidarComposable(vm: MainViewModel) {
 
 
                     drawContext.canvas.nativeCanvas.drawText(
-                        "clearance: IR: ${ir.toInt()} ${obs.toInt()}mm", canvasWidth / 2, canvasHeight - 20, paint
+                        "clearance: Sonar: ${son.toInt()}cm IR: ${ir.toInt()}cm ${obs.toInt()}mm", canvasWidth / 2, canvasHeight - 20, paint
                     )
                 })
             }

@@ -17,6 +17,7 @@ enum class Source {
     MQTT,
     MOTOR,
     FORWARD_IR,
-    COMPASS;
+    COMPASS,
+    SONAR;
 
 }
