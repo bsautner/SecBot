@@ -24,16 +24,17 @@ repositories {
     maven(url= "https://oss.sonatype.org/content/groups/public")
     maven(url ="https://jitpack.io")
 }
-tasks {
-    "build" {
-        dependsOn(fatJar)
-    }
-}
+//tasks {
+//    "build" {
+//        dependsOn(fatJar)
+//    }
+//}
 
 dependencies {
 
     implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
-
+    implementation("io.ktor:ktor-network:1.4.1")
+    implementation("io.ktor:ktor-websockets:1.4.1")
     implementation("com.github.Hopding:JRPiCam:1.1.1")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.20")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0")
@@ -63,13 +64,13 @@ dependencies {
 //        attributes["Main-Class"] = "com.secbot.pi.Application"
 //    }
 //}
-val fatJar = task("fatJar", type = org.gradle.jvm.tasks.Jar::class) {
-    baseName = "${project.name}-fat"
-    manifest {
-        attributes["Implementation-Title"] = "SecBot Go!"
-        attributes["Implementation-Version"] = version
-        attributes["Main-Class"] = "com.secbot.pi.Application"
-    }
-    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
-    with(tasks.jar.get() as CopySpec)
-}
+//val fatJar = task("fatJar", type = org.gradle.jvm.tasks.Jar::class) {
+//    baseName = "${project.name}-fat"
+//    manifest {
+//        attributes["Implementation-Title"] = "SecBot Go!"
+//        attributes["Implementation-Version"] = version
+//        attributes["Main-Class"] = "com.secbot.pi.Application"
+//    }
+//    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
+//    with(tasks.jar.get() as CopySpec)
+//}
