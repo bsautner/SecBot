@@ -20,6 +20,8 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.secbot.core.devices.lidar.Lidar
+import com.secbot.core.devices.lidar.LidarPoint
+import com.google.gson.JsonArray
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -29,6 +31,7 @@ fun lidarComposable(vm: LidarViewModel) {
 
     val lidar: Lidar by vm.lidar.observeAsState(vm.lidar.value ?: Lidar())
     val t: String by vm.live.observeAsState("")
+    val payload: JsonArray by vm.payload.observeAsState(JsonArray())
 
     val paint = Paint()
     paint.textAlign = Paint.Align.CENTER
@@ -111,10 +114,25 @@ fun lidarComposable(vm: LidarViewModel) {
                         val surroundings: MutableList<Offset> = ArrayList()
 
 
-                        lidar.data.values.forEach {
 
-                            val angle: Double = it.angle
-                            val distance: Double = it.distance
+
+
+//
+//                            .forEach { v ->
+//                            val item = v.asJsonArray
+//                            if (item[0].asInt >= 15 && item[2].asDouble > 5.0) {
+//                                val point = LidarPoint(item[1].asDouble, item[2].asDouble)
+//                                if (lidar.update(point)) {
+//                                    mqtt.publish(Lidar.topic, gson.toJson(point))
+//                                }
+//                            }
+//                        }
+//
+
+                       payload.forEach {
+                            val item = it.asJsonArray
+                            val angle: Double = item[1].asDouble
+                            val distance: Double = item[2].asDouble
                             val fixed = angle - vm.compass
                             val rad = fixed * PI / 180
                             val xx = this.center.x + (distance * cos(rad))

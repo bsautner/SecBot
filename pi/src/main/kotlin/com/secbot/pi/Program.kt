@@ -27,7 +27,7 @@ object Program {
     private val listener = object : MqttListener {
         override fun onConnected() {
             println("MQTT Connected")
-            mqtt.subscribe("RAW_LIDAR")
+          //  mqtt.subscribe("RAW_LIDAR")
 
         }
 
@@ -47,7 +47,7 @@ object Program {
                                 if (item[0].asInt >= 15 && item[2].asDouble > 5.0) {
                                     val point = LidarPoint(item[1].asDouble, item[2].asDouble)
                                     if (lidar.update(point)) {
-                                        mqtt.publish(Lidar.topic, gson.toJson(point))
+                                     //   mqtt.publish(Lidar.topic, gson.toJson(point))
                                     }
                                 }
                             }

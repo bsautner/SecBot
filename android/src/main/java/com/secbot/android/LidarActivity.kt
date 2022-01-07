@@ -18,16 +18,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.Observer
+import com.google.gson.Gson
+import com.google.gson.JsonArray
+import com.secbot.core.DeviceScope
 import com.secbot.core.devices.lidar.Lidar
-import com.secbot.core.devices.lidar.LidarPoint
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
+import com.secbot.core.mqtt.MQTT
+import com.secbot.core.mqtt.MqttListener
+import com.secbot.core.mqtt.Topic
 import kotlinx.coroutines.launch
-import java.util.*
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
+import org.eclipse.paho.client.mqttv3.MqttMessage
 
-class LidarActivity : ComponentActivity() {
+class LidarActivity : ComponentActivity(), MqttListener {
 
+    private val scope: DeviceScope = DeviceScope()
+    // private val vm by viewModels<MainViewModel>()
+    private val broker = "tcp://10.0.0.205:1883"
+    private val mqtt: MQTT = MQTT(this, broker)
+    private val gson = Gson()
     val vm by viewModels<LidarViewModel>()
 
 
@@ -38,50 +46,41 @@ class LidarActivity : ComponentActivity() {
         vm.screenWidth = displayMetrics.widthPixels / displayMetrics.density
         setContent {
             lidarComposable(vm)
-//            SecbotTheme {
-//                // A surface container using the 'background' color from the theme
-//                Surface(color = MaterialTheme.colors.background) {
-//                    Greeting(vm, vm.live.value ?: "null")
-//                }
-//            }
         }
 
-        val observer = Observer<String> {
-            //println("BEN:: $it")
-
-        }
-
-        val lidarObserver = Observer<Lidar> {
-            //println("BEN:: $it")
-
-        }
-        vm.live.observe(this, observer)
-        vm.lidar.observe(this, lidarObserver)
-
-
+         vm.payload.observe(this) {}
     }
 
-    val r = Random()
-    suspend fun tick() {
-        while (true) {
-            vm.live.postValue(System.currentTimeMillis().toString())
-           // println("BEN:: tick")
-          //  vm.lidar.value?.update(LidarPoint(r.nextInt(360).toDouble(), r.nextInt(1000).toDouble()))
-             delay(100)
-        }
-    }
+
 
     override fun onResume() {
         super.onResume()
-        vm.live.postValue("foo")
-        GlobalScope.launch {
-            vm.start()
-            tick()
+        scope.launch {
+            mqtt.start()
+        }
+    }
 
+    override fun onConnected() {
+        Topic.values().forEach {
+            mqtt.subscribe(it.name)
         }
 
-
     }
+
+    override fun connectionLost(cause: Throwable?) {
+        println("MQTT Connection Lost")
+    }
+
+    override fun messageArrived(topic: String, message: MqttMessage) {
+        when (Topic.valueOf(topic)) {
+            Topic.RAW_LIDAR -> {
+                val payload = gson.fromJson(String(message.payload), JsonArray::class.java)
+                vm.payload.postValue(payload)
+            }
+        }
+    }
+
+    override fun deliveryComplete(token: IMqttDeliveryToken?) { }
 }
 
 
