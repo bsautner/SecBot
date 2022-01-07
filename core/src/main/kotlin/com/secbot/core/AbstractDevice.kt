@@ -4,7 +4,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
-import java.lang.StringBuilder
 
 
 abstract class AbstractDevice<T> : Device {
@@ -18,8 +17,6 @@ abstract class AbstractDevice<T> : Device {
 
      override fun start() {
 
-          //Robot.update(this)
-
           val cls = this::class.java.name
           scope.launch(newSingleThreadContext(cls)) {
                println("Starting $cls Thread: ${Thread.currentThread().name}")
@@ -31,7 +28,9 @@ abstract class AbstractDevice<T> : Device {
      }
 
 
-     abstract fun update(device: T)
+
+
+     abstract fun update(value: T)
 
      override fun stop() {
           scope.cancel()

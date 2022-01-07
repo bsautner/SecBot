@@ -1,53 +1,26 @@
 package com.secbot.core.mqtt
 
-import com.secbot.core.AbstractDevice
-import com.secbot.core.Bus
-import com.secbot.core.Device
-import com.secbot.core.Robot
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import org.eclipse.paho.client.mqttv3.*
+import org.eclipse.paho.client.mqttv3.MqttClient
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions
+import org.eclipse.paho.client.mqttv3.MqttMessage
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 import java.util.*
-import kotlin.collections.ArrayList
 
-object MQTT : AbstractDevice<String>() {
+class MQTT(private val listener: MqttListener, private val broker: String) {
 
-    private const val qos = 0
+
 
     private val clientId = UUID.randomUUID().toString()
     private val persistence = MemoryPersistence()
     private lateinit var client : MqttClient
-    lateinit var broker : String
-
-    private val listener = object : MqttCallback {
-        override fun connectionLost(cause: Throwable?) {
-            println("MQTT Connection Lost")
-        }
-
-        override fun messageArrived(topic: String?, message: MqttMessage?) {
-
-            message?.let {
-             println("MQTT RX $it")
-                scope.launch {
-                    Bus.post(it.toString())
-                   }
-            }
 
 
-        }
 
-        override fun deliveryComplete(token: IMqttDeliveryToken?) {
+     suspend fun start() {
+         client = MqttClient(broker, clientId, persistence)
 
-        }
 
-    }
-
-    override fun start() {
-        super.start()
-        client = MqttClient(broker, clientId, persistence)
-
-        scope.launch {
             val connOpts = MqttConnectOptions()
             connOpts.isCleanSession = true
             connOpts.userName = "ben"
@@ -60,49 +33,34 @@ object MQTT : AbstractDevice<String>() {
             while (client.isConnected.not()) {
                 delay(10)
             }
-            println("MQTT Connected MQTT OK")
-            Robot.devices.forEach {
-                subscribe(it.topic())
-            }
-
-
-        }
-
-
-
+           listener.onConnected()
 
     }
 
-     fun publish(device: Device, data: String) {
-         println("MQTT TX ${device.topic()} $data")
-        checkConnection()
+     fun publish(topic: String, data: String) {
+         println("MQTT TX $topic $data")
 
         val message = MqttMessage(data.toByteArray())
         message.qos = qos
-        client.publish(device.topic(), message)
+        client.publish(topic, message)
 
 
     }
 
      fun subscribe(topic: String) {
-        checkConnection()
-
-         println("MQTT SUB $topic")
+        println("MQTT SUB $topic")
         client.subscribe(topic)
 
 
     }
 
-    private fun checkConnection() {
-        if (! client.isConnected ) {
-            println("MQTT reconnecting mqtt broker")
-            start()
-        }
+    fun stop() {
+        client.disconnect()
     }
 
-    override fun update(device: String) {
-        TODO("Not yet implemented")
-    }
 
+    companion object {
+        private const val qos = 0
+    }
 
 }

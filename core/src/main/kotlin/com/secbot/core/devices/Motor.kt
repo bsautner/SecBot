@@ -14,7 +14,7 @@ object Motor : AbstractDevice<Motion>()  {
         if (lastMotion != payload) {
             lastMotion = payload
             scope.async {
-                MQTT.publish(Motor, "MOTOR,${payload}")
+              //  MQTT.publish(Motor, "MOTOR,${payload}")
             }.start()
 
         }

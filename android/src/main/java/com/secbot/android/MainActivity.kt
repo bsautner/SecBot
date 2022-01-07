@@ -1,86 +1,90 @@
 package com.secbot.android
 
+import android.app.Activity
 import android.os.Bundle
 import android.util.DisplayMetrics
-import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.ui.platform.setContent
-import com.secbot.android.Compass.CompassListener
+import androidx.lifecycle.Observer
+import com.google.gson.Gson
 import com.secbot.core.DeviceScope
-import com.secbot.core.Robot
-import com.secbot.core.devices.InfraredRange
-import com.secbot.core.devices.Sonar
 import com.secbot.core.devices.lidar.Lidar
 import com.secbot.core.mqtt.MQTT
+import com.secbot.core.mqtt.MqttListener
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.async
-
+import kotlinx.coroutines.launch
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
+import org.eclipse.paho.client.mqttv3.MqttMessage
 
 @ExperimentalCoroutinesApi
-class MainActivity : AppCompatActivity() {
+class MainActivity : Activity(), MqttListener {
 
     private val scope: DeviceScope = DeviceScope()
-    private val vm by viewModels<MainViewModel>()
-    private lateinit var compass: Compass
+   // private val vm by viewModels<MainViewModel>()
     private val broker = "tcp://10.0.0.205:1883"
+    private val mqtt: MQTT = MQTT(this, broker)
+    private val gson = Gson()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        MQTT.broker = broker
 
-      //  MQTT.topics.add(InfraredRange)
-       // MQTT.topics.add(Lidar)
-        setupCompass()
         val displayMetrics: DisplayMetrics =  resources.displayMetrics
-        vm.screenHeight = displayMetrics.heightPixels / displayMetrics.density
-        vm.screenWidth = displayMetrics.widthPixels / displayMetrics.density
-        setContent {
-            lidarComposable(vm)
+//        vm.screenHeight = displayMetrics.heightPixels / displayMetrics.density
+//        vm.screenWidth = displayMetrics.widthPixels / displayMetrics.density
+//        setContent {
+//            lidarComposable(vm)
+//        }
+
+        val observer = Observer<String> {
+            println(it)
         }
+
 
     }
 
     override fun onResume() {
         super.onResume()
         println("BEN::channel opening")
-        compass.start()
-        Robot.update(Sonar)
-        Robot.update(Lidar)
-        Robot.update(InfraredRange)
-        MQTT.start()
+        //compass.start()
+        scope.launch {
+            mqtt.start()
+        }
 
 
 
-        println("BEN:: channel closed")
-    }
 
-    override fun onPause() {
-        super.onPause()
-        compass.stop()
+
     }
 
 
-    private fun setupCompass() {
-        compass = Compass(this)
-        val cl: CompassListener = getCompassListener()
-        compass.setListener(cl)
+    override fun onDestroy() {
+        super.onDestroy()
+        mqtt.stop()
     }
 
-    private fun getCompassListener(): CompassListener {
-        return object : CompassListener {
-            override fun onNewAzimuth(azimuth: Float) {
-           //     println("Compass: $azimuth")
-                vm.compass = azimuth
+    override fun onConnected() {
+       mqtt.subscribe(Lidar.topic)
+    }
+
+    override fun connectionLost(cause: Throwable?) {
+      // Lidar.stop()
+    }
+
+    override fun messageArrived(topic: String?, message: MqttMessage?) {
+        println("MQTT RX: $topic ${message.toString()}")
+        when (topic) {
+            Lidar.topic -> {
+                message?.let {
+                 //   vm.lidar.storeChanged(gson.fromJson(String(it.payload), LidarPoint::class.java))
+                  //  vm.clearance.postValue(System.currentTimeMillis())
+                }
+
+
             }
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        MQTT.stop()
+    override fun deliveryComplete(token: IMqttDeliveryToken?) {
+
     }
-
-
 
 
 }

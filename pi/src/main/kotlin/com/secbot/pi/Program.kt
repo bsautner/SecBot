@@ -1,106 +1,89 @@
+@file:OptIn(KtorExperimentalAPI::class)
+
 package com.secbot.pi
 
-import com.google.gson.GsonBuilder
+import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-import com.pi4j.io.gpio.GpioController
-import com.pi4j.io.gpio.GpioFactory
-import com.pi4j.io.gpio.GpioPinDigitalOutput
-import com.pi4j.io.gpio.RaspiPin
-import com.secbot.core.Bus
 import com.secbot.core.DeviceScope
-import com.secbot.pi.devices.C
-import com.secbot.core.Robot
-import com.secbot.core.devices.Motor
-import com.secbot.core.devices.Sonar
 import com.secbot.core.devices.lidar.Lidar
+import com.secbot.core.devices.lidar.LidarPoint
 import com.secbot.core.mqtt.MQTT
-import com.secbot.pi.devices.led.ArduinoPongLed
-import com.secbot.pi.devices.serial.SerialPort
-import io.ktor.network.selector.*
-import kotlinx.coroutines.*
+import com.secbot.core.mqtt.MqttListener
+import io.ktor.util.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
+import org.eclipse.paho.client.mqttv3.MqttMessage
 import java.io.IOException
-import java.net.InetSocketAddress
-import io.ktor.network.sockets.*
-import io.ktor.utils.io.*
 
-@ExperimentalCoroutinesApi
-object Program  {
+object Program {
 
-    private val broker = "tcp://localhost:1883"
-    val scope = DeviceScope()
+    private const val broker =  "tcp://localhost:1883"
+    private val gson = Gson()
+    private val scope = DeviceScope()
+    private val lidar = Lidar()
+
+    private val listener = object : MqttListener {
+        override fun onConnected() {
+            println("MQTT Connected")
+            mqtt.subscribe("RAW_LIDAR")
+
+        }
+
+        override fun connectionLost(cause: Throwable?) {
+           println("MQTT Connection Lost: ${cause?.message}")
+            cause?.printStackTrace()
+        }
+
+        override fun messageArrived(topic: String?, message: MqttMessage?) {
+            scope.launch {
+                when (topic) {
+                    "RAW_LIDAR" -> {
+                        message?.let {
+                            val payload = gson.fromJson(String(it.payload), JsonArray::class.java)
+                            payload.forEach { v ->
+                                val item = v.asJsonArray
+                                if (item[0].asInt >= 15 && item[2].asDouble > 5.0) {
+                                    val point = LidarPoint(item[1].asDouble, item[2].asDouble)
+                                    if (lidar.update(point)) {
+                                        mqtt.publish(Lidar.topic, gson.toJson(point))
+                                    }
+                                }
+                            }
+                        }
+                        //  println("Processing Raw Lidar")
+                    }
+                    else -> {
+                        println("MQTT Message Arrived but unhandled $topic")
+                    }
+                }
+            }
+
+
+        }
+
+        override fun deliveryComplete(token: IMqttDeliveryToken?) { }
+
+    }
+
+    private val mqtt : MQTT = MQTT(listener, broker)
+
 
     @Throws(InterruptedException::class, IOException::class)
     @JvmStatic
     fun main(args: Array<String>) {
-//        val gpio: GpioController = GpioFactory.getInstance()
-//
-//        val motorPin: GpioPinDigitalOutput = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_07)
-//
-//        motorPin.high()
 
-        Bus.deviceListener = PiDeviceListener()
-      //  MQTT.broker = broker
-      //  MQTT.start()
-
-            runBlocking {
-                val server = aSocket(ActorSelectorManager(Dispatchers.IO)).tcp().bind(InetSocketAddress("127.0.0.1", 2323))
-                println("Started echo telnet server at ${server.localAddress}")
-
-                while (true) {
-                    val socket = server.accept()
-
-                    scope.launch {
-                       // println("Socket accepted: ${socket.remoteAddress} ${Thread.currentThread().name}")
-
-                        val input = socket.openReadChannel()
-                      //  val output = socket.openWriteChannel(true)
-                        val line = input.readUTF8Line(4200)
-                        line?.let {
-                        //    MQTT.publish(Lidar, line )
-                            val values = GsonBuilder().create().fromJson<JsonArray>(it, JsonArray::class.java)
-                            println(values.size())
-                        }
-
-                      //  println("${line?.length}")
-                    //    val obj = GsonBuilder().create().fromJson(line, JsonArray::class.java)
-                    // //   println("${obj.size()}")
-//
-//                        line?.let {
-//                         //   println("${socket.remoteAddress}: $it")
-//                            output.writeAvailable("echo $it ${System.currentTimeMillis()}".toByteArray())
-//
-//                        }
-
-
-                    }
-                }
-            }
+        GlobalScope.launch {
+            mqtt.start()
         }
 
-//        val gpio: GpioController = GpioFactory.getInstance()
-//
-//        val motorPin: GpioPinDigitalOutput = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_07)
-//
-//        motorPin.high()
-//
-//            Robot.update(SerialPort)
-//            Robot.update(MQTT)
-//            Robot.update(Sonar)
-//            Robot.update(Motor)
-//
-//            Robot.start()
-//
-//
-//
-//        while(true) {
-//            Thread.sleep(10)
-//        }
-//
 
+        while (true) {
+            Thread.sleep(10)
+        }
 
-
- //  }
+    }
 
 
 }

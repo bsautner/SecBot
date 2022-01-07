@@ -8,81 +8,89 @@ import time
 import board
 import digitalio
 import json
+import random
+import paho.mqtt.client as mqtt_client
 
-
-HOST = '127.0.0.1'  # The server's hostname or IP address
-PORT = 2323        # The port used by the server
-
+broker = "localhost"
+port = 1883
+topic = "RAW_LIDAR"
+client_id = f'python-mqtt-{random.randint(0, 1000)}'
+username = 'ben'
+password = 'imarobot'
 
 PORT_NAME = '/dev/ttyUSB0'
-lidar = RPLidar(None, PORT_NAME)
 
 # used to scale data to fit on the screen
 max_distance = 0
-scan_data = [0]*360
+scan_data = [0] * 360
 led = digitalio.DigitalInOut(board.D4)
 led.direction = digitalio.Direction.OUTPUT
-# quality, angle, distance https://github.com/adafruit/Adafruit_CircuitPython_RPLIDAR/blob/208b16f92b6491d3d950d587bc9eb60ea2d51251/adafruit_rplidar.py#L508
-def collect_data():
+
+
+# quality, angle, distance https://github.com/adafruit/Adafruit_CircuitPython_RPLIDAR/blob
+# /208b16f92b6491d3d950d587bc9eb60ea2d51251/adafruit_rplidar.py#L508
+def collect_data(client):
     try:
+        led.value = False
+        sleep(2)
+        led.value = True
+        sleep(2)
+        lidar = RPLidar(None, PORT_NAME)
+
         print(lidar.info)
 
         for scan in lidar.iter_scans():
-            print(scan)
-            post(scan)
-            # for (_, angle, distance) in scan:
-            #     scan_data[min([359, floor(angle)])] = distance
-                # try:
-                #     # print("processing")
-                #     # process_data(scan_data)
-                #     post(scan_data)
-                # except RPLidarException as err:
-                #     print(err)
-
-
+            post(client, scan)
+    except RPLidarException:
+        lidar.stop()
+        lidar.disconnect()
+        collect_data(client)
     except KeyboardInterrupt:
-        print('Stoping.')
-    lidar.stop()
-    lidar.disconnect()
+        print('Stopping.')
+        lidar.stop()
+        lidar.disconnect()
 
-def post(data):
+
+def connect_mqtt():
+    def on_connect(client, userdata, flags, rc):
+        if rc == 0:
+            print("Connected to MQTT Broker!")
+
+        else:
+            print("Failed to connect, return code %d\n", rc)
+
+    client = mqtt_client.Client(client_id)
+    client.username_pw_set(username, password)
+    client.on_connect = on_connect
+    client.connect(broker, port)
+    return client
+
+
+def post(client, data):
     try:
         v = json.dumps(data)
-        byte_message = bytes(v, 'utf-8')
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.connect((HOST, PORT))
-            s.sendall(byte_message)
+
+        result = client.publish(topic, v)
+        # result: [0, 1]
+        status = result[0]
+        if status == 1:
+            print(f"Failed to send message to topic {topic}")
     except (ConnectionResetError, ConnectionRefusedError) as err:
         print(err)
-#
-# def process_data(data):
-#     global max_distance
-#
-#     for angle in range(360):
-#         distance = data[angle]
-#
-#         # if distance > 0:                  # ignore initially ungathered data points
-#             # post(angle, distance)
-#             # max_distance = max([min([5000, distance]), max_distance])
-#             # radians = angle * pi / 180.0
-#             # x = distance * cos(radians)
-#             # y = distance * sin(radians)
-#             # point = (160 + int(x / max_distance * 119), 120 + int(y / max_distance * 119))
-#
-
 
 
 def run():
-    print("hello lidar")
-    led.value = True
-    sleep(2)
+    print("hello mqtt lidar!")
+    client = connect_mqtt()
+    client.loop_start()
+
+
+
     try:
-        collect_data()
+        collect_data(client)
     except RPLidarException as err:
         print(err)
         led.value = False
-
-
 
 
 if __name__ == '__main__':

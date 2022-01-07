@@ -1,17 +1,10 @@
 package com.secbot.core.devices.lidar
 
-import com.secbot.core.AbstractDevice
-import com.secbot.core.mqtt.MQTT
-import kotlinx.coroutines.async
-import java.math.BigDecimal
-import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.atomic.AtomicLong
-
-object Lidar : AbstractDevice<List<String>>() {
 
 
-    val data = HashMap<Int, LidarPoint>()
+class Lidar  {
 
+    val data: MutableMap<Int, LidarPoint> = HashMap()
 
     init {
         for (i in 1..(36000)) {
@@ -21,20 +14,27 @@ object Lidar : AbstractDevice<List<String>>() {
     }
 
 
-    override fun update(line: List<String>) {
-        val index = line[1].toBigDecimal().times(BigDecimal(100)).toInt()
+    fun update(value: LidarPoint): Boolean {
 
-        data[index]?.let {
-            it.timestamp = System.currentTimeMillis()
-            it.angle = line[1].toBigDecimal().toDouble()
-            it.distance = line[2].toBigDecimal().toDouble()
+        if (value.index > data.size) {
+            throw RuntimeException("wierd angle")
+        }
+        val old: LidarPoint? = data[value.index ]
+        old?.let {
+            if (old.distance != value.distance) {
+                data[value.index ] = value
+                return true
+            }
 
         }
-
+        return false
 
     }
 
-
+    companion object {
+         val topic :String = Lidar::class.java.simpleName
+    }
 
 
 }
+

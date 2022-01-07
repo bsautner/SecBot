@@ -2,9 +2,7 @@ package com.secbot.pi.devices.mag
 
 
 import com.secbot.core.AbstractDevice
-import com.secbot.core.Bus
 import com.secbot.core.Source
-import com.secbot.core.DeviceListener
 import kotlinx.coroutines.*
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -68,7 +66,7 @@ object MagnetometerAccelerometer : AbstractDevice<String>() {
         bufferedReader.lines().forEach {
 
             scope.async {
-                Bus.post(it)
+               // Bus.post(it)
              }.start()
 
         }

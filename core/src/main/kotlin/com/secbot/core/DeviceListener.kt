@@ -2,5 +2,5 @@ package com.secbot.core
 
 interface DeviceListener {
 
-   suspend fun onReceive(data: String)
+   suspend fun onReceive(topic: String, data: String)
 }

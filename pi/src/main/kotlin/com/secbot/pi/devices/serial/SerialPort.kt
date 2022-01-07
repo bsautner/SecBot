@@ -2,13 +2,11 @@ package com.secbot.pi.devices.serial
 
 import com.pi4j.io.serial.*
 import com.secbot.core.AbstractDevice
-import com.secbot.core.Bus
 import com.secbot.core.Source
 import com.secbot.pi.devices.C
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.*
 
@@ -80,7 +78,7 @@ object SerialPort : AbstractDevice<String>() {
                     scope.async {
                         println("serial RX $part")
 
-                       Bus.post(part.trim())
+                       //Bus.post(part.trim())
                     }.start()
 
                 }

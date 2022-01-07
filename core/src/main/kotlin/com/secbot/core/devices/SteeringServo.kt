@@ -14,7 +14,7 @@ object SteeringServo : AbstractDevice<SteeringServo.Direction>() {
 
     override fun update(payload: Direction) {
         scope.async {
-            MQTT.publish(SteeringServo, "${Source.STEER},$payload")
+        //    MQTT.publish(SteeringServo, "${Source.STEER},$payload")
         }.start()
     }
 
