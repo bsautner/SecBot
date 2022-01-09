@@ -21,30 +21,29 @@ password = 'imarobot'
 PORT_NAME = '/dev/ttyUSB0'
 
 # used to scale data to fit on the screen
-max_distance = 0
 scan_data = [0] * 360
-led = digitalio.DigitalInOut(board.D4)
-led.direction = digitalio.Direction.OUTPUT
+motor = digitalio.DigitalInOut(board.D4)
+motor.direction = digitalio.Direction.OUTPUT
 
 
-# quality, angle, distance https://github.com/adafruit/Adafruit_CircuitPython_RPLIDAR/blob
-# /208b16f92b6491d3d950d587bc9eb60ea2d51251/adafruit_rplidar.py#L508
 def collect_data(client):
+    lidar = RPLidar(None, PORT_NAME)
     try:
-        led.value = False
+
+        motor.value = False
         sleep(2)
-        led.value = True
+        motor.value = True
         sleep(2)
-        lidar = RPLidar(None, PORT_NAME)
 
         print(lidar.info)
 
         for scan in lidar.iter_scans():
             post(client, scan)
     except RPLidarException:
-        lidar.stop()
-        lidar.disconnect()
-        collect_data(client)
+        if lidar is not None:
+            lidar.stop()
+            lidar.disconnect()
+            collect_data(client)
     except KeyboardInterrupt:
         print('Stopping.')
         lidar.stop()
@@ -90,7 +89,7 @@ def run():
         collect_data(client)
     except RPLidarException as err:
         print(err)
-        led.value = False
+        motor.value = False
 
 
 if __name__ == '__main__':
