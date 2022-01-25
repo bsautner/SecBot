@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalComposeUiApi::class)
+
 package com.secbot.android
 
 import android.os.Bundle
@@ -14,6 +16,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -21,7 +24,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.secbot.core.DeviceScope
+import com.secbot.core.Motion
 import com.secbot.core.devices.lidar.Lidar
+import com.secbot.core.devices.motor.MotorCommand
 import com.secbot.core.mqtt.MQTT
 import com.secbot.core.mqtt.MqttListener
 import com.secbot.core.mqtt.Topic
@@ -36,7 +41,7 @@ class LidarActivity : ComponentActivity(), MqttListener {
     private val broker = "tcp://10.0.0.205:1883"
     private val mqtt: MQTT = MQTT(this, broker)
     private val gson = Gson()
-    val vm by viewModels<LidarViewModel>()
+    private val vm by viewModels<LidarViewModel>()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,14 +54,36 @@ class LidarActivity : ComponentActivity(), MqttListener {
         }
 
          vm.payload.observe(this) {}
+
+        vm.touch.observe(this) {
+          sendMotorCommand(it)
+
+
+        }
+
     }
 
+    private fun sendMotorCommand(offset: Offset) {
+        val motion : Motion = if (offset == vm.center) {
+            Motion.STOP
+        } else if (offset.y > vm.center.y) {
+            Motion.REVERSE
+        } else {
+            Motion.FORWARD
+        }
+        val command = MotorCommand(motion)
+        mqtt.publish("MOTOR", gson.toJson(command))
+
+    }
 
 
     override fun onResume() {
         super.onResume()
         scope.launch {
-            mqtt.start()
+            kotlin.runCatching {
+                mqtt.start()
+            }
+
         }
     }
 
@@ -64,6 +91,7 @@ class LidarActivity : ComponentActivity(), MqttListener {
         Topic.values().forEach {
             mqtt.subscribe(it.name)
         }
+
 
     }
 

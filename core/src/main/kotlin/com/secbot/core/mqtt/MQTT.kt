@@ -38,17 +38,19 @@ class MQTT(private val listener: MqttListener, private val broker: String) {
     }
 
      fun publish(topic: String, data: String) {
-         println("MQTT TX $topic $data")
+       //  println("MQTT TX $topic $data")
 
         val message = MqttMessage(data.toByteArray())
         message.qos = qos
-        client.publish(topic, message)
+         if (client.isConnected) {
+             client.publish(topic, message)
+         }
 
 
     }
 
      fun subscribe(topic: String) {
-        println("MQTT SUB $topic")
+       // println("MQTT SUB $topic")
         client.subscribe(topic)
 
 

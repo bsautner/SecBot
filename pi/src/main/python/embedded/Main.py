@@ -1,55 +1,59 @@
+import RPi.GPIO as GPIO
 from math import cos, sin, pi, floor
 from adafruit_rplidar import RPLidar
+from adafruit_rplidar import RPLidarException
 import socket
 from time import sleep
+import threading
 import time
 import board
 import digitalio
+import json
+import random
+import paho.mqtt.client as mqtt_client
+import network.mqtt as mqtt
+import sensors.sonar as sonar
+
+running = False
+
+broker = "localhost"
+port = 1883
+topic = "RAW_LIDAR"
+client_id = f'python-mqtt-{random.randint(0, 1000)}'
+username = 'ben'
+password = 'imarobot'
 
 PORT_NAME = '/dev/ttyUSB0'
-lidar = RPLidar(None, PORT_NAME)
-
-# used to scale data to fit on the screen
-max_distance = 0
-scan_data = [0]*360
+scan_data = [0] * 360
+lidar_motor = digitalio.DigitalInOut(board.D4)
+lidar_motor.direction = digitalio.Direction.OUTPUT
 
 
-led = digitalio.DigitalInOut(board.D7)
-led.direction = digitalio.Direction.OUTPUT
-
-def collect_data():
-    try:
-        print(lidar.info)
-        for scan in lidar.iter_scans():
-            for (_, angle, distance) in scan:
-                scan_data[min([359, floor(angle)])] = distance
-            process_data(scan_data)
-
-    except KeyboardInterrupt:
-        print('Stoping.')
-    lidar.stop()
-    lidar.disconnect()
+def init():
+    print("Shutting Down!")
+    lidar_motor.value = False
 
 
-def process_data(data):
-    global max_distance
+    print("Starting up!")
+    running = True
+    m = threading.Thread(target=mqtt.run())
+    m.setDaemon(True)
+    m.start()
 
-    for angle in range(360):
-        distance = data[angle]
-        if distance > 0:                  # ignore initially ungathered data points
-            max_distance = max([min([5000, distance]), max_distance])
-            radians = angle * pi / 180.0
-            x = distance * cos(radians)
-            y = distance * sin(radians)
-            point = (160 + int(x / max_distance * 119), 120 + int(y / max_distance * 119))
-            print(point[0])
 
+    sonarProcess = threading.Thread(target=sonar.run())
+    sonarProcess.setDaemon(True)
+    sonarProcess.start()
+
+
+
+
+    while running:
+        sleep(0.1)
 
 
 def run():
-    print("hello lidar")
-    led.value = True
-    collect_data()
+   init()
 
 
 if __name__ == '__main__':

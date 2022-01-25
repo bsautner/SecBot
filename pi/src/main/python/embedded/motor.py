@@ -2,13 +2,13 @@ import time
 import RPi.GPIO as GPIO
 
 GPIO.setmode(GPIO.BOARD)
-GPIO.setup(32, GPIO.OUT)
 GPIO.setup(33, GPIO.OUT)
+GPIO.setup(31, GPIO.OUT)
 
-p = GPIO.PWM(32, 50)  # channel=12 frequency=50Hz
+p = GPIO.PWM(33, 50)  # channel=12 frequency=50Hz
 p.start(0)
 
-p2 = GPIO.PWM(33, 50)  # channel=12 frequency=50Hz
+p2 = GPIO.PWM(31, 50)  # channel=12 frequency=50Hz
 p2.start(0)
 
 p.ChangeDutyCycle(50)
