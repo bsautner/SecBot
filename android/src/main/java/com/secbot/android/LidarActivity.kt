@@ -38,7 +38,7 @@ class LidarActivity : ComponentActivity(), MqttListener {
 
     private val scope: DeviceScope = DeviceScope()
     // private val vm by viewModels<MainViewModel>()
-    private val broker = "tcp://10.0.0.205:1883"
+    private val broker = "tcp://10.0.0.207:1883"
     private val mqtt: MQTT = MQTT(this, broker)
     private val gson = Gson()
     private val vm by viewModels<LidarViewModel>()
@@ -53,7 +53,7 @@ class LidarActivity : ComponentActivity(), MqttListener {
             lidarComposable(vm)
         }
 
-         vm.payload.observe(this) {}
+        vm.payload.observe(this) {}
 
         vm.touch.observe(this) {
           sendMotorCommand(it)
@@ -71,8 +71,18 @@ class LidarActivity : ComponentActivity(), MqttListener {
         } else {
             Motion.FORWARD
         }
-        val command = MotorCommand(motion)
-        mqtt.publish("MOTOR", gson.toJson(command))
+
+
+        val steering: Motion = if (offset.x < vm.center.x - 10.0F) {
+            Motion.LEFT
+        } else if (offset.x > vm.center.x + 10.0F) {
+            Motion.RIGHT
+        } else {
+            Motion.STOP
+        }
+
+        mqtt.publish(MotorCommand::class.java.simpleName, gson.toJson(MotorCommand(motion)))
+        mqtt.publish(MotorCommand::class.java.simpleName, gson.toJson(MotorCommand(steering)))
 
     }
 

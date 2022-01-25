@@ -1,10 +1,10 @@
 #!/bin/bash
 
 $PWD/gradlew build
-ssh pi@secbot "pkill java; pkill python; rm -fRv ~/secbot; mkdir ~/secbot; mkdir ~/secbot/python"
+ssh pi@secbot "pkill java; pkill python; rm -fRv ~/secbot; mkdir ~/secbot; mkdir ~/secbot/python; mkdir ~/secbot/python/embedded"
 scp $PWD/pi/build/libs/*.jar pi@secbot:~/secbot/
-scp $PWD/pi/src/main/python/embedded/* pi@secbot:~/secbot/python/
+scp -r $PWD/pi/src/main/python pi@secbot:~/secbot
 sleep 3
 #ssh pi@secbot "java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar ~/secbot/pi-fat-1.0.jar  & python3 ~/secbot/python/Main.py & python3 ~/secbot/python/locomotion.py"
-ssh pi@secbot "java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar ~/secbot/pi-fat-1.0.jar  & python3 ~/secbot/python/Main.py"
+ssh pi@secbot "java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar ~/secbot/pi-fat-1.0.jar  & python3 ~/secbot/python/embedded/Main.py"
 

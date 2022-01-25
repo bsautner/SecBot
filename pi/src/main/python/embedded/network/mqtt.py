@@ -1,8 +1,12 @@
+import sys
+sys.path.append('../')
+
 import paho.mqtt.client as mqtt_client
 from time import sleep
 import time
 import json
 import random
+import system.command_processor as command_processor
 
 broker = "localhost"
 port = 1883
@@ -40,7 +44,7 @@ def on_connect(client, userdata, flags, rc):
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
-    print(msg.topic+" "+str(msg.payload))
+    command_processor.processCommand(msg.topic, msg.payload)
 
 
     return

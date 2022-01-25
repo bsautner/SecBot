@@ -27,6 +27,7 @@ object Program {
     private val listener = object : MqttListener {
         override fun onConnected() {
             println("MQTT Connected")
+            mqtt.subscribe("#")
           //  mqtt.subscribe("RAW_LIDAR")
 
         }
@@ -55,7 +56,7 @@ object Program {
                         //  println("Processing Raw Lidar")
                     }
                     else -> {
-                        println("MQTT Message Arrived but unhandled $topic")
+                        println("${System.currentTimeMillis()}  MQTT Message Arrived but unhandled $topic")
                     }
                 }
             }
