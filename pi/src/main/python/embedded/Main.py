@@ -13,6 +13,7 @@ import random
 import paho.mqtt.client as mqtt_client
 import network.mqtt as mqtt
 import sensors.sonar as sonar
+import embedded.led as led
 
 running = False
 
@@ -33,27 +34,22 @@ def init():
     print("Shutting Down!")
     lidar_motor.value = False
 
-
     print("Starting up!")
     running = True
     m = threading.Thread(target=mqtt.run())
     m.setDaemon(True)
     m.start()
 
-
-    sonarProcess = threading.Thread(target=sonar.run())
-    sonarProcess.setDaemon(True)
-    sonarProcess.start()
-
-
-
+    sonar_process = threading.Thread(target=sonar.run())
+    sonar_process.setDaemon(True)
+    sonar_process.start()
 
     while running:
         sleep(0.1)
 
 
 def run():
-   init()
+    init()
 
 
 if __name__ == '__main__':

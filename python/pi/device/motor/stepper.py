@@ -1,6 +1,3 @@
-import sys
-
-sys.path.append('../')
 from adafruit_motor import stepper
 import time
 import board
@@ -19,12 +16,11 @@ def steer(command):
 
     print(pos)
     if command['motion'] == "LEFT":
-        while (pos < 40):
+        while pos < 40:
             pos = pos + 1
             kit.stepper2.onestep(direction=stepper.FORWARD, style=stepper.DOUBLE)
             time.sleep(s)
     if command['motion'] == "RIGHT":
-
         while pos > -40:
             pos = pos - 1
             kit.stepper2.onestep(direction=stepper.BACKWARD, style=stepper.DOUBLE)

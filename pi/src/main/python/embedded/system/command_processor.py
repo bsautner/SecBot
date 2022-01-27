@@ -1,13 +1,15 @@
 import sys
+
 sys.path.append('../')
 import json
-import embedded.motors.stepper as steering
+import motors.stepper as steering
+import motors.motor as motor
 
-def processCommand(topic, payload):
-# print(f'processing command {topic} {payload}')
+def process_command(topic, payload):
+    # print(preprocessing command {topic} {payload}')
     command = json.loads(payload)
     if topic == "MotorCommand":
-          steering.steer(command)
-
+        steering.steer(command)
+        motor.move(command)
 
     return
