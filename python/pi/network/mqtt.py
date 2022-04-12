@@ -13,7 +13,7 @@ import system.command_processor as command_processor
 
 class MQTT:
 
-    def __init__(self, command_processor, mqtt_client):
+    def __init__(self, command_processor: object, mqtt_client: object) -> object:
         print("Initializing MQTT")
         self.client = mqtt_client
         self.command_processor = command_processor

@@ -4,7 +4,7 @@ import pwmio
 from adafruit_motor import servo
 
 # create a PWMOut object on Pin D5.
-pwm = pwmio.PWMOut(board.D5, frequency=50)
+pwm = pwmio.PWMOut(board.D21, frequency=50)
 
 # Create a servo object.
 servo = servo.Servo(pwm)

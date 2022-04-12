@@ -1,5 +1,4 @@
 import json
-import device.motor.stepper as steering
 import device.motor.motor as motor
 
 
@@ -16,7 +15,7 @@ class CommandProcessor:
             print("MotorCommand")
             cmd = json.loads(payload)
             self.motor.move(cmd)
-            steering.steer(cmd)
-            # motor.move(command)
+            self.steer.turn(10)
+            # steering.steer(cmd)
 
         return

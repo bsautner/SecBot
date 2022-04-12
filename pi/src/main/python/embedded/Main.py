@@ -44,6 +44,7 @@ def init():
     sonar_process.setDaemon(True)
     sonar_process.start()
 
+    lidar_process = threading.Thread(target=lidar.run())
     while running:
         sleep(0.1)
 

@@ -1,7 +1,7 @@
 import time
 import RPi.GPIO as GPIO
 
-power = 15
+power = 0
 
 
 class Motor:
