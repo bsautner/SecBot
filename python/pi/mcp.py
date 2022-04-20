@@ -14,7 +14,7 @@ import adafruit_hcsr04
 from adafruit_mcp230xx.mcp23008 import MCP23008
 
 
-
+delay = 0.1
 # from adafruit_mcp230xx.mcp23017 import MCP23017
 
 
@@ -25,7 +25,7 @@ i2c = busio.I2C(board.SCL, board.SDA)
 # which chip you're using:
 mcp = MCP23008(i2c)  # MCP23008
 # mcp = MCP23017(i2c)  # MCP23017
-
+time.sleep(1)
 # Optionally change the address of the device if you set any of the A0, A1, A2
 # pins.  Specify the new address with a keyword parameter:
 # mcp = MCP23017(i2c, address=0x21)  # MCP23017 w/ A0 set
@@ -47,10 +47,10 @@ pin7 = mcp.get_pin(7)
 
 
 # Setup pin0 as an output that's at a high logic level.
-pin0.switch_to_output(value=True)
-pin1.switch_to_output(value=True)
-pin2.switch_to_output(value=True)
-pin3.switch_to_output(value=True)
+pin0.switch_to_output(value=False)
+pin1.switch_to_output(value=False)
+pin2.switch_to_output(value=False)
+pin3.switch_to_output(value=False)
 pin4.switch_to_output(value=True)
 pin5.switch_to_output(value=True)
 pin6.switch_to_output(value=True)
@@ -62,27 +62,44 @@ pin7.switch_to_output(value=True)
 # pin1.pull = digitalio.Pull.UP
 
 # Now loop blinking the pin 0 output and reading the state of pin 1 input.
+time.sleep(1)
 while True:
     # Blink pin 0 on and then off.
     pin0.value = True
+    time.sleep(delay)
     pin1.value = True
+    time.sleep(delay)
     pin2.value = True
+    time.sleep(delay)
     pin3.value = True
+    time.sleep(delay)
     pin4.value = True
+    time.sleep(delay)
     pin5.value = True
+    time.sleep(delay)
     pin6.value = True
+    time.sleep(delay)
     pin7.value = True
+    time.sleep(delay)
     print("Pin 0 is at a high level: {0}".format(pin0.value))
     print("Pin 1 is at a high level: {0}".format(pin1.value))
     time.sleep(3)
     pin0.value = False
+    time.sleep(delay)
     pin1.value = False
+    time.sleep(delay)
     pin2.value = False
+    time.sleep(delay)
     pin3.value = False
+    time.sleep(delay)
     pin4.value = False
+    time.sleep(delay)
     pin5.value = False
+    time.sleep(delay)
     pin6.value = False
+    time.sleep(delay)
     pin7.value = False
+    time.sleep(delay)
     time.sleep(3)
     print("Pin 0 is at a high level: {0}".format(pin0.value))
     # Read pin 1 and print its state.

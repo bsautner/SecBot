@@ -8,17 +8,31 @@ import python.pi.device.led.led as led
 import python.pi.network.mqtt as mqtt
 import python.pi.device.motor.motor as motor
 import python.pi.system.command_processor as command_processor
+import board
+import busio
+import digitalio
+import adafruit_hcsr04
+from adafruit_mcp230xx.mcp23008 import MCP23008
 
 #
+# clutch
+i2c = busio.I2C(board.SCL, board.SDA)
+mcp = MCP23008(i2c)
+time.sleep(1)
+
+# pin0 = mcp.get_pin(0)
+clutch3 = mcp.get_pin(1)
+clutch4 = mcp.get_pin(2)
+front_clutch = mcp.get_pin(3)
 
 pin_motor_1_a = 20  # GPOIO38
 pin_motor_1_b = 21  # GPIO40
 
-pin_motor_2_a = 18  # GPIO12
-pin_motor_2_b = 23  # GPIO16
+pin_motor_2_a = 23  # GPIO12
+pin_motor_2_b = 18  # GPIO16
 
-pin_motor_3_a = 12  # GPIO18
-pin_motor_3_b = 16  # GPIO23
+pin_motor_3_a = 16  # GPIO18
+pin_motor_3_b = 12  # GPIO23
 
 pin_motor_4_a = 24  # GPIO18
 pin_motor_4_b = 25  # GPIO25
@@ -48,6 +62,11 @@ def connect_mqtt():
 def run():
     print("Hello World!!")
     # led.blink(1)
+
+    # pin0.switch_to_output(value=False)
+    clutch3.switch_to_output(value=False)
+    clutch4.switch_to_output(value=False)
+    front_clutch.switch_to_output(value=False)
 
     GPIO.setmode(GPIO.BCM)
 
@@ -94,42 +113,61 @@ def run():
 
     while True:
         print("testing motors")
-        print("Motor 1")
+
+        print("Clutch On")
+
+        front_clutch.value = True
+        time.sleep(0.01)
+        clutch3.value = False   # Front Clutch
+        time.sleep(0.01)
+        clutch4.value = False
 
         motor_1_f.ChangeDutyCycle(0)
         motor_1_r.ChangeDutyCycle(max)
 
-        print("Motor 2")
         motor_2_f.ChangeDutyCycle(0)
         motor_2_r.ChangeDutyCycle(max)
 
-        print("Motor 3")
         motor_3_f.ChangeDutyCycle(0)
         motor_3_r.ChangeDutyCycle(max)
 
-        print("Motor 4")
         motor_4_f.ChangeDutyCycle(0)
         motor_4_r.ChangeDutyCycle(max)
-        print("Motors On Forward")
+        print("Motors On Reverse")
 
         time.sleep(3)
-        print("Motor 1")
+        time.sleep(3)
+        print("clutch off")
+        # pin0.value = False
+
+        front_clutch.value = False
+        time.sleep(0.01)
+        clutch3.value = False   # Front Clutch
+        time.sleep(0.01)
+        clutch4.value = False
+
         motor_1_f.ChangeDutyCycle(0)
         motor_1_r.ChangeDutyCycle(0)
 
-        print("Motor 2")
         motor_2_f.ChangeDutyCycle(0)
         motor_2_r.ChangeDutyCycle(0)
 
-        print("Motor 3")
         motor_3_f.ChangeDutyCycle(0)
         motor_3_r.ChangeDutyCycle(0)
 
-        print("Motor 4")
         motor_4_f.ChangeDutyCycle(0)
         motor_4_r.ChangeDutyCycle(0)
         print("Motors Off")
         time.sleep(3)
+
+        print("Clutch On")
+        # pin0.value = True
+        time.sleep(0.01)
+        clutch3.value = False
+        time.sleep(0.01)
+        clutch4.value = False
+        time.sleep(0.01)
+        front_clutch.value = True
 
         print("Motor 1")
         motor_1_f.ChangeDutyCycle(max)
@@ -146,7 +184,7 @@ def run():
         print("Motor 4")
         motor_4_f.ChangeDutyCycle(max)
         motor_4_r.ChangeDutyCycle(0)
-        print("Motors On Reverse")
+        print("Motors On Forward")
         time.sleep(3)
 
 
