@@ -14,7 +14,7 @@ import adafruit_hcsr04
 from adafruit_mcp230xx.mcp23008 import MCP23008
 
 
-delay = 0.1
+delay = 0.5
 # from adafruit_mcp230xx.mcp23017 import MCP23017
 
 
@@ -51,10 +51,10 @@ pin0.switch_to_output(value=False)
 pin1.switch_to_output(value=False)
 pin2.switch_to_output(value=False)
 pin3.switch_to_output(value=False)
-pin4.switch_to_output(value=True)
-pin5.switch_to_output(value=True)
-pin6.switch_to_output(value=True)
-pin7.switch_to_output(value=True)
+pin4.switch_to_output(value=False)
+pin5.switch_to_output(value=False)
+pin6.switch_to_output(value=False)
+pin7.switch_to_output(value=False)
 # pin3.switch_to_input()
 # Setup pin1 as an input with a pull-up resistor enabled.  Notice you can also
 # use properties to change this state.
@@ -67,22 +67,28 @@ while True:
     # Blink pin 0 on and then off.
     pin0.value = True
     time.sleep(delay)
+    print("Pin 0 is: {}".format(pin0.value))
     pin1.value = True
+    print("Pin 1 is: {}".format(pin1.value))
     time.sleep(delay)
     pin2.value = True
+    print("Pin 2 is: {}".format(pin2.value))
     time.sleep(delay)
     pin3.value = True
+    print("Pin 3 is: {}".format(pin3.value))
     time.sleep(delay)
     pin4.value = True
+    print("Pin 4 is: {}".format(pin4.value))
     time.sleep(delay)
     pin5.value = True
+    print("Pin 5 is: {}".format(pin5.value))
     time.sleep(delay)
     pin6.value = True
+    print("Pin 6 is: {}".format(pin6.value))
     time.sleep(delay)
     pin7.value = True
-    time.sleep(delay)
-    print("Pin 0 is at a high level: {0}".format(pin0.value))
-    print("Pin 1 is at a high level: {0}".format(pin1.value))
+    print("Pin 7 is: {}".format(pin7.value))
+
     time.sleep(3)
     pin0.value = False
     time.sleep(delay)

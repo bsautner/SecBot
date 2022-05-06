@@ -20,28 +20,69 @@ i2c = busio.I2C(board.SCL, board.SDA)
 mcp = MCP23008(i2c)
 time.sleep(1)
 
-# pin0 = mcp.get_pin(0)
-clutch3 = mcp.get_pin(1)
-clutch4 = mcp.get_pin(2)
-front_clutch = mcp.get_pin(3)
+clutch_1 = mcp.get_pin(4)
+clutch_2 = mcp.get_pin(3)
+clutch_3 = mcp.get_pin(2)
+clutch_4 = mcp.get_pin(1)
+led_1 = mcp.get_pin(6)
 
-pin_motor_1_a = 20  # GPOIO38
-pin_motor_1_b = 21  # GPIO40
+pin_motor_2_a = 20  # GPOIO38
+pin_motor_2_b = 21  # GPIO40
 
-pin_motor_2_a = 23  # GPIO12
-pin_motor_2_b = 18  # GPIO16
+pin_motor_4_a = 16  # GPIO36
+pin_motor_4_b = 12  # GPIO32
 
-pin_motor_3_a = 16  # GPIO18
-pin_motor_3_b = 12  # GPIO23
+pin_motor_1_a = 23  # GPIO12
+pin_motor_1_b = 18  # GPIO16
 
-pin_motor_4_a = 24  # GPIO18
-pin_motor_4_b = 25  # GPIO25
+pin_motor_3_a = 24  # GPIO18
+pin_motor_3_b = 25  # GPIO25
 
 broker = "localhost"
 port = 1883
 client_id = f'python-mqtt-{random.randint(0, 1000)}'
 username = 'ben'
 password = 'imarobot'
+clutch_throttle = 0.2
+max = 100
+
+print("Hello World!!")
+led_1.switch_to_output(value=True)
+
+clutch_1.switch_to_output(value=False)
+clutch_2.switch_to_output(value=False)
+clutch_3.switch_to_output(value=False)
+clutch_4.switch_to_output(value=False)
+
+GPIO.setmode(GPIO.BCM)
+
+GPIO.setup(pin_motor_1_a, GPIO.OUT)
+GPIO.setup(pin_motor_1_b, GPIO.OUT)
+motor_1_f = GPIO.PWM(pin_motor_1_a, 50)
+motor_1_r = GPIO.PWM(pin_motor_1_b, 50)
+motor_1_f.start(0)
+motor_1_r.start(0)
+
+GPIO.setup(pin_motor_2_a, GPIO.OUT)
+GPIO.setup(pin_motor_2_b, GPIO.OUT)
+motor_2_f = GPIO.PWM(pin_motor_2_a, 50)
+motor_2_r = GPIO.PWM(pin_motor_2_b, 50)
+motor_2_f.start(0)
+motor_2_r.start(0)
+
+GPIO.setup(pin_motor_3_a, GPIO.OUT)
+GPIO.setup(pin_motor_3_b, GPIO.OUT)
+motor_3_f = GPIO.PWM(pin_motor_3_a, 50)
+motor_3_r = GPIO.PWM(pin_motor_3_b, 50)
+motor_3_f.start(0)
+motor_3_r.start(0)
+
+GPIO.setup(pin_motor_4_a, GPIO.OUT)
+GPIO.setup(pin_motor_4_b, GPIO.OUT)
+motor_4_f = GPIO.PWM(pin_motor_4_a, 60)
+motor_4_r = GPIO.PWM(pin_motor_4_b, 60)
+motor_4_f.start(0)
+motor_4_r.start(0)
 
 
 def connect_mqtt():
@@ -58,46 +99,6 @@ def connect_mqtt():
     client.connect(broker, port, 30)
     return client
 
-
-def run():
-    print("Hello World!!")
-    # led.blink(1)
-
-    # pin0.switch_to_output(value=False)
-    clutch3.switch_to_output(value=False)
-    clutch4.switch_to_output(value=False)
-    front_clutch.switch_to_output(value=False)
-
-    GPIO.setmode(GPIO.BCM)
-
-    GPIO.setup(pin_motor_1_a, GPIO.OUT)
-    GPIO.setup(pin_motor_1_b, GPIO.OUT)
-    motor_1_f = GPIO.PWM(pin_motor_1_a, 50)
-    motor_1_r = GPIO.PWM(pin_motor_1_b, 50)
-    motor_1_f.start(0)
-    motor_1_r.start(0)
-
-    GPIO.setup(pin_motor_2_a, GPIO.OUT)
-    GPIO.setup(pin_motor_2_b, GPIO.OUT)
-    motor_2_f = GPIO.PWM(pin_motor_2_a, 50)
-    motor_2_r = GPIO.PWM(pin_motor_2_b, 50)
-    motor_2_f.start(0)
-    motor_2_r.start(0)
-
-    GPIO.setup(pin_motor_3_a, GPIO.OUT)
-    GPIO.setup(pin_motor_3_b, GPIO.OUT)
-    motor_3_f = GPIO.PWM(pin_motor_3_a, 50)
-    motor_3_r = GPIO.PWM(pin_motor_3_b, 50)
-    motor_3_f.start(0)
-    motor_3_r.start(0)
-
-    GPIO.setup(pin_motor_4_a, GPIO.OUT)
-    GPIO.setup(pin_motor_4_b, GPIO.OUT)
-    motor_4_f = GPIO.PWM(pin_motor_4_a, 60)
-    motor_4_r = GPIO.PWM(pin_motor_4_b, 60)
-    motor_4_f.start(0)
-    motor_4_r.start(0)
-
     # m = motor.Motor(motor_1_f, motor_1_r)
     # p = command_processor.CommandProcessor(m)  # Command Processor
 
@@ -109,83 +110,192 @@ def run():
 
     # m.stop()
 
-    max = 100
 
-    while True:
-        print("testing motors")
+def run():
+    disengageClutches()
+    # print("testing motors")
+    spin(0)
 
-        print("Clutch On")
+    time.sleep(3)
 
-        front_clutch.value = True
-        time.sleep(0.01)
-        clutch3.value = False   # Front Clutch
-        time.sleep(0.01)
-        clutch4.value = False
+    spin(1)
 
-        motor_1_f.ChangeDutyCycle(0)
-        motor_1_r.ChangeDutyCycle(max)
+    time.sleep(3)
 
-        motor_2_f.ChangeDutyCycle(0)
-        motor_2_r.ChangeDutyCycle(max)
+    fullDrive(0)
+    time.sleep(1)
+    fullDrive(1)
+    time.sleep(1)
+    wideTurn(0)
+    brakeStop()
+    sleep(2)
+    wideTurn(1)
+    brakeStop()
+    sleep(2)
+    wideTurn(2)
+    brakeStop()
+    sleep(2)
+    wideTurn(3)
+    brakeStop()
+    sleep(2)
+    wideTurn(4)
+    brakeStop()
 
-        motor_3_f.ChangeDutyCycle(0)
-        motor_3_r.ChangeDutyCycle(max)
 
-        motor_4_f.ChangeDutyCycle(0)
-        motor_4_r.ChangeDutyCycle(max)
-        print("Motors On Reverse")
 
-        time.sleep(3)
-        time.sleep(3)
-        print("clutch off")
-        # pin0.value = False
+def sleep(t):
+    time.sleep(t)
 
-        front_clutch.value = False
-        time.sleep(0.01)
-        clutch3.value = False   # Front Clutch
-        time.sleep(0.01)
-        clutch4.value = False
 
-        motor_1_f.ChangeDutyCycle(0)
-        motor_1_r.ChangeDutyCycle(0)
+def driveMotor(n, d):
+    if n == 1:
+        clutch_1.value = True
+        time.sleep(clutch_throttle)
+        if d == 0:
+            motor_1_f.ChangeDutyCycle(max)
+            motor_1_r.ChangeDutyCycle(0)
+        else:
+            motor_1_f.ChangeDutyCycle(0)
+            motor_1_r.ChangeDutyCycle(max)
+    elif n == 2:
+        clutch_2.value = True
+        time.sleep(clutch_throttle)
+        if d == 0:
+            motor_2_f.ChangeDutyCycle(max)
+            motor_2_r.ChangeDutyCycle(0)
+        else:
+            motor_2_f.ChangeDutyCycle(0)
+            motor_2_r.ChangeDutyCycle(max)
+    elif n == 3:
+        clutch_3.value = True
+        time.sleep(clutch_throttle)
+        if d == 0:
+            motor_3_f.ChangeDutyCycle(max)
+            motor_3_r.ChangeDutyCycle(0)
+        else:
+            motor_3_f.ChangeDutyCycle(0)
+            motor_3_r.ChangeDutyCycle(max)
+    elif n == 4:
+        clutch_4.value = True
+        time.sleep(clutch_throttle)
+        if d == 0:
+            motor_4_f.ChangeDutyCycle(max)
+            motor_4_r.ChangeDutyCycle(0)
+        else:
+            motor_4_f.ChangeDutyCycle(0)
+            motor_4_r.ChangeDutyCycle(max)
 
-        motor_2_f.ChangeDutyCycle(0)
-        motor_2_r.ChangeDutyCycle(0)
 
-        motor_3_f.ChangeDutyCycle(0)
-        motor_3_r.ChangeDutyCycle(0)
+def wideTurn(d):
+    disengageClutches()
 
-        motor_4_f.ChangeDutyCycle(0)
-        motor_4_r.ChangeDutyCycle(0)
-        print("Motors Off")
-        time.sleep(3)
+    if d == 1:
+        clutch_3.value = False
+        sleep(clutch_throttle)
+        clutch_2.value = False
+        sleep(clutch_throttle)
+        driveMotor(1, 0)
+        driveMotor(4, 0)
 
-        print("Clutch On")
-        # pin0.value = True
-        time.sleep(0.01)
-        clutch3.value = False
-        time.sleep(0.01)
-        clutch4.value = False
-        time.sleep(0.01)
-        front_clutch.value = True
+    elif d == 2:
+        clutch_1.value = False
+        sleep(clutch_throttle)
+        clutch_4.value = False
+        sleep(clutch_throttle)
+        driveMotor(2, 0)
+        driveMotor(3, 0)
 
-        print("Motor 1")
+    elif d == 3:
+        clutch_3.value = False
+        sleep(clutch_throttle)
+        clutch_2.value = False
+        sleep(clutch_throttle)
+        driveMotor(1, 1)
+        driveMotor(4, 1)
+
+    elif d == 4:
+        clutch_1.value = False
+        sleep(clutch_throttle)
+        clutch_4.value = False
+        sleep(clutch_throttle)
+        driveMotor(2, 1)
+        driveMotor(3, 1)
+
+
+
+def brakeStop():
+    engageClutches()
+    motor_1_f.ChangeDutyCycle(0)
+    motor_1_r.ChangeDutyCycle(0)
+    motor_2_f.ChangeDutyCycle(0)
+    motor_2_r.ChangeDutyCycle(0)
+
+    motor_3_f.ChangeDutyCycle(0)
+    motor_3_r.ChangeDutyCycle(0)
+
+    motor_4_f.ChangeDutyCycle(0)
+    motor_4_r.ChangeDutyCycle(0)
+
+
+def fullDrive(d):
+    engageClutches()
+    if d == 0:
         motor_1_f.ChangeDutyCycle(max)
         motor_1_r.ChangeDutyCycle(0)
-
-        print("Motor 2")
         motor_2_f.ChangeDutyCycle(max)
         motor_2_r.ChangeDutyCycle(0)
-
-        print("Motor 3")
         motor_3_f.ChangeDutyCycle(max)
         motor_3_r.ChangeDutyCycle(0)
-
-        print("Motor 4")
         motor_4_f.ChangeDutyCycle(max)
         motor_4_r.ChangeDutyCycle(0)
-        print("Motors On Forward")
-        time.sleep(3)
+    else:
+        motor_1_f.ChangeDutyCycle(0)
+        motor_1_r.ChangeDutyCycle(max)
+        motor_2_f.ChangeDutyCycle(0)
+        motor_2_r.ChangeDutyCycle(max)
+        motor_3_f.ChangeDutyCycle(0)
+        motor_3_r.ChangeDutyCycle(max)
+        motor_4_f.ChangeDutyCycle(0)
+        motor_4_r.ChangeDutyCycle(max)
+
+
+def spin(d):
+    if d == 0:
+        driveMotor(1, 0)
+        driveMotor(4, 0)
+        driveMotor(2, 1)
+        driveMotor(3, 1)
+    else:
+        driveMotor(1, 1)
+        driveMotor(4, 1)
+        driveMotor(2, 0)
+        driveMotor(3, 0)
+
+
+def engageClutches():
+    print("Clutch On")
+    clutch_1.value = True
+    time.sleep(clutch_throttle)
+    clutch_2.value = True
+    time.sleep(clutch_throttle)
+    clutch_3.value = True
+    time.sleep(clutch_throttle)
+    clutch_4.value = True
+    time.sleep(clutch_throttle)
+    led_1.value = True
+
+
+def disengageClutches():
+    print("Clutch On")
+    clutch_1.value = False
+    time.sleep(clutch_throttle)
+    clutch_2.value = False
+    time.sleep(clutch_throttle)
+    clutch_3.value = False
+    time.sleep(clutch_throttle)
+    clutch_4.value = False
+    time.sleep(clutch_throttle)
+    led_1.value = False
 
 
 if __name__ == '__main__':
