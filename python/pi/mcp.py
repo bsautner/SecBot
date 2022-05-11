@@ -36,7 +36,7 @@ time.sleep(1)
 # resistors, only pull-up!).  For the MCP23008 you specify a pin number from 0
 # to 7 for the GP0...GP7 pins.  For the MCP23017 you specify a pin number from
 # 0 to 15 for the GPIOA0...GPIOA7, GPIOB0...GPIOB7 pins (i.e. pin 12 is GPIOB4).
-pin0 = mcp.get_pin(0)
+fan_pin = mcp.get_pin(0)
 pin1 = mcp.get_pin(1)
 pin2 = mcp.get_pin(2)
 pin3 = mcp.get_pin(3)
@@ -47,7 +47,7 @@ pin7 = mcp.get_pin(7)
 
 
 # Setup pin0 as an output that's at a high logic level.
-pin0.switch_to_output(value=False)
+fan_pin.switch_to_output(value=False)
 pin1.switch_to_output(value=False)
 pin2.switch_to_output(value=False)
 pin3.switch_to_output(value=False)
@@ -65,9 +65,9 @@ pin7.switch_to_output(value=False)
 time.sleep(1)
 while True:
     # Blink pin 0 on and then off.
-    pin0.value = True
+    fan_pin.value = True
     time.sleep(delay)
-    print("Pin 0 is: {}".format(pin0.value))
+    print("Pin 0 is: {}".format(fan_pin.value))
     pin1.value = True
     print("Pin 1 is: {}".format(pin1.value))
     time.sleep(delay)
@@ -90,7 +90,7 @@ while True:
     print("Pin 7 is: {}".format(pin7.value))
 
     time.sleep(3)
-    pin0.value = False
+    fan_pin.value = False
     time.sleep(delay)
     pin1.value = False
     time.sleep(delay)
@@ -107,6 +107,6 @@ while True:
     pin7.value = False
     time.sleep(delay)
     time.sleep(3)
-    print("Pin 0 is at a high level: {0}".format(pin0.value))
+    print("Pin 0 is at a high level: {0}".format(fan_pin.value))
     # Read pin 1 and print its state.
     print("Pin 1 is at a high level: {0}".format(pin1.value))

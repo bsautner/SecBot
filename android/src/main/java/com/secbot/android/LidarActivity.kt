@@ -38,7 +38,7 @@ class LidarActivity : ComponentActivity(), MqttListener {
 
     private val scope: DeviceScope = DeviceScope()
     // private val vm by viewModels<MainViewModel>()
-    private val broker = "tcp://10.0.0.207:1883"
+    private val broker = "tcp://10.0.0.205:1883"
     private val mqtt: MQTT = MQTT(this, broker)
     private val gson = Gson()
     private val vm by viewModels<LidarViewModel>()

@@ -1,17 +1,10 @@
 import time
-import threading
 import random
 import paho.mqtt.client as mqtt_client
 
 import RPi.GPIO as GPIO
-import python.pi.device.led.led as led
-import python.pi.network.mqtt as mqtt
-import python.pi.device.motor.motor as motor
-import python.pi.system.command_processor as command_processor
 import board
 import busio
-import digitalio
-import adafruit_hcsr04
 from adafruit_mcp230xx.mcp23008 import MCP23008
 
 #
@@ -38,7 +31,7 @@ pin_motor_1_b = 18  # GPIO16
 pin_motor_3_a = 24  # GPIO18
 pin_motor_3_b = 25  # GPIO25
 
-broker = "localhost"
+broker = "10.0.0.205"
 port = 1883
 client_id = f'python-mqtt-{random.randint(0, 1000)}'
 username = 'ben'
@@ -58,29 +51,29 @@ GPIO.setmode(GPIO.BCM)
 
 GPIO.setup(pin_motor_1_a, GPIO.OUT)
 GPIO.setup(pin_motor_1_b, GPIO.OUT)
-motor_1_f = GPIO.PWM(pin_motor_1_a, 50)
-motor_1_r = GPIO.PWM(pin_motor_1_b, 50)
+motor_1_f = GPIO
+motor_1_r = GPIO
 motor_1_f.start(0)
 motor_1_r.start(0)
 
 GPIO.setup(pin_motor_2_a, GPIO.OUT)
 GPIO.setup(pin_motor_2_b, GPIO.OUT)
-motor_2_f = GPIO.PWM(pin_motor_2_a, 50)
-motor_2_r = GPIO.PWM(pin_motor_2_b, 50)
+motor_2_f = GPIO
+motor_2_r = GPIO
 motor_2_f.start(0)
 motor_2_r.start(0)
 
 GPIO.setup(pin_motor_3_a, GPIO.OUT)
 GPIO.setup(pin_motor_3_b, GPIO.OUT)
-motor_3_f = GPIO.PWM(pin_motor_3_a, 50)
-motor_3_r = GPIO.PWM(pin_motor_3_b, 50)
+motor_3_f = GPIO
+motor_3_r = GPIO
 motor_3_f.start(0)
 motor_3_r.start(0)
 
 GPIO.setup(pin_motor_4_a, GPIO.OUT)
 GPIO.setup(pin_motor_4_b, GPIO.OUT)
-motor_4_f = GPIO.PWM(pin_motor_4_a, 60)
-motor_4_r = GPIO.PWM(pin_motor_4_b, 60)
+motor_4_f = GPIO
+motor_4_r = GPIO
 motor_4_f.start(0)
 motor_4_r.start(0)
 

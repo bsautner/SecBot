@@ -1,14 +1,24 @@
 import sys
 
 sys.path.append('../')
-import paho.mqtt.client
+import paho.mqtt.client as mqtt_client
 
 from time import sleep
 import time
 import json
+import random
 
 import system.command_processor as command_processor
 
+broker = "10.0.0.205"
+port = 1883
+client_id = f'python-mqtt-{random.randint(0, 1000)}'
+username = 'ben'
+password = 'imarobot'
+
+
+def start():
+    print("starting mqtt...")
 
 
 class MQTT:
@@ -20,20 +30,6 @@ class MQTT:
 
     def on_disconnect(self):
         print("mqtt disconnected")
-
-    # The callback for when the client receives a CONNACK response from the server.
-    def on_connect(self, client, userdata, flags, rc):
-        print("MQTT connected with result code " + str(rc))
-        # Subscribing in on_connect() means that if we lose the connection and
-        # reconnect then subscriptions will be renewed.
-        client.subscribe("#")
-
-    # The callback for when a PUBLISH message is received from the server.
-    def on_message(self, client, userdata, msg):
-        self.command_processor.process_command(msg.topic, msg.payload)
-        print(msg.topic + " " + str(msg.payload))
-
-        return
 
     def publish(self, topic, payload):
         try:
@@ -47,10 +43,28 @@ class MQTT:
         except (ConnectionResetError, ConnectionRefusedError) as err:
             print(err)
 
-    def run(self):
-        print("trying to connect mqtt broker...")
 
-        self.client.on_connect = self.on_connect
-        self.client.on_message = self.on_message
-        self.client.loop_start()
-        # client.loop_forever()
+def connect_mqtt():
+    def on_connect(client, userdata, flags, rc):
+        if rc == 0:
+            print("Connected to MQTT Broker!")
+            client.subscribe("#")
+
+        else:
+            print("Failed to connect to mqtt, return code %d\n", rc)
+
+    def on_message(self, userdata, msg):
+        print(msg.topic + " " + str(msg.payload))
+        command_processor.process_command(self, msg.topic, msg.payload)
+
+    def on_disconnect(self, client, userdata, rc):
+        if rc != 0:
+            print("Unexpected disconnection.")
+
+    client = mqtt_client.Client(client_id)
+    client.username_pw_set(username, password)
+    client.on_connect = on_connect
+    client.connect(broker, port, 30)
+    client.on_message = on_message
+    client.on_disconnect = on_disconnect
+    client.loop_start()
