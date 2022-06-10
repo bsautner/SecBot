@@ -1,3 +1,4 @@
+import threading
 import time
 
 import RPi.GPIO as GPIO
@@ -5,7 +6,7 @@ import board
 import busio
 import digitalio
 import adafruit_hcsr04
-import python.pi.device.motor.motor as motor
+import py.pi.device.motor.motor as motor
 from adafruit_mcp230xx.mcp23008 import MCP23008
 
 
@@ -241,5 +242,17 @@ def run():
         time.sleep(1)
 
 
+def first():
+    while True:
+        print("First")
+
+def second():
+    while True:
+        print("Second")
+
+
 if __name__ == '__main__':
-    run()
+    threading.Thread(target=first).start()
+    threading.Thread(target=second).start()
+
+

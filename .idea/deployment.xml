@@ -1,15 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="ben@bot1:22 agent" remoteFilesAllowedToDisappearOnAutoupload="false">
+  <component name="PublishConfigData" autoUpload="Always" serverName="ben@bot1:22 agent" deleteMissingItems="true" createEmptyFolders="true" confirmBeforeUploading="false">
+    <option name="confirmBeforeUploading" value="false" />
     <serverData>
       <paths name="ben@bot1:22 agent">
         <serverdata>
           <mappings>
-            <mapping deploy="/home/ben/code/SecBot" local="$PROJECT_DIR$" />
+            <mapping deploy="/tmp/pycharm_project_562" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>
       <paths name="bot1">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/tmp/python" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="pi@10.0.0.166:22">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$/android" web="/" />
